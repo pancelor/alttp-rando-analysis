@@ -1,4 +1,5 @@
 mod Items;
+mod Medallions;
 
 
 fn main() {
