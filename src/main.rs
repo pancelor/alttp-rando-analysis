@@ -1335,7 +1335,7 @@ mod regions {
 
 mod world {
   use std::collections::HashMap;
-  use super::{medallions, locations, regions, items};
+  use super::{medallions, locations, items};
 
   #[derive(Eq, PartialEq, Debug)]
   pub struct World {
@@ -1970,10 +1970,11 @@ mod generator {
       rng.shuffle(&mut randomized_order_locations);
 
       fast_fill_items_in_locations(&mut nice_items_iter, &randomized_order_locations, &mut assignments);
-
+      assert_eq!(nice_items_iter.next(), None);
       // @hack: the php randomizes junk_items _again_ here;
       //   I'm skipping that useless step (or maybe I'm dumb?)
       fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut assignments);
+      assert_eq!(junk_items_iter.next(), None);
     }
 
     let world = world::World {
@@ -2017,7 +2018,6 @@ mod generator {
       let loc = locations.iter()
         .filter(|&&loc| assignments.get(&loc) == None)
         .filter(|&&loc| logic::can_fill(item, loc, &assumed_items, &assignments))
-        .take(1)
         .next();
       match loc {
         Some(loc) => {
@@ -2025,7 +2025,7 @@ mod generator {
           assignments.insert(*loc, item);
         },
         None => {
-          panic!("No valid location for {:?}", item); // TODO: ~s/panic/Result/
+          panic!("No available locations for {:?}", item); // TODO: ~s/panic/Result/
         }
       }
     }
