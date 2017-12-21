@@ -1674,20 +1674,20 @@ mod logic {
 
     let todo = true;
     match loc { // @TODO
-      DesertPalaceBigChest => item != items::Item::BigKeyP2,
+      DesertPalaceBigChest => item != BigKeyP2,
       DesertPalaceMapChest => true,
       DesertPalaceTorch => true,
-      DesertPalaceBigKeyChest => item != items::Item::KeyP2,
-      DesertPalaceCompassChest => item != items::Item::KeyP2,
-      DesertPalaceLanmolas => item != items::Item::KeyP2 && item != items::Item::BigKeyP2,
+      DesertPalaceBigKeyChest => item != KeyP2,
+      DesertPalaceCompassChest => item != KeyP2,
+      DesertPalaceLanmolas => item != KeyP2 && item != BigKeyP2,
       DesertPalacePrize => true,
-      EasternPalaceCompassChest => todo,
-      EasternPalaceBigChest => todo,
-      EasternPalaceCannonballChest => todo,
-      EasternPalaceBigKeyChest => todo,
-      EasternPalaceMapChest => todo,
-      EasternPalaceArmosKnights => todo,
-      EasternPalacePrize => todo,
+      EasternPalaceCompassChest => true,
+      EasternPalaceBigChest => item != BigKeyP1,
+      EasternPalaceCannonballChest => true,
+      EasternPalaceBigKeyChest => true,
+      EasternPalaceMapChest => true,
+      EasternPalaceArmosKnights => item != BigKeyP1,
+      EasternPalacePrize => true,
       TowerOfHeraBigKeyChest => todo,
       TowerOfHeraBasementCage => todo,
       TowerOfHeraMapChest => todo,
@@ -1921,7 +1921,7 @@ mod logic {
     match reg { // @TODO
       LightWorld => todo,
       Escape => todo,
-      EasternPalace => todo,
+      EasternPalace => true,
       DesertPalace => {
         my_items.contains(&BookOfMudora)
         || (
