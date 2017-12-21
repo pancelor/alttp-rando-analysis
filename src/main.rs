@@ -1519,11 +1519,34 @@ mod generator {
     unimplemented!();
   }
 
+  fn can_access(
+    loc: &locations::Location,
+    my_items: &Vec<items::Item>,
+    assignments: &HashMap<locations::Location, items::Item>,
+  ) -> bool {
+    unimplemented!();
+  }
+
   fn collect_items(
     assumed_items: &Vec<items::Item>,
     assignments: &HashMap<locations::Location, items::Item>,
   ) -> Vec<items::Item> {
-    unimplemented!();
+    let mut my_items = assumed_items.clone();
+    let mut found_items: Vec<items::Item> = Vec::new();
+    let locations = locations::get_all_locations();
+    while true {
+      found_items = locations.iter()
+        .filter(|loc| can_access(&loc, &my_items, &assignments))
+        .filter_map(|loc| assignments.get(loc))
+        .map(|&item| item.clone())
+        .collect();
+      if found_items.len() == 0 {
+        break;
+      }
+      my_items.append(&mut found_items);
+    }
+
+    return my_items;
   }
 }
 
