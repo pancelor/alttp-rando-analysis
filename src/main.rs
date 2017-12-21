@@ -1,5 +1,7 @@
-#[allow(unused_imports)]
+extern crate rand;
+
 use std::collections::HashMap;
+use rand::{Rng, ThreadRng};
 
 mod items {
   #[allow(dead_code)]
@@ -258,7 +260,7 @@ mod medallions {
     Quake,
   }
 
-  pub fn get_all_medallion_goals() -> Vec<Medallion> {
+  pub fn get_all_medallions() -> Vec<Medallion> {
     vec![
       Medallion::Bombos,
       Medallion::Ether,
@@ -267,10 +269,10 @@ mod medallions {
   }
 
   #[allow(dead_code)]
-  #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
-  pub enum Location {
-    TurtleRockMedallion,
-    MiseryMireMedallion,
+  #[derive(Eq, PartialEq, Copy, Clone, Debug)]
+  pub struct Entrance {
+    pub turtle_rock: Medallion,
+    pub misery_mire: Medallion,
   }
 }
 
@@ -517,17 +519,8 @@ mod world {
 
   #[derive(Eq, PartialEq, Debug)]
   pub struct World {
-    medallions: HashMap<medallions::Location, medallions::Medallion>,
-    assignments: HashMap<locations::Location, items::Item>,
-  }
-
-  impl World {
-    pub fn new() -> Self {
-      Self {
-        medallions: HashMap::new(),
-        assignments: HashMap::new(),
-      }
-    }
+    pub medallions: medallions::Entrance,
+    pub assignments: HashMap<locations::Location, items::Item>,
   }
 }
 
@@ -536,8 +529,29 @@ fn generate_world(
   nice_items: &Vec<items::Item>,
   junk_items: &Vec<items::Item>,
   dungeon_items: &Vec<items::Item>,
+  rng: &mut ThreadRng,
 ) -> world::World {
-  let world = world::World::new();
+  // Set up medallions
+  let medallions;
+  {
+    let all_meds = medallions::get_all_medallions();
+    medallions = medallions::Entrance {
+      turtle_rock: rng.choose(&all_meds).expect("empty medallion array").clone(),
+      misery_mire: rng.choose(&all_meds).expect("empty medallion array").clone(),
+    };
+  }
+
+  // Set up assignments
+  let assignments;
+  {
+    assignments = HashMap::new();
+
+  }
+
+  let world = world::World {
+    assignments,
+    medallions,
+  };
   world
 }
 
@@ -554,9 +568,11 @@ fn main() {
   let dungeon_items = items::get_dungeon_pool();
   println!("dungeon_items: {:?}", dungeon_items);
 
+  let mut rng = rand::thread_rng();
+
   let sim_count = 1;
   for _ in 0..sim_count {
-    let world = generate_world(&advancement_items, &nice_items, &junk_items, &dungeon_items);
+    let world = generate_world(&advancement_items, &nice_items, &junk_items, &dungeon_items, &mut rng);
     println!("{:?}", world);
   }
 }
