@@ -130,6 +130,16 @@ mod items {
     CompassP1,
     CompassP2,
     CompassP3,
+    Crystal1,
+    Crystal2,
+    Crystal3,
+    Crystal4,
+    Crystal5,
+    Crystal6,
+    Crystal7,
+    PendantOfCourage,
+    PendantOfPower,
+    PendantOfWisdom,
   }
 
   pub fn get_advancement_items() -> Vec<Item> {
@@ -542,10 +552,34 @@ fn generate_world(
   }
 
   // Set up assignments
-  let assignments;
+  let mut assignments;
   {
     assignments = HashMap::new();
-
+    let mut prizes = vec![
+      items::Item::Crystal1,
+      items::Item::Crystal2,
+      items::Item::Crystal3,
+      items::Item::Crystal4,
+      items::Item::Crystal5,
+      items::Item::Crystal6,
+      items::Item::Crystal7,
+      items::Item::PendantOfCourage,
+      items::Item::PendantOfPower,
+      items::Item::PendantOfWisdom,
+    ];
+    rng.shuffle(&mut prizes);
+    let mut iter = prizes.into_iter();
+    assignments.insert(locations::Location::TowerOfHeraPrize, iter.next().unwrap());
+    assignments.insert(locations::Location::EasternPalacePrize, iter.next().unwrap());
+    assignments.insert(locations::Location::DesertPalacePrize, iter.next().unwrap());
+    assignments.insert(locations::Location::SkullWoodsPrize, iter.next().unwrap());
+    assignments.insert(locations::Location::ThievesTownPrize, iter.next().unwrap());
+    assignments.insert(locations::Location::MiseryMirePrize, iter.next().unwrap());
+    assignments.insert(locations::Location::SwampPalacePrize, iter.next().unwrap());
+    assignments.insert(locations::Location::IcePalacePrize, iter.next().unwrap());
+    assignments.insert(locations::Location::PalaceOfDarknessPrize, iter.next().unwrap());
+    assignments.insert(locations::Location::TurtleRockPrize, iter.next().unwrap());
+    assert!(iter.next() == None);
   }
 
   let world = world::World {
@@ -557,16 +591,16 @@ fn generate_world(
 
 fn main() {
   let advancement_items = items::get_advancement_items();
-  println!("advancement_items: {:?}", advancement_items);
+  // println!("advancement_items: {:?}", advancement_items);
 
   let nice_items = items::get_nice_items();
-  println!("nice_items: {:?}", nice_items);
+  // println!("nice_items: {:?}", nice_items);
 
   let junk_items = items::get_item_pool();
-  println!("item_pool: {:?}", junk_items);
+  // println!("item_pool: {:?}", junk_items);
 
   let dungeon_items = items::get_dungeon_pool();
-  println!("dungeon_items: {:?}", dungeon_items);
+  // println!("dungeon_items: {:?}", dungeon_items);
 
   let mut rng = rand::thread_rng();
 
