@@ -1,6 +1,8 @@
-mod Items {
+use std::collections::HashMap;
+
+mod items {
   #[allow(dead_code)]
-  #[derive(Copy, Clone, Debug)]
+  #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
   pub enum Item {
     L1Sword,
     MasterSword,
@@ -127,7 +129,7 @@ mod Items {
     CompassP3,
   }
 
-  pub fn getAdvancementItems() -> Vec<Item> {
+  pub fn get_advancement_items() -> Vec<Item> {
     let mut res = Vec::new();
     for _ in 0..4 { res.push(Item::ProgressiveSword); }
     // @hack: the web code randomly chooses a specific bottle each seed
@@ -162,7 +164,7 @@ mod Items {
     return res;
   }
 
-  pub fn getNiceItems() -> Vec<Item> {
+  pub fn get_nice_items() -> Vec<Item> {
     let mut res = Vec::new();
     for _ in 0..1 { res.push(Item::HeartContainer); }
     for _ in 0..10 { res.push(Item::BossHeartContainer); }
@@ -175,7 +177,7 @@ mod Items {
     return res;
   }
 
-  pub fn getItemPool() -> Vec<Item> {
+  pub fn get_item_pool() -> Vec<Item> {
     let mut res = Vec::new();
     for _ in 0..24 { res.push(Item::PieceOfHeart); }
     for _ in 0..6 { res.push(Item::BombUpgrade5); }
@@ -194,7 +196,7 @@ mod Items {
     return res;
   }
 
-  pub fn getDungeonPool() -> Vec<Item> {
+  pub fn get_dungeon_pool() -> Vec<Item> {
     let mut res = Vec::new();
     for _ in 0..1 { res.push(Item::BigKeyA2); }
     for _ in 0..1 { res.push(Item::BigKeyD1); }
@@ -246,15 +248,16 @@ mod Items {
   }
 }
 
-mod Medallions {
+mod medallions {
   #[allow(dead_code)]
+  #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
   pub enum MedallionGoal {
     Bombos,
     Ether,
     Quake,
   }
 
-  pub fn getAllMedallionGoals() -> Vec<MedallionGoal> {
+  pub fn get_all_medallion_goals() -> Vec<MedallionGoal> {
     vec![
       MedallionGoal::Bombos,
       MedallionGoal::Ether,
@@ -262,14 +265,15 @@ mod Medallions {
     ]
   }
 
-  pub fn setMedallions() {
+  pub fn set_medallions() {
     // take in a world
     unimplemented!();
   }
 }
 
-mod Location {
+mod locations {
   #[allow(dead_code)]
+  #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
   pub enum Location {
     DesertPalaceBigChest,
     DesertPalaceMapChest,
@@ -506,16 +510,32 @@ mod Location {
   }
 }
 
+fn generate_world(
+  advancement_items: &Vec<items::Item>,
+  nice_items: &Vec<items::Item>,
+  junk_items: &Vec<items::Item>,
+  dungeon_items: &Vec<items::Item>,
+) -> HashMap<locations::Location, items::Item> {
+  let assignments = HashMap::new();
+  assignments
+}
+
 fn main() {
-  let advancement_items = Items::getAdvancementItems();
+  let advancement_items = items::get_advancement_items();
   println!("advancement_items: {:?}", advancement_items);
 
-  let nice_items = Items::getNiceItems();
+  let nice_items = items::get_nice_items();
   println!("nice_items: {:?}", nice_items);
 
-  let junk_items = Items::getItemPool();
+  let junk_items = items::get_item_pool();
   println!("item_pool: {:?}", junk_items);
 
-  let dungeon_items = Items::getDungeonPool();
+  let dungeon_items = items::get_dungeon_pool();
   println!("dungeon_items: {:?}", dungeon_items);
+
+  let sim_count = 1;
+  for _ in 0..sim_count {
+    let world = generate_world(&advancement_items, &nice_items, &junk_items, &dungeon_items);
+    println!("{:?}", world);
+  }
 }
