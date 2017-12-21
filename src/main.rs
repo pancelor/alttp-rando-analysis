@@ -1,3 +1,6 @@
+extern crate env_logger;
+#[macro_use]
+extern crate log;
 extern crate rand;
 
 use std::collections::HashMap;
@@ -555,31 +558,37 @@ fn generate_world(
   let mut assignments;
   {
     assignments = HashMap::new();
-    let mut prizes = vec![
-      items::Item::Crystal1,
-      items::Item::Crystal2,
-      items::Item::Crystal3,
-      items::Item::Crystal4,
-      items::Item::Crystal5,
-      items::Item::Crystal6,
-      items::Item::Crystal7,
-      items::Item::PendantOfCourage,
-      items::Item::PendantOfPower,
-      items::Item::PendantOfWisdom,
-    ];
-    rng.shuffle(&mut prizes);
-    let mut iter = prizes.into_iter();
-    assignments.insert(locations::Location::TowerOfHeraPrize, iter.next().unwrap());
-    assignments.insert(locations::Location::EasternPalacePrize, iter.next().unwrap());
-    assignments.insert(locations::Location::DesertPalacePrize, iter.next().unwrap());
-    assignments.insert(locations::Location::SkullWoodsPrize, iter.next().unwrap());
-    assignments.insert(locations::Location::ThievesTownPrize, iter.next().unwrap());
-    assignments.insert(locations::Location::MiseryMirePrize, iter.next().unwrap());
-    assignments.insert(locations::Location::SwampPalacePrize, iter.next().unwrap());
-    assignments.insert(locations::Location::IcePalacePrize, iter.next().unwrap());
-    assignments.insert(locations::Location::PalaceOfDarknessPrize, iter.next().unwrap());
-    assignments.insert(locations::Location::TurtleRockPrize, iter.next().unwrap());
-    assert!(iter.next() == None);
+    // Place prizes
+    {
+      let mut prizes = vec![
+        items::Item::Crystal1,
+        items::Item::Crystal2,
+        items::Item::Crystal3,
+        items::Item::Crystal4,
+        items::Item::Crystal5,
+        items::Item::Crystal6,
+        items::Item::Crystal7,
+        items::Item::PendantOfCourage,
+        items::Item::PendantOfPower,
+        items::Item::PendantOfWisdom,
+      ];
+      rng.shuffle(&mut prizes);
+      let mut iter = prizes.into_iter();
+      assignments.insert(locations::Location::TowerOfHeraPrize, iter.next().unwrap());
+      assignments.insert(locations::Location::EasternPalacePrize, iter.next().unwrap());
+      assignments.insert(locations::Location::DesertPalacePrize, iter.next().unwrap());
+      assignments.insert(locations::Location::SkullWoodsPrize, iter.next().unwrap());
+      assignments.insert(locations::Location::ThievesTownPrize, iter.next().unwrap());
+      assignments.insert(locations::Location::MiseryMirePrize, iter.next().unwrap());
+      assignments.insert(locations::Location::SwampPalacePrize, iter.next().unwrap());
+      assignments.insert(locations::Location::IcePalacePrize, iter.next().unwrap());
+      assignments.insert(locations::Location::PalaceOfDarknessPrize, iter.next().unwrap());
+      assignments.insert(locations::Location::TurtleRockPrize, iter.next().unwrap());
+      assert!(iter.next() == None);
+      // TODO: php has a weird conditional-and-`throw`; is this relevant?
+      //   There aren't any restrictions, are there?
+      //   e.g. Turtle Rock can't have a red pendant?
+    }
   }
 
   let world = world::World {
@@ -590,23 +599,25 @@ fn generate_world(
 }
 
 fn main() {
+  env_logger::init().unwrap();
+
   let advancement_items = items::get_advancement_items();
-  // println!("advancement_items: {:?}", advancement_items);
+  trace!("advancement_items: {:?}", advancement_items);
 
   let nice_items = items::get_nice_items();
-  // println!("nice_items: {:?}", nice_items);
+  trace!("nice_items: {:?}", nice_items);
 
   let junk_items = items::get_item_pool();
-  // println!("item_pool: {:?}", junk_items);
+  trace!("item_pool: {:?}", junk_items);
 
   let dungeon_items = items::get_dungeon_pool();
-  // println!("dungeon_items: {:?}", dungeon_items);
+  trace!("dungeon_items: {:?}", dungeon_items);
 
   let mut rng = rand::thread_rng();
 
   let sim_count = 1;
   for _ in 0..sim_count {
     let world = generate_world(&advancement_items, &nice_items, &junk_items, &dungeon_items, &mut rng);
-    println!("{:?}", world);
+    info!("{:?}", world);
   }
 }
