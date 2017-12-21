@@ -1,3 +1,4 @@
+#[allow(unused_imports)]
 use std::collections::HashMap;
 
 mod items {
@@ -251,23 +252,25 @@ mod items {
 mod medallions {
   #[allow(dead_code)]
   #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
-  pub enum MedallionGoal {
+  pub enum Medallion {
     Bombos,
     Ether,
     Quake,
   }
 
-  pub fn get_all_medallion_goals() -> Vec<MedallionGoal> {
+  pub fn get_all_medallion_goals() -> Vec<Medallion> {
     vec![
-      MedallionGoal::Bombos,
-      MedallionGoal::Ether,
-      MedallionGoal::Quake,
+      Medallion::Bombos,
+      Medallion::Ether,
+      Medallion::Quake,
     ]
   }
 
-  pub fn set_medallions() {
-    // take in a world
-    unimplemented!();
+  #[allow(dead_code)]
+  #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+  pub enum Location {
+    TurtleRockMedallion,
+    MiseryMireMedallion,
   }
 }
 
@@ -400,8 +403,6 @@ mod locations {
     GanonSTowerMoldormChest,
     WaterfallBottle,
     PyramidBottle,
-    TurtleRockMedallion,
-    MiseryMireMedallion,
     Sanctuary,
     SewersSecretRoomLeft,
     SewersSecretRoomMiddle,
@@ -510,14 +511,34 @@ mod locations {
   }
 }
 
+mod world {
+  use std::collections::HashMap;
+  use super::{medallions, locations, items};
+
+  #[derive(Eq, PartialEq, Debug)]
+  pub struct World {
+    medallions: HashMap<medallions::Location, medallions::Medallion>,
+    assignments: HashMap<locations::Location, items::Item>,
+  }
+
+  impl World {
+    pub fn new() -> Self {
+      Self {
+        medallions: HashMap::new(),
+        assignments: HashMap::new(),
+      }
+    }
+  }
+}
+
 fn generate_world(
   advancement_items: &Vec<items::Item>,
   nice_items: &Vec<items::Item>,
   junk_items: &Vec<items::Item>,
   dungeon_items: &Vec<items::Item>,
-) -> HashMap<locations::Location, items::Item> {
-  let assignments = HashMap::new();
-  assignments
+) -> world::World {
+  let world = world::World::new();
+  world
 }
 
 fn main() {
