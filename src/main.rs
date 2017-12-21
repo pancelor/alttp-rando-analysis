@@ -1416,8 +1416,11 @@ fn generate_world(
 
     fill_items_in_locations(&mut dungeon_items_iter, &mut randomized_order_locations, &advancement_items);
     let num_junk_items = rng.next_u32() % 16;
-    let mut ganon_iter = regions::get_locations_for(regions::Region::GanonsTower).iter()
-      .filter(|loc| assignments.get(loc) == None);
+    let ganon_locs: Vec<locations::Location> = regions::get_locations_for(regions::Region::GanonsTower).into_iter()
+      .filter(|loc| assignments.get(loc) == None)
+      .take(num_junk_items as usize)
+      .collect();
+    let mut ganon_iter = ganon_locs.iter();
     for _ in 0..num_junk_items {
       assignments.insert(*ganon_iter.next().unwrap(), *junk_items_iter.next().unwrap());
     }
