@@ -84,6 +84,8 @@ mod items {
     ThreeHundredRupees,
     Heart,
     Rupoor,
+    BigKeyH2,
+    BigKeyA1,
     BigKeyA2,
     BigKeyD1,
     BigKeyD2,
@@ -95,6 +97,8 @@ mod items {
     BigKeyP1,
     BigKeyP2,
     BigKeyP3,
+    KeyH2,
+    KeyA1,
     KeyA2,
     KeyD1,
     KeyD2,
@@ -103,10 +107,11 @@ mod items {
     KeyD5,
     KeyD6,
     KeyD7,
-    KeyA1,
-    KeyH2,
+    KeyP1,
     KeyP2,
     KeyP3,
+    MapH2,
+    MapA1,
     MapA2,
     MapD1,
     MapD2,
@@ -115,10 +120,11 @@ mod items {
     MapD5,
     MapD6,
     MapD7,
-    MapH2,
     MapP1,
     MapP2,
     MapP3,
+    CompassH2,
+    CompassA1,
     CompassA2,
     CompassD1,
     CompassD2,
@@ -1034,7 +1040,7 @@ mod locations {
 }
 
 mod regions {
-  use super::{locations};
+  use super::{locations, items};
 
   #[allow(dead_code)]
   #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
@@ -1348,6 +1354,101 @@ mod regions {
       ],
     }
   }
+
+  pub fn get_dungeon_items_for(reg: Region) -> Option<Vec<items::Item>> {
+    use self::Region::*;
+    use items::Item::*;
+    match reg {
+      DesertPalace => Some(vec![
+        BigKeyP2,
+        CompassP2,
+        KeyP2,
+        MapP2,
+      ]),
+      EasternPalace => Some(vec![
+        BigKeyP1,
+        CompassP1,
+        KeyP1,
+        MapP1,
+      ]),
+      TowerofHera => Some(vec![
+        BigKeyP3,
+        CompassP3,
+        KeyP3,
+        MapP3,
+      ]),
+      IcePalace => Some(vec![
+        BigKeyD5,
+        CompassD5,
+        KeyD5,
+        MapD5,
+      ]),
+      MiseryMire => Some(vec![
+        BigKeyD6,
+        CompassD6,
+        KeyD6,
+        MapD6,
+      ]),
+      PalaceofDarkness => Some(vec![
+        BigKeyD1,
+        CompassD1,
+        KeyD1,
+        MapD1,
+      ]),
+      SkullWoods => Some(vec![
+        BigKeyD3,
+        CompassD3,
+        KeyD3,
+        MapD3,
+      ]),
+      SwampPalace => Some(vec![
+        BigKeyD2,
+        CompassD2,
+        KeyD2,
+        MapD2,
+      ]),
+      ThievesTown => Some(vec![
+        BigKeyD4,
+        CompassD4,
+        KeyD4,
+        MapD4,
+      ]),
+      TurtleRock => Some(vec![
+        BigKeyD7,
+        CompassD7,
+        KeyD7,
+        MapD7,
+      ]),
+      GanonsTower => Some(vec![
+        BigKeyA2,
+        CompassA2,
+        KeyA2,
+        MapA2,
+      ]),
+      Fountains => None,
+      Escape => Some(vec![
+        BigKeyH2,
+        CompassH2,
+        KeyH2,
+        MapH2,
+      ]),
+      HyruleCastleTower => Some(vec![
+        BigKeyA1,
+        CompassA1,
+        KeyA1,
+        MapA1,
+      ]),
+      Mire => None,
+      NorthEastDarkWorld => None,
+      NorthWestDarkWorld => None,
+      SouthDarkWorld => None,
+      EastDarkWorldDeathMountain => None,
+      WestDarkWorldDeathMountain => None,
+      EastDeathMountain => None,
+      WestDeathMountain => None,
+      LightWorld => None,
+    }
+  }
 }
 
 mod world {
@@ -1533,6 +1634,19 @@ mod logic {
     my_items: &Vec<items::Item>,
     assignments: &HashMap<locations::Location, items::Item>,
   ) -> bool {
+
+    // @TODO: some sort of logic in Region.php#canFill
+    //   I assume it keeps keys where they belong but idk
+    //   and I'm too tired right now to get this right.
+    match regions::get_dungeon_items_for(locations::get_region_for(loc)) {
+      Some(dungeon_items) => {
+
+      },
+      None => {
+
+      }
+    };
+
     let todo = true;
     match loc { // @TODO
       DesertPalaceBigChest => item != items::Item::BigKeyP2,
@@ -1825,13 +1939,41 @@ mod logic {
 
     let todo = true;
     match loc { // @TODO
-      DesertPalaceBigChest => todo,
-      DesertPalaceMapChest => todo,
-      DesertPalaceTorch => todo,
-      DesertPalaceBigKeyChest => todo,
-      DesertPalaceCompassChest => todo,
-      DesertPalaceLanmolas => todo,
-      DesertPalacePrize => todo,
+      DesertPalaceBigChest => {
+        my_items.contains(&BigKeyP2)
+      },
+      DesertPalaceMapChest => true,
+      DesertPalaceTorch => {
+        my_items.contains(&PegasusBoots)
+      },
+      DesertPalaceBigKeyChest => {
+        my_items.contains(&KeyP2)
+      },
+      DesertPalaceCompassChest => {
+        my_items.contains(&KeyP2)
+      },
+      DesertPalaceLanmolas => {
+        if !(
+          has_sword(&my_items)
+          || my_items.contains(&Hammer)
+          || can_shoot_arrows(&my_items)
+          || my_items.contains(&FireRod)
+          || my_items.contains(&IceRod)
+          || my_items.contains(&CaneOfByrna)
+          || my_items.contains(&CaneOfSomaria)
+        ) {
+          return false;
+        }
+
+        (
+          can_enter(DesertPalace, &my_items, &assignments)
+          && can_lift_rocks(&my_items)
+          && can_light_torches(&my_items)
+          && my_items.contains(&BigKeyP2)
+          && my_items.contains(&KeyP2)
+        )
+      },
+      DesertPalacePrize => can_access(DesertPalaceLanmolas, &my_items, &assignments),
       EasternPalaceCompassChest => todo,
       EasternPalaceBigChest => todo,
       EasternPalaceCannonballChest => todo,
@@ -2282,5 +2424,19 @@ fn main() {
   for _ in 0..sim_count {
     let world = generator::generate_world(&advancement_items, &nice_items, &junk_items, &dungeon_items, &mut rng);
     info!("{:?}", world);
+
+    // { // @TODO: debug code; rm
+    //   for loc in vec![
+    //     locations::Location::DesertPalaceBigChest,
+    //     locations::Location::DesertPalaceMapChest,
+    //     locations::Location::DesertPalaceTorch,
+    //     locations::Location::DesertPalaceBigKeyChest,
+    //     locations::Location::DesertPalaceCompassChest,
+    //     locations::Location::DesertPalaceLanmolas,
+    //     locations::Location::DesertPalacePrize,
+    //   ] {
+    //     error!("{:?}: {:?}", loc, world.assignments.get(&loc));
+    //   }
+    // }
   }
 }
