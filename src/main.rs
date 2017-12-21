@@ -1354,9 +1354,8 @@ fn generate_world(
   dungeon_items: &Vec<items::Item>,
   rng: &mut ThreadRng,
 ) -> world::World {
-  // Set up medallions
   let medallions;
-  {
+  { // Set up medallions
     let all_meds = medallions::get_all_medallions();
     medallions = medallions::Entrance {
       turtle_rock: *rng.choose(&all_meds).expect("empty medallion array"),
@@ -1364,12 +1363,10 @@ fn generate_world(
     };
   }
 
-  // Set up assignments
   let mut assignments;
-  {
+  { // Set up assignments
     assignments = HashMap::new();
-    // Place prizes
-    {
+    { // Place prizes
       let mut prizes = vec![
         items::Item::Crystal1,
         items::Item::Crystal2,
@@ -1404,25 +1401,45 @@ fn generate_world(
     //   it sets waterfall fairy stuff and bow fairy stuff for some reason.
     //   It seems to set what the fairy fills your bottles with? idk
 
+    let mut advancement_items_iter;
+    let mut nice_items_iter;
+    let mut junk_items_iter;
+    let mut dungeon_items_iter;
+    { // init item iterators
+      let mut advancement_items_clone = advancement_items.clone();
+      rng.shuffle(&mut advancement_items_clone);
+      advancement_items_iter = advancement_items_clone.into_iter();
+
+      let mut nice_items_clone = nice_items.clone();
+      rng.shuffle(&mut nice_items_clone);
+      nice_items_iter = nice_items_clone.into_iter();
+
+      let mut junk_items_clone = junk_items.clone();
+      rng.shuffle(&mut junk_items_clone);
+      junk_items_iter = junk_items_clone.into_iter();
+
+      let mut dungeon_items_clone = dungeon_items.clone();
+      rng.shuffle(&mut dungeon_items_clone);
+      dungeon_items_iter = dungeon_items_clone.into_iter();
+    }
+
     // The code from here to the end is based on RandomAssumed.php
-    let mut advancement_items_iter = advancement_items.iter();
-    let mut nice_items_iter = nice_items.iter();
-    let mut junk_items_iter = junk_items.iter();
-    let mut dungeon_items_iter = dungeon_items.iter();
 
     let mut randomized_order_locations = locations::get_all_locations();
     rng.shuffle(&mut randomized_order_locations);
     trace!("randomized_order_locations: {:?}", randomized_order_locations);
 
-    fill_items_in_locations(&mut dungeon_items_iter, &mut randomized_order_locations, &advancement_items);
-    let num_junk_items = rng.next_u32() % 16;
-    let ganon_locs: Vec<locations::Location> = regions::get_locations_for(regions::Region::GanonsTower).into_iter()
-      .filter(|loc| assignments.get(loc) == None)
-      .take(num_junk_items as usize)
-      .collect();
-    let mut ganon_iter = ganon_locs.iter();
-    for _ in 0..num_junk_items {
-      assignments.insert(*ganon_iter.next().unwrap(), *junk_items_iter.next().unwrap());
+    fill_items_in_locations(dungeon_items_iter, &mut randomized_order_locations, &advancement_items);
+    { // put some junk in ganon
+      let num_junk_items = rng.next_u32() % 16;
+      let ganon_locs: Vec<locations::Location> = regions::get_locations_for(regions::Region::GanonsTower).into_iter()
+        .filter(|loc| assignments.get(loc) == None)
+        .take(num_junk_items as usize)
+        .collect();
+      let mut ganon_iter = ganon_locs.into_iter();
+      for _ in 0..num_junk_items {
+        assignments.insert(ganon_iter.next().unwrap(), junk_items_iter.next().unwrap());
+      }
     }
   }
 
@@ -1433,9 +1450,9 @@ fn generate_world(
   world
 }
 
-use std::slice::Iter;
+use std::vec::IntoIter;
 fn fill_items_in_locations(
-  fill_items: &mut Iter<items::Item>,
+  fill_items: IntoIter<items::Item>,
   locations: &mut Vec<locations::Location>,
   base_assumed_items: &Vec<items::Item>
 ) {
