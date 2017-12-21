@@ -143,6 +143,9 @@ mod items {
     DefeatAgahnim,
     DefeatAgahnim2,
     DefeatGanon,
+    BowAndArrows,
+    L1SwordAndShield,
+    L2Sword, // no idea why this is different than MasterSword
   }
 
   pub fn get_advancement_items() -> Vec<Item> {
@@ -1365,16 +1368,127 @@ mod logic {
   use regions::Region::*;
   use items::Item::*;
 
+  fn count(
+    item: &items::Item,
+    my_items: &Vec<items::Item>,
+  ) -> usize {
+    my_items.iter()
+      .filter(|&&it| it == *item)
+      .cloned()
+      .collect::<Vec<items::Item>>()
+      .len()
+  }
+
+  fn can_lift_rocks(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&PowerGlove)
+    || my_items.contains(&ProgressiveGlove)
+    || my_items.contains(&TitansMitt)
+  }
+
   fn can_lift_dark_rocks(
     my_items: &Vec<items::Item>,
   ) -> bool {
-    unimplemented!()
+    my_items.contains(&TitansMitt)
+    || count(&ProgressiveGlove, &my_items) >= 2
+  }
+
+  fn can_light_torches(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&FireRod)
+    || my_items.contains(&Lamp)
+  }
+
+  fn can_melt_things(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&FireRod)
+    || (my_items.contains(&Bombos) && has_sword(&my_items))
   }
 
   fn can_fly(
     my_items: &Vec<items::Item>,
   ) -> bool {
-    unimplemented!()
+    my_items.contains(&OcarinaActive)
+    || my_items.contains(&OcarinaInactive)
+  }
+
+  fn can_spin_speed(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&PegasusBoots) && (
+      has_sword(&my_items)
+      || my_items.contains(&Hookshot)
+    )
+  }
+
+  fn can_shoot_arrows(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&Bow)
+    || my_items.contains(&BowAndArrows)
+    || my_items.contains(&BowAndSilverArrows)
+  }
+
+  fn can_block_lasers(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&MirrorShield)
+    || count(&ProgressiveShield, &my_items) >= 3
+  }
+
+  fn can_extend_magic(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&HalfMagic)
+    || my_items.contains(&QuarterMagic)
+    || has_a_bottle(&my_items)
+  }
+
+  fn glitched_link_in_dark_world(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&MoonPearl)
+    || has_a_bottle(&my_items)
+  }
+
+  fn has_sword(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&L1Sword)
+    || my_items.contains(&L1SwordAndShield)
+    || my_items.contains(&ProgressiveSword)
+    || has_upgraded_sword(&my_items)
+  }
+
+  fn has_upgraded_sword(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&L2Sword)
+    || my_items.contains(&MasterSword)
+    || my_items.contains(&L3Sword)
+    || my_items.contains(&L4Sword)
+    || count(&ProgressiveSword, &my_items) >= 2
+  }
+
+  fn has_bottle(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    unimplemented!() // @TODO? only used in tests
+  }
+
+  fn has_a_bottle(
+    my_items: &Vec<items::Item>,
+  ) -> bool {
+    my_items.contains(&BottleWithBee)
+    || my_items.contains(&BottleWithFairy)
+    || my_items.contains(&BottleWithRedPotion)
+    || my_items.contains(&BottleWithGreenPotion)
+    || my_items.contains(&BottleWithBluePotion)
+    || my_items.contains(&Bottle)
+    || my_items.contains(&BottleWithGoldBee)
   }
 
   pub fn can_complete(
@@ -1672,7 +1786,9 @@ mod logic {
       DesertPalace => {
         my_items.contains(&BookOfMudora)
         || (
-          my_items.contains(&MagicMirror) && can_lift_dark_rocks(&my_items) && can_fly(&my_items)
+          my_items.contains(&MagicMirror)
+          && can_lift_dark_rocks(&my_items)
+          && can_fly(&my_items)
         )
       },
       WestDeathMountain => todo,
