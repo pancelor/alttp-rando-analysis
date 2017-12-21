@@ -1394,7 +1394,7 @@ fn generate_world(
       assert!(iter.next() == None);
       // TODO: php has a weird conditional-and-`throw`; is this relevant?
       //   There aren't any restrictions, are there?
-      //   e.g. Turtle Rock can't have a red pendant?
+      //   e.g. something like "Turtle Rock can't have the red pendant"?
     }
 
     // TODO: not sure what's up in the php here;
@@ -1429,7 +1429,7 @@ fn generate_world(
     rng.shuffle(&mut randomized_order_locations);
     trace!("randomized_order_locations: {:?}", randomized_order_locations);
 
-    fill_items_in_locations(dungeon_items_iter, &randomized_order_locations, &advancement_items);
+    fill_items_in_locations(dungeon_items_iter, &randomized_order_locations, &advancement_items, &mut assignments);
 
     { // put some junk in ganon
       let num_junk_items = rng.next_u32() % 16;
@@ -1437,23 +1437,19 @@ fn generate_world(
         .filter(|loc| assignments.get(loc) == None)
         .take(num_junk_items as usize)
         .collect();
-      let mut ganon_iter = ganon_locs.into_iter();
-      for _ in 0..num_junk_items {
-        let loc = ganon_iter.next().unwrap();
-        let item = junk_items_iter.next().unwrap();
-        debug!("Placing {:?} in {:?}", item, loc);
-        assignments.insert(loc, item);
-      }
+      fast_fill_items_in_locations(&mut junk_items_iter, &ganon_locs, &mut assignments);
     }
 
     randomized_order_locations.reverse();
 
-    fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![]);
+    fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![], &mut assignments);
 
     rng.shuffle(&mut randomized_order_locations);
 
     fast_fill_items_in_locations(&mut nice_items_iter, &randomized_order_locations, &mut assignments);
 
+    // @hack: the php randomizes junk_items _again_ here;
+    //   I'm skipping that useless step (or maybe I'm dumb?)
     fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut assignments);
   }
 
@@ -1472,7 +1468,10 @@ fn fast_fill_items_in_locations(
   for &loc in locations.iter() {
     if assignments.contains_key(&loc) { continue };
     match fill_items.next() {
-      Some(item) => assignments.insert(loc, item),
+      Some(item) => {
+        debug!("Filling {:?} with {:?}", loc, item);
+        assignments.insert(loc, item)
+      },
       None => break,
     };
   }
@@ -1482,7 +1481,8 @@ use std::vec::IntoIter;
 fn fill_items_in_locations(
   fill_items: IntoIter<items::Item>,
   locations: &Vec<locations::Location>,
-  base_assumed_items: &Vec<items::Item>
+  base_assumed_items: &Vec<items::Item>,
+  assignments: &mut HashMap<locations::Location, items::Item>,
 ) {
   unimplemented!();
 }
