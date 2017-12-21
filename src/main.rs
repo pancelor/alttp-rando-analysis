@@ -1688,13 +1688,13 @@ mod logic {
       EasternPalaceMapChest => true,
       EasternPalaceArmosKnights => item != BigKeyP1,
       EasternPalacePrize => true,
-      TowerOfHeraBigKeyChest => todo,
-      TowerOfHeraBasementCage => todo,
-      TowerOfHeraMapChest => todo,
-      TowerOfHeraCompassChest => todo,
-      TowerOfHeraBigChest => todo,
-      TowerOfHeraMoldorm => todo,
-      TowerOfHeraPrize => todo,
+      TowerOfHeraBigKeyChest => item != KeyP3,
+      TowerOfHeraBasementCage => true,
+      TowerOfHeraMapChest => true,
+      TowerOfHeraCompassChest => item != BigKeyP3,
+      TowerOfHeraBigChest => item != BigKeyP3,
+      TowerOfHeraMoldorm => item != BigKeyP3,
+      TowerOfHeraPrize => true,
       IcePalaceBigKeyChest => todo,
       IcePalaceCompassChest => todo,
       IcePalaceMapChest => todo,
@@ -1932,7 +1932,15 @@ mod logic {
       },
       WestDeathMountain => todo,
       EastDeathMountain => todo,
-      TowerofHera => todo,
+      TowerofHera => {
+        (
+          my_items.contains(&MagicMirror)
+          || (
+            my_items.contains(&Hookshot)
+            && my_items.contains(&Hammer)
+          )
+        ) && can_enter(WestDeathMountain, &my_items, &assignments)
+      },
       HyruleCastleTower => todo,
       EastDarkWorldDeathMountain => todo,
       WestDarkWorldDeathMountain => todo,
@@ -1999,20 +2007,42 @@ mod logic {
         )
       },
       DesertPalacePrize => can_access(DesertPalaceLanmolas, &my_items, &assignments),
-      EasternPalaceCompassChest => todo,
-      EasternPalaceBigChest => todo,
-      EasternPalaceCannonballChest => todo,
-      EasternPalaceBigKeyChest => todo,
-      EasternPalaceMapChest => todo,
-      EasternPalaceArmosKnights => todo,
-      EasternPalacePrize => todo,
-      TowerOfHeraBigKeyChest => todo,
-      TowerOfHeraBasementCage => todo,
-      TowerOfHeraMapChest => todo,
-      TowerOfHeraCompassChest => todo,
-      TowerOfHeraBigChest => todo,
-      TowerOfHeraMoldorm => todo,
-      TowerOfHeraPrize => todo,
+      EasternPalaceCompassChest => true,
+      EasternPalaceBigChest => {
+        my_items.contains(&BigKeyP1)
+      },
+      EasternPalaceCannonballChest => true,
+      EasternPalaceBigKeyChest => {
+        my_items.contains(&Lamp)
+      },
+      EasternPalaceMapChest => true,
+      EasternPalaceArmosKnights => {
+        can_enter(EasternPalace, &my_items, &assignments)
+        can_shoot_arrows(&my_items)
+        && my_items.contains(&Lamp)
+        && my_items.contains(&BigKeyP1)
+      },
+      EasternPalacePrize => can_access(EasternPalaceArmosKnights, &my_items, &assignments),
+      TowerOfHeraBigKeyChest => {
+        can_light_torches(&my_items)
+        && my_items.contains(&KeyP3)
+      },
+      TowerOfHeraBasementCage => true,
+      TowerOfHeraMapChest => true,
+      TowerOfHeraCompassChest => {
+        my_items.contains(&BigKeyP3)
+      },
+      TowerOfHeraBigChest => {
+        my_items.contains(&BigKeyP3)
+      },
+      TowerOfHeraMoldorm => {
+        can_enter(TowerofHera, &my_items, &assignments)
+        && (
+          has_sword(&my_items)
+          || my_items.contains(&Hammer)
+        ) && my_items.contains(&BigKeyP3)
+      },
+      TowerOfHeraPrize => can_access(TowerOfHeraMoldorm, &my_items, &assignments),
       IcePalaceBigKeyChest => todo,
       IcePalaceCompassChest => todo,
       IcePalaceMapChest => todo,
