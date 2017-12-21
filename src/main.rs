@@ -1486,6 +1486,43 @@ mod generator {
     base_assumed_items: &Vec<items::Item>,
     assignments: &mut HashMap<locations::Location, items::Item>,
   ) {
+    let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
+    for _ in 0..remaining_fill_items.len() {
+      let item = remaining_fill_items.pop().expect("bad for loop sync");
+      let mut assumed_items = base_assumed_items.clone();
+      assumed_items.append(&mut (remaining_fill_items.clone()));
+      assumed_items = collect_items(&assumed_items, &assignments);
+
+      let loc = locations.iter()
+        .filter(|loc| assignments.get(loc) == None)
+        .filter(|loc| can_fill(&item, &loc, &assumed_items, &assignments))
+        .take(1)
+        .next();
+      match loc {
+        Some(loc) => {
+          debug!("Filling {:?} with {:?}", loc, item);
+          assignments.insert(*loc, item);
+        },
+        None => {
+          panic!("No valid location for {:?}", item); // TODO: ~s/panic/Result/
+        }
+      }
+    }
+  }
+
+  fn can_fill(
+    item: &items::Item,
+    loc: &locations::Location,
+    assumed_items: &Vec<items::Item>,
+    assignments: &HashMap<locations::Location, items::Item>,
+  ) -> bool {
+    unimplemented!();
+  }
+
+  fn collect_items(
+    assumed_items: &Vec<items::Item>,
+    assignments: &HashMap<locations::Location, items::Item>,
+  ) -> Vec<items::Item> {
     unimplemented!();
   }
 }
