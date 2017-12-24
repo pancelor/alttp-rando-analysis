@@ -316,6 +316,16 @@ mod medallions {
     ]
   }
 
+  pub fn as_item(med: MedallionLock) -> items::Item {
+    use self::MedallionLock::*;
+    use items::Item::*;
+    match med {
+      BombosLock => Bombos,
+      EtherLock  => Ether,
+      QuakeLock  => Quake,
+    }
+  }
+
   #[allow(dead_code)]
   #[derive(Eq, PartialEq, Copy, Clone, Debug)]
   pub struct EntranceConfig {
@@ -1623,7 +1633,9 @@ mod logic {
     assignments: &HashMap<locations::Location, items::Item>,
   ) {
     // @TODO are types right here?
-    locs.iter().any(|&loc| *(assignments.get(&loc)) == item)
+    locs.iter()
+      .filter_map(|&loc| assignments.get(&loc))
+      .any(|&it| it == item)
   }
 
   pub fn can_complete(
@@ -1657,7 +1669,7 @@ mod logic {
       Fountains                  => None,
     };
     match prize_loc {
-      Some(loc) => can_access(loc, &my_items, &assignments),
+      Some(loc) => can_access(loc, &my_items, &world),
       None => true,
     }
   }
@@ -1666,7 +1678,6 @@ mod logic {
     item: items::Item,
     loc: locations::Location,
     my_items: &Vec<items::Item>,
-    assignments: &HashMap<locations::Location, items::Item>,
   ) -> bool {
 
     // @TODO: some sort of logic in Region.php#canFill
@@ -1704,24 +1715,24 @@ mod logic {
       TowerOfHeraBigChest => item != BigKeyP3,
       TowerOfHeraMoldorm => item != BigKeyP3,
       TowerOfHeraPrize => true,
-      IcePalaceBigKeyChest => todo,
-      IcePalaceCompassChest => todo,
-      IcePalaceMapChest => todo,
-      IcePalaceSpikeRoom => todo,
-      IcePalaceFreezorChest => todo,
-      IcePalaceIcedTRoom => todo,
+      IcePalaceBigKeyChest => true,
+      IcePalaceCompassChest => true,
+      IcePalaceMapChest => true,
+      IcePalaceSpikeRoom => true,
+      IcePalaceFreezorChest => true,
+      IcePalaceIcedTRoom => true,
       IcePalaceBigChest => item != BigKeyD5,
       IcePalaceKholdstare => item != BigKeyD5,
-      IcePalacePrize => todo,
-      MiseryMireBigChest => todo,
-      MiseryMireMainLobby => todo,
-      MiseryMireBigKeyChest => todo,
-      MiseryMireCompassChest => todo,
-      MiseryMireBridgeChest => todo,
-      MiseryMireMapChest => todo,
-      MiseryMireSpikeChest => todo,
-      MiseryMireVitreous => todo,
-      MiseryMirePrize => todo,
+      IcePalacePrize => true,
+      MiseryMireBigChest => item != BigKeyD6,
+      MiseryMireMainLobby => true,
+      MiseryMireBigKeyChest => true,
+      MiseryMireCompassChest => true,
+      MiseryMireBridgeChest => true,
+      MiseryMireMapChest => true,
+      MiseryMireSpikeChest => true,
+      MiseryMireVitreous => item != BigKeyD6,
+      MiseryMirePrize => true,
       PalaceOfDarknessBigKeyChest => todo,
       PalaceOfDarknessTheArenaLedge => todo,
       PalaceOfDarknessTheArenaBridge => todo,
@@ -1921,7 +1932,7 @@ mod logic {
   pub fn can_enter(
     reg: regions::Region,
     my_items: &Vec<items::Item>,
-    assignments: &HashMap<locations::Location, items::Item>,
+    world: &world::World,
   ) -> bool {
     use items::Item::*;
     use regions::Region::*;
@@ -1948,7 +1959,7 @@ mod logic {
             my_items.contains(&Hookshot)
             && my_items.contains(&Hammer)
           )
-        ) && can_enter(WestDeathMountain, &my_items, &assignments)
+        ) && can_enter(WestDeathMountain, &my_items, &world)
       },
       HyruleCastleTower => todo,
       EastDarkWorldDeathMountain => todo,
@@ -1967,7 +1978,15 @@ mod logic {
         && can_lift_dark_rocks(&my_items)
         && can_melt_things(&my_items)
       },
-      MiseryMire => todo,
+      MiseryMire => {
+        my_items.contains(medallions::as_item(medallions))
+        && has_sword(&my_items)
+        && my_items.contains(&MoonPearl)
+        && (
+          my_items.contains(&PegasusBoots)
+          || my_items.contains(&Hookshot)
+        ) && can_enter(Mire, &my_items, &world)
+      },
       TurtleRock => todo,
       GanonsTower => todo,
       Fountains => todo,
@@ -1977,10 +1996,10 @@ mod logic {
   pub fn can_access(
     loc: locations::Location,
     my_items: &Vec<items::Item>,
-    assignments: &HashMap<locations::Location, items::Item>,
+    world: &world::World,
   ) -> bool {
     let reg = locations::get_region_for(loc);
-    if !can_enter(reg, &my_items, &assignments) {
+    if !can_enter(reg, &my_items, &world) {
       return false;
     }
 
@@ -2013,14 +2032,14 @@ mod logic {
         }
 
         (
-          can_enter(DesertPalace, &my_items, &assignments)
+          can_enter(DesertPalace, &my_items, &world)
           && can_lift_rocks(&my_items)
           && can_light_torches(&my_items)
           && my_items.contains(&BigKeyP2)
           && my_items.contains(&KeyP2)
         )
       },
-      DesertPalacePrize => can_access(DesertPalaceLanmolas, &my_items, &assignments),
+      DesertPalacePrize => can_access(DesertPalaceLanmolas, &my_items, &world),
       EasternPalaceCompassChest => true,
       EasternPalaceBigChest => {
         my_items.contains(&BigKeyP1)
@@ -2031,12 +2050,12 @@ mod logic {
       },
       EasternPalaceMapChest => true,
       EasternPalaceArmosKnights => {
-        can_enter(EasternPalace, &my_items, &assignments)
+        can_enter(EasternPalace, &my_items, &world)
         can_shoot_arrows(&my_items)
         && my_items.contains(&Lamp)
         && my_items.contains(&BigKeyP1)
       },
-      EasternPalacePrize => can_access(EasternPalaceArmosKnights, &my_items, &assignments),
+      EasternPalacePrize => can_access(EasternPalaceArmosKnights, &my_items, &world),
       TowerOfHeraBigKeyChest => {
         can_light_torches(&my_items)
         && my_items.contains(&KeyP3)
@@ -2050,13 +2069,13 @@ mod logic {
         my_items.contains(&BigKeyP3)
       },
       TowerOfHeraMoldorm => {
-        can_enter(TowerofHera, &my_items, &assignments)
+        can_enter(TowerofHera, &my_items, &world)
         && (
           has_sword(&my_items)
           || my_items.contains(&Hammer)
         ) && my_items.contains(&BigKeyP3)
       },
-      TowerOfHeraPrize => can_access(TowerOfHeraMoldorm, &my_items, &assignments),
+      TowerOfHeraPrize => can_access(TowerOfHeraMoldorm, &my_items, &world),
       IcePalaceBigKeyChest => {
         my_items.contains(&Hammer)
         && can_lift_rocks(&my_items)
@@ -2119,16 +2138,50 @@ mod logic {
           ) || count(&KeyD5, &my_items) >= 2
         )
       },
-      IcePalacePrize => can_access(&IcePalaceKholdstare, &my_items, &assignments),
-      MiseryMireBigChest => todo,
-      MiseryMireMainLobby => todo,
-      MiseryMireBigKeyChest => todo,
-      MiseryMireCompassChest => todo,
-      MiseryMireBridgeChest => todo,
-      MiseryMireMapChest => todo,
-      MiseryMireSpikeChest => todo,
-      MiseryMireVitreous => todo,
-      MiseryMirePrize => can_access(MiseryMireVitreous, &my_items, &assignments),
+      IcePalacePrize => can_access(&IcePalaceKholdstare, &my_items, &world),
+      MiseryMireBigChest => my_items.contains(&BigKeyD6),
+      MiseryMireMainLobby => {
+        my_items.contains(&KeyD6)
+        || my_items.contains(&BigKeyD6)
+      },
+      MiseryMireBigKeyChest => {
+        can_light_torches(&my_items)
+        && (
+          (
+            item_in_locations(&BigKeyD6, vec![MiseryMireCompassChest])
+            && count(&KeyD6, &my_items) >= 2
+          ) || count(&KeyD6, &my_items) >= 3
+        )
+      },
+      MiseryMireCompassChest => {
+        can_light_torches(&my_items)
+        && (
+          (
+            item_in_locations(&BigKeyD6, vec![MiseryMireBigKeyChest])
+            && count(&KeyD6, &my_items) >= 2
+          ) || count(&KeyD6, &my_items) >= 3
+        )
+      },
+      MiseryMireBridgeChest => true,
+      MiseryMireMapChest => {
+        my_items.contains(&KeyD6)
+        || my_items.contains(&BigKeyD6)
+      },
+      MiseryMireSpikeChest => {
+        my_items.contains(&Cape)
+        || my_items.contains(&CaneOfByrna)
+      },
+      MiseryMireVitreous => {
+        my_items.contains(&CaneOfSomaria)
+        && my_items.contains(&Lamp)
+        && my_items.contains(&BigKeyD6)
+        && (
+          has_sword(&my_items)
+          || my_items.contains(&Hammer)
+          || can_shoot_arrows(&my_items)
+        )
+      },
+      MiseryMirePrize => can_access(MiseryMireVitreous, &my_items, &world),
       PalaceOfDarknessBigKeyChest => todo,
       PalaceOfDarknessTheArenaLedge => todo,
       PalaceOfDarknessTheArenaBridge => todo,
@@ -2143,7 +2196,7 @@ mod logic {
       PalaceOfDarknessDarkMazeBottom => todo,
       PalaceOfDarknessShooterRoom => todo,
       PalaceOfDarknessHelmasaurKing => todo,
-      PalaceOfDarknessPrize => can_access(PalaceOfDarknessHelmasaurKing, &my_items, &assignments),
+      PalaceOfDarknessPrize => can_access(PalaceOfDarknessHelmasaurKing, &my_items, &world),
       SkullWoodsBigChest => todo,
       SkullWoodsBigKeyChest => todo,
       SkullWoodsCompassChest => todo,
@@ -2152,7 +2205,7 @@ mod logic {
       SkullWoodsPotPrison => todo,
       SkullWoodsPinballRoom => todo,
       SkullWoodsMothula => todo,
-      SkullWoodsPrize => can_access(SkullWoodsMothula, &my_items, &assignments),
+      SkullWoodsPrize => can_access(SkullWoodsMothula, &my_items, &world),
       SwampPalaceEntrance => todo,
       SwampPalaceBigChest => todo,
       SwampPalaceBigKeyChest => todo,
@@ -2163,7 +2216,7 @@ mod logic {
       SwampPalaceFloodedRoomRight => todo,
       SwampPalaceWaterfallRoom => todo,
       SwampPalaceArrghus => todo,
-      SwampPalacePrize => can_access(SwampPalaceArrghus, &my_items, &assignments),
+      SwampPalacePrize => can_access(SwampPalaceArrghus, &my_items, &world),
       ThievesTownAttic => todo,
       ThievesTownBigKeyChest => todo,
       ThievesTownMapChest => todo,
@@ -2172,7 +2225,7 @@ mod logic {
       ThievesTownBigChest => todo,
       ThievesTownBlindSCell => todo,
       ThievesTownBlind => todo,
-      ThievesTownPrize => can_access(ThievesTownBlind, &my_items, &assignments),
+      ThievesTownPrize => can_access(ThievesTownBlind, &my_items, &world),
       TurtleRockChainChomps => todo,
       TurtleRockCompassChest => todo,
       TurtleRockRollerRoomLeft => todo,
@@ -2185,7 +2238,7 @@ mod logic {
       TurtleRockEyeBridgeTopLeft => todo,
       TurtleRockEyeBridgeTopRight => todo,
       TurtleRockTrinexx => todo,
-      TurtleRockPrize => can_access(TurtleRockTrinexx, &my_items, &assignments),
+      TurtleRockPrize => can_access(TurtleRockTrinexx, &my_items, &world),
       GanonSTowerBobSTorch => todo,
       GanonSTowerDMsRoomTopLeft => todo,
       GanonSTowerDMsRoomTopRight => todo,
@@ -2347,9 +2400,12 @@ mod generator {
       };
     }
 
-    let mut assignments;
+    let mut world;
     { // Set up assignments
-      assignments = HashMap::new();
+      world = world::World {
+        assignments: HashMap::new(),
+        medallions,
+      };
       { // Place prizes
         let mut prizes = vec![
           items::Item::Crystal1,
@@ -2365,16 +2421,16 @@ mod generator {
         ];
         rng.shuffle(&mut prizes);
         let mut iter = prizes.into_iter();
-        assignments.insert(locations::Location::TowerOfHeraPrize, iter.next().unwrap());
-        assignments.insert(locations::Location::EasternPalacePrize, iter.next().unwrap());
-        assignments.insert(locations::Location::DesertPalacePrize, iter.next().unwrap());
-        assignments.insert(locations::Location::SkullWoodsPrize, iter.next().unwrap());
-        assignments.insert(locations::Location::ThievesTownPrize, iter.next().unwrap());
-        assignments.insert(locations::Location::MiseryMirePrize, iter.next().unwrap());
-        assignments.insert(locations::Location::SwampPalacePrize, iter.next().unwrap());
-        assignments.insert(locations::Location::IcePalacePrize, iter.next().unwrap());
-        assignments.insert(locations::Location::PalaceOfDarknessPrize, iter.next().unwrap());
-        assignments.insert(locations::Location::TurtleRockPrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::TowerOfHeraPrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::EasternPalacePrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::DesertPalacePrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::SkullWoodsPrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::ThievesTownPrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::MiseryMirePrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::SwampPalacePrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::IcePalacePrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::PalaceOfDarknessPrize, iter.next().unwrap());
+        world.assignments.insert(locations::Location::TurtleRockPrize, iter.next().unwrap());
         assert!(iter.next() == None);
         // TODO: php has a weird conditional-and-`throw`; is this relevant?
         //   There aren't any restrictions, are there?
@@ -2413,35 +2469,31 @@ mod generator {
       rng.shuffle(&mut randomized_order_locations);
       trace!("randomized_order_locations: {:?}", randomized_order_locations);
 
-      fill_items_in_locations(dungeon_items_iter, &randomized_order_locations, &advancement_items, &mut assignments);
+      fill_items_in_locations(dungeon_items_iter, &randomized_order_locations, &advancement_items, &mut world);
 
       { // put some junk in ganon
         let num_junk_items = rng.next_u32() % 16;
         let ganon_locs: Vec<locations::Location> = regions::get_locations_for(regions::Region::GanonsTower).into_iter()
-          .filter(|loc| assignments.get(loc) == None)
+          .filter(|loc| world.assignments.get(loc) == None)
           .take(num_junk_items as usize)
           .collect();
-        fast_fill_items_in_locations(&mut junk_items_iter, &ganon_locs, &mut assignments);
+        fast_fill_items_in_locations(&mut junk_items_iter, &ganon_locs, &mut world.assignments);
       }
 
       randomized_order_locations.reverse();
 
-      fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![], &mut assignments);
+      fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![], &mut world);
 
       rng.shuffle(&mut randomized_order_locations);
 
-      fast_fill_items_in_locations(&mut nice_items_iter, &randomized_order_locations, &mut assignments);
+      fast_fill_items_in_locations(&mut nice_items_iter, &randomized_order_locations, &mut world.assignments);
       assert_eq!(nice_items_iter.next(), None);
       // @hack: the php randomizes junk_items _again_ here;
       //   I'm skipping that useless step (or maybe I'm dumb?)
-      fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut assignments);
+      fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut world.assignments);
       assert_eq!(junk_items_iter.next(), None);
     }
 
-    let world = world::World {
-      assignments,
-      medallions,
-    };
     world
   }
 
@@ -2467,23 +2519,23 @@ mod generator {
     fill_items: IntoIter<items::Item>,
     locations: &Vec<locations::Location>,
     base_assumed_items: &Vec<items::Item>,
-    assignments: &mut HashMap<locations::Location, items::Item>,
+    world: &mut HashMap<locations::Location, items::Item>,
   ) {
     let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
     for _ in 0..remaining_fill_items.len() {
       let item = remaining_fill_items.pop().expect("bad for loop sync");
       let mut assumed_items = base_assumed_items.clone();
       assumed_items.append(&mut (remaining_fill_items.clone()));
-      assumed_items = collect_items(&assumed_items, &assignments);
+      assumed_items = collect_items(&assumed_items, &world);
 
       let loc = locations.iter()
-        .filter(|&&loc| assignments.get(&loc) == None)
-        .filter(|&&loc| logic::can_fill(item, loc, &assumed_items, &assignments))
+        .filter(|&&loc| world.assignments.get(&loc) == None)
+        .filter(|&&loc| logic::can_fill(item, loc, &assumed_items))
         .next();
       match loc {
         Some(loc) => {
           debug!("Filling {:?} with {:?}", loc, item);
-          assignments.insert(*loc, item);
+          world.assignments.insert(*loc, item);
         },
         None => {
           panic!("No available locations for {:?}", item); // TODO: ~s/panic/Result/
@@ -2495,16 +2547,16 @@ mod generator {
   use std::collections::HashSet;
   fn collect_items(
     assumed_items: &Vec<items::Item>,
-    assignments: &HashMap<locations::Location, items::Item>,
+    world: &world::World,
   ) -> Vec<items::Item> {
     let mut my_items = assumed_items.clone();
     let mut available_locations: HashSet<locations::Location> = locations::get_all_locations()
       .into_iter()
-      .filter(|&loc| assignments.get(&loc).is_some())
+      .filter(|&loc| world.assignments.get(&loc).is_some())
       .collect();
     loop {
       let search_locations: Vec<locations::Location> = available_locations.iter()
-        .filter(|&&loc| logic::can_access(loc, &my_items, &assignments))
+        .filter(|&&loc| logic::can_access(loc, &my_items, &world))
         .cloned()
         .collect();
 
@@ -2513,7 +2565,7 @@ mod generator {
         .filter(|&loc| !search_locations.contains(&loc))
         .collect();
       let mut found_items: Vec<items::Item> = search_locations.into_iter()
-        .filter_map(|loc| assignments.get(&loc))
+        .filter_map(|loc| world.assignments.get(&loc))
         .map(|&item| item)
         .collect();
       if found_items.len() == 0 {
