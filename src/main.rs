@@ -1617,6 +1617,15 @@ mod logic {
     || my_items.contains(&BottleWithGoldBee)
   }
 
+  fn item_in_locations(
+    item: &items::Item,
+    locs: &Vec<locations::Location>,
+    assignments: &HashMap<locations::Location, items::Item>,
+  ) {
+    // @TODO are types right here?
+    locs.iter().any(|&loc| *(assignments.get(&loc)) == item)
+  }
+
   pub fn can_complete(
     reg: regions::Region,
     my_items: &Vec<items::Item>,
@@ -1701,8 +1710,8 @@ mod logic {
       IcePalaceSpikeRoom => todo,
       IcePalaceFreezorChest => todo,
       IcePalaceIcedTRoom => todo,
-      IcePalaceBigChest => todo,
-      IcePalaceKholdstare => todo,
+      IcePalaceBigChest => item != BigKeyD5,
+      IcePalaceKholdstare => item != BigKeyD5,
       IcePalacePrize => todo,
       MiseryMireBigChest => todo,
       MiseryMireMainLobby => todo,
@@ -1952,7 +1961,12 @@ mod logic {
       SwampPalace => todo,
       SkullWoods => todo,
       ThievesTown => todo,
-      IcePalace => todo,
+      IcePalace => {
+        my_items.contains(&MoonPearl)
+        && my_items.contains(&Flippers)
+        && can_lift_dark_rocks(&my_items)
+        && can_melt_things(&my_items)
+      },
       MiseryMire => todo,
       TurtleRock => todo,
       GanonsTower => todo,
@@ -2043,15 +2057,69 @@ mod logic {
         ) && my_items.contains(&BigKeyP3)
       },
       TowerOfHeraPrize => can_access(TowerOfHeraMoldorm, &my_items, &assignments),
-      IcePalaceBigKeyChest => todo,
-      IcePalaceCompassChest => todo,
-      IcePalaceMapChest => todo,
-      IcePalaceSpikeRoom => todo,
-      IcePalaceFreezorChest => todo,
-      IcePalaceIcedTRoom => todo,
-      IcePalaceBigChest => todo,
-      IcePalaceKholdstare => todo,
-      IcePalacePrize => todo,
+      IcePalaceBigKeyChest => {
+        my_items.contains(&Hammer)
+        && can_lift_rocks(&my_items)
+        && (
+          my_items.contains(&Hookshot)
+          || (
+            item_in_locations(&BigKeyD5,
+              vec![IcePalaceMapChest, IcePalaceSpikeRoom])
+            && my_items.contains(&KeyD5)
+          ) || count(&KeyD5, &my_items) >= 2
+        ) && (
+          my_items.contains(&Hookshot)
+          || my_items.contains(&CaneOfByrna)
+          || my_items.contains(&Cape)
+        )
+      },
+      IcePalaceCompassChest => true,
+      IcePalaceMapChest => {,
+        my_items.contains(&Hammer)
+        && can_lift_rocks(&my_items)
+        && (
+          my_items.contains(&Hookshot)
+          || (
+            item_in_locations(&BigKeyD5,
+              vec![IcePalaceSpikeRoom, IcePalaceBigKeyChest])
+            && my_items.contains(&KeyD5)
+          ) || count(&KeyD5, &my_items) >= 2
+        ) && (
+          my_items.contains(&Hookshot)
+          || my_items.contains(&CaneOfByrna)
+          || my_items.contains(&Cape)
+        )
+      },
+      IcePalaceSpikeRoom => {,
+        (
+          my_items.contains(&Hookshot)
+          || (
+            item_in_locations(&BigKeyD5,
+              vec![IcePalaceMapChest, IcePalaceBigKeyChest])
+            && my_items.contains(&KeyD5)
+          ) || count(&KeyD5, &my_items) >= 2
+        ) && (
+          my_items.contains(&Hookshot)
+          || my_items.contains(&CaneOfByrna)
+          || my_items.contains(&Cape)
+        )
+      },
+      IcePalaceFreezorChest => can_melt_things(&my_items),
+      IcePalaceIcedTRoom => true,
+      IcePalaceBigChest => my_items.contains(&BigKeyD5),
+      IcePalaceKholdstare => {
+        my_items.contains(&Hammer)
+        && can_melt_things(&my_items)
+        && can_lift_rocks(&my_items)
+        && my_items.contains(&BigKeyD5)
+        && (
+          (
+            my_items.contains(&CaneOfSomaria)
+            && my_items.contains(&KeyD5)
+          ) || count(&KeyD5, &my_items) >= 2
+        )
+      },
+      IcePalacePrize => can_access(&IcePalaceKholdstare, &my_items, &assignments),
       MiseryMireBigChest => todo,
       MiseryMireMainLobby => todo,
       MiseryMireBigKeyChest => todo,
@@ -2060,7 +2128,7 @@ mod logic {
       MiseryMireMapChest => todo,
       MiseryMireSpikeChest => todo,
       MiseryMireVitreous => todo,
-      MiseryMirePrize => todo,
+      MiseryMirePrize => can_access(MiseryMireVitreous, &my_items, &assignments),
       PalaceOfDarknessBigKeyChest => todo,
       PalaceOfDarknessTheArenaLedge => todo,
       PalaceOfDarknessTheArenaBridge => todo,
@@ -2075,7 +2143,7 @@ mod logic {
       PalaceOfDarknessDarkMazeBottom => todo,
       PalaceOfDarknessShooterRoom => todo,
       PalaceOfDarknessHelmasaurKing => todo,
-      PalaceOfDarknessPrize => todo,
+      PalaceOfDarknessPrize => can_access(PalaceOfDarknessHelmasaurKing, &my_items, &assignments),
       SkullWoodsBigChest => todo,
       SkullWoodsBigKeyChest => todo,
       SkullWoodsCompassChest => todo,
@@ -2084,7 +2152,7 @@ mod logic {
       SkullWoodsPotPrison => todo,
       SkullWoodsPinballRoom => todo,
       SkullWoodsMothula => todo,
-      SkullWoodsPrize => todo,
+      SkullWoodsPrize => can_access(SkullWoodsMothula, &my_items, &assignments),
       SwampPalaceEntrance => todo,
       SwampPalaceBigChest => todo,
       SwampPalaceBigKeyChest => todo,
@@ -2095,7 +2163,7 @@ mod logic {
       SwampPalaceFloodedRoomRight => todo,
       SwampPalaceWaterfallRoom => todo,
       SwampPalaceArrghus => todo,
-      SwampPalacePrize => todo,
+      SwampPalacePrize => can_access(SwampPalaceArrghus, &my_items, &assignments),
       ThievesTownAttic => todo,
       ThievesTownBigKeyChest => todo,
       ThievesTownMapChest => todo,
@@ -2104,7 +2172,7 @@ mod logic {
       ThievesTownBigChest => todo,
       ThievesTownBlindSCell => todo,
       ThievesTownBlind => todo,
-      ThievesTownPrize => todo,
+      ThievesTownPrize => can_access(ThievesTownBlind, &my_items, &assignments),
       TurtleRockChainChomps => todo,
       TurtleRockCompassChest => todo,
       TurtleRockRollerRoomLeft => todo,
@@ -2117,7 +2185,7 @@ mod logic {
       TurtleRockEyeBridgeTopLeft => todo,
       TurtleRockEyeBridgeTopRight => todo,
       TurtleRockTrinexx => todo,
-      TurtleRockPrize => todo,
+      TurtleRockPrize => can_access(TurtleRockTrinexx, &my_items, &assignments),
       GanonSTowerBobSTorch => todo,
       GanonSTowerDMsRoomTopLeft => todo,
       GanonSTowerDMsRoomTopRight => todo,
