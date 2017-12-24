@@ -299,6 +299,8 @@ mod items {
 }
 
 mod medallions {
+  use super::{items};
+
   #[allow(dead_code)]
   #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
   pub enum MedallionLock {
@@ -1499,7 +1501,7 @@ mod world {
 
 mod logic {
   use std::collections::HashMap;
-  use super::{locations, regions, items};
+  use super::{locations, regions, items, world, medallions};
   use locations::Location::*;
   use regions::Region::*;
   use items::Item::*;
@@ -1629,19 +1631,18 @@ mod logic {
 
   fn item_in_locations(
     item: &items::Item,
-    locs: &Vec<locations::Location>,
-    assignments: &HashMap<locations::Location, items::Item>,
-  ) {
-    // @TODO are types right here?
+    locs: Vec<locations::Location>,
+    world: &world::World,
+  ) -> bool {
     locs.iter()
-      .filter_map(|&loc| assignments.get(&loc))
-      .any(|&it| it == item)
+      .filter_map(|&loc| world.assignments.get(&loc))
+      .any(|&it| it == *item)
   }
 
   pub fn can_complete(
     reg: regions::Region,
     my_items: &Vec<items::Item>,
-    assignments: &HashMap<locations::Location, items::Item>,
+    world: &world::World,
   ) -> bool {
     let prize_loc = match reg {
       LightWorld                 => None,
@@ -1979,7 +1980,7 @@ mod logic {
         && can_melt_things(&my_items)
       },
       MiseryMire => {
-        my_items.contains(medallions::as_item(medallions))
+        my_items.contains(&medallions::as_item(world.medallions.misery_mire))
         && has_sword(&my_items)
         && my_items.contains(&MoonPearl)
         && (
@@ -2050,7 +2051,6 @@ mod logic {
       },
       EasternPalaceMapChest => true,
       EasternPalaceArmosKnights => {
-        can_enter(EasternPalace, &my_items, &world)
         can_shoot_arrows(&my_items)
         && my_items.contains(&Lamp)
         && my_items.contains(&BigKeyP1)
@@ -2083,7 +2083,7 @@ mod logic {
           my_items.contains(&Hookshot)
           || (
             item_in_locations(&BigKeyD5,
-              vec![IcePalaceMapChest, IcePalaceSpikeRoom])
+              vec![IcePalaceMapChest, IcePalaceSpikeRoom], &world)
             && my_items.contains(&KeyD5)
           ) || count(&KeyD5, &my_items) >= 2
         ) && (
@@ -2093,14 +2093,14 @@ mod logic {
         )
       },
       IcePalaceCompassChest => true,
-      IcePalaceMapChest => {,
+      IcePalaceMapChest => {
         my_items.contains(&Hammer)
         && can_lift_rocks(&my_items)
         && (
           my_items.contains(&Hookshot)
           || (
             item_in_locations(&BigKeyD5,
-              vec![IcePalaceSpikeRoom, IcePalaceBigKeyChest])
+              vec![IcePalaceSpikeRoom, IcePalaceBigKeyChest], &world)
             && my_items.contains(&KeyD5)
           ) || count(&KeyD5, &my_items) >= 2
         ) && (
@@ -2109,12 +2109,12 @@ mod logic {
           || my_items.contains(&Cape)
         )
       },
-      IcePalaceSpikeRoom => {,
+      IcePalaceSpikeRoom => {
         (
           my_items.contains(&Hookshot)
           || (
             item_in_locations(&BigKeyD5,
-              vec![IcePalaceMapChest, IcePalaceBigKeyChest])
+              vec![IcePalaceMapChest, IcePalaceBigKeyChest], &world)
             && my_items.contains(&KeyD5)
           ) || count(&KeyD5, &my_items) >= 2
         ) && (
@@ -2138,7 +2138,7 @@ mod logic {
           ) || count(&KeyD5, &my_items) >= 2
         )
       },
-      IcePalacePrize => can_access(&IcePalaceKholdstare, &my_items, &world),
+      IcePalacePrize => can_access(IcePalaceKholdstare, &my_items, &world),
       MiseryMireBigChest => my_items.contains(&BigKeyD6),
       MiseryMireMainLobby => {
         my_items.contains(&KeyD6)
@@ -2148,7 +2148,7 @@ mod logic {
         can_light_torches(&my_items)
         && (
           (
-            item_in_locations(&BigKeyD6, vec![MiseryMireCompassChest])
+            item_in_locations(&BigKeyD6, vec![MiseryMireCompassChest], &world)
             && count(&KeyD6, &my_items) >= 2
           ) || count(&KeyD6, &my_items) >= 3
         )
@@ -2157,7 +2157,7 @@ mod logic {
         can_light_torches(&my_items)
         && (
           (
-            item_in_locations(&BigKeyD6, vec![MiseryMireBigKeyChest])
+            item_in_locations(&BigKeyD6, vec![MiseryMireBigKeyChest], &world)
             && count(&KeyD6, &my_items) >= 2
           ) || count(&KeyD6, &my_items) >= 3
         )
@@ -2519,7 +2519,7 @@ mod generator {
     fill_items: IntoIter<items::Item>,
     locations: &Vec<locations::Location>,
     base_assumed_items: &Vec<items::Item>,
-    world: &mut HashMap<locations::Location, items::Item>,
+    world: &mut world::World,
   ) {
     let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
     for _ in 0..remaining_fill_items.len() {
