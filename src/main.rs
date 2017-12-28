@@ -2697,28 +2697,28 @@ mod logic {
       Blacksmith => can_lift_dark_rocks(&my_items),
       PurpleChest => can_lift_dark_rocks(&my_items),
       HypeCaveTop => todo,
-      HypeCaveMiddleRight => todo,
-      HypeCaveMiddleLeft => todo,
-      HypeCaveBottom => todo,
+      HypeCaveMiddleRight
+      | HypeCaveMiddleLeft
+      | HypeCaveBottom => todo,
       Stumpy => todo,
       HypeCaveNPC => todo,
       DiggingGame => todo,
-      SuperbunnyCaveTop => todo,
-      SuperbunnyCaveBottom => todo,
-      HookshotCaveTopRight => todo,
-      HookshotCaveTopLeft => todo,
-      HookshotCaveBottomLeft => todo,
-      HookshotCaveBottomRight => todo,
+      SuperbunnyCaveTop
+      | SuperbunnyCaveBottom => todo,
+      HookshotCaveTopRight
+      | HookshotCaveTopLeft
+      | HookshotCaveBottomLeft
+      | HookshotCaveBottomRight => todo,
       SpikeCave => todo,
       SpiralCave => todo,
       MimicCave => todo,
-      ParadoxCaveLowerFarLeft => todo,
-      ParadoxCaveLowerLeft => todo,
-      ParadoxCaveLowerRight => todo,
-      ParadoxCaveLowerFarRight => todo,
-      ParadoxCaveLowerMiddle => todo,
-      ParadoxCaveUpperLeft => todo,
-      ParadoxCaveUpperRight => todo,
+      ParadoxCaveLowerFarLeft
+      | ParadoxCaveLowerLeft
+      | ParadoxCaveLowerRight
+      | ParadoxCaveLowerFarRight
+      | ParadoxCaveLowerMiddle => todo,
+      ParadoxCaveUpperLeft
+      | ParadoxCaveUpperRight => todo,
       FloatingIsland => todo,
       OldMan => todo,
       SpectacleRockCave => todo,
@@ -2733,24 +2733,24 @@ mod logic {
       KakarikoTavern => todo,
       ChickenHouse => todo,
       AginahSCave => todo,
-      SahasrahlaSHutLeft => todo,
-      SahasrahlaSHutMiddle => todo,
-      SahasrahlaSHutRight => todo,
-      KakrikoWellTop => todo,
-      KakrikoWellLeft => todo,
-      KakrikoWellMiddle => todo,
-      KakrikoWellRight => todo,
-      KakrikoWellBottom => todo,
-      BlindSHideoutTop => todo,
-      BlindSHideoutLeft => todo,
-      BlindSHideoutRight => todo,
-      BlindSHideoutFarLeft => todo,
-      BlindSHideoutFarRight => todo,
+      SahasrahlaSHutLeft
+      | SahasrahlaSHutMiddle
+      | SahasrahlaSHutRight => todo,
+      KakrikoWellTop
+      | KakrikoWellLeft
+      | KakrikoWellMiddle
+      | KakrikoWellRight
+      | KakrikoWellBottom => todo,
+      BlindSHideoutTop
+      | BlindSHideoutLeft
+      | BlindSHideoutRight
+      | BlindSHideoutFarLeft
+      | BlindSHideoutFarRight => todo,
       PegasusRocks => todo,
-      MiniMoldormCaveFarLeft => todo,
-      MiniMoldormCaveLeft => todo,
-      MiniMoldormCaveRight => todo,
-      MiniMoldormCaveFarRight => todo,
+      MiniMoldormCaveFarLeft
+      | MiniMoldormCaveLeft
+      | MiniMoldormCaveRight
+      | MiniMoldormCaveFarRight => todo,
       IceRodCave => todo,
       BottleMerchant => todo,
       Sahasrahla => todo,
@@ -2774,8 +2774,8 @@ mod logic {
       SunkenTreasure => todo,
       ZoraSLedge => todo,
       FluteSpot => todo,
-      WaterfallFairyLeft => todo,
-      WaterfallFairyRight => todo,
+      WaterfallFairyLeft
+      | WaterfallFairyRight => todo,
     }
   }
 }
