@@ -1611,12 +1611,6 @@ mod logic {
     || count(&ProgressiveSword, &my_items) >= 2
   }
 
-  fn has_bottle(
-    my_items: &Vec<items::Item>,
-  ) -> bool {
-    unimplemented!() // @TODO? only used in tests
-  }
-
   fn has_a_bottle(
     my_items: &Vec<items::Item>,
   ) -> bool {
@@ -1778,46 +1772,46 @@ mod logic {
       ThievesTownBlindSCell => item != BigKeyD4,
       ThievesTownBlind => item != KeyD4 && item != BigKeyD4,
       ThievesTownPrize => true,
-      TurtleRockChainChomps => todo,
-      TurtleRockCompassChest => todo,
-      TurtleRockRollerRoomLeft => todo,
-      TurtleRockRollerRoomRight => todo,
+      TurtleRockChainChomps => true,
+      TurtleRockCompassChest => true,
+      TurtleRockRollerRoomLeft => true,
+      TurtleRockRollerRoomRight => true,
       TurtleRockBigChest => item != BigKeyD7,
-      TurtleRockBigKeyChest => todo,
+      TurtleRockBigKeyChest => true,
       TurtleRockCrystarollerRoom => item != BigKeyD7,
       TurtleRockEyeBridgeBottomLeft => item != BigKeyD7,
       TurtleRockEyeBridgeBottomRight => item != BigKeyD7,
       TurtleRockEyeBridgeTopLeft => item != BigKeyD7,
       TurtleRockEyeBridgeTopRight => item != BigKeyD7,
       TurtleRockTrinexx => item != KeyD7 && item != BigKeyD7,
-      TurtleRockPrize => todo,
-      GanonSTowerBobSTorch => todo,
-      GanonSTowerDMsRoomTopLeft => todo,
-      GanonSTowerDMsRoomTopRight => todo,
-      GanonSTowerDMsRoomBottomLeft => todo,
-      GanonSTowerDMsRoomBottomRight => todo,
-      GanonSTowerRandomizerRoomTopLeft => todo,
-      GanonSTowerRandomizerRoomTopRight => todo,
-      GanonSTowerRandomizerRoomBottomLeft => todo,
-      GanonSTowerRandomizerRoomBottomRight => todo,
-      GanonSTowerFiresnakeRoom => todo,
-      GanonSTowerMapChest => todo,
-      GanonSTowerBigChest => todo,
-      GanonSTowerHopeRoomLeft => todo,
-      GanonSTowerHopeRoomRight => todo,
-      GanonSTowerBobSChest => todo,
-      GanonSTowerTileRoom => todo,
-      GanonSTowerCompassRoomTopLeft => todo,
-      GanonSTowerCompassRoomTopRight => todo,
-      GanonSTowerCompassRoomBottomLeft => todo,
-      GanonSTowerCompassRoomBottomRight => todo,
-      GanonSTowerBigKeyChest => todo,
-      GanonSTowerBigKeyRoomLeft => todo,
-      GanonSTowerBigKeyRoomRight => todo,
-      GanonSTowerMiniHelmasaurRoomLeft => todo,
-      GanonSTowerMiniHelmasaurRoomRight => todo,
-      GanonSTowerPreMoldormChest => todo,
-      GanonSTowerMoldormChest => todo,
+      TurtleRockPrize => true,
+      GanonSTowerBobSTorch => true,
+      GanonSTowerDMsRoomTopLeft => true,
+      GanonSTowerDMsRoomTopRight => true,
+      GanonSTowerDMsRoomBottomLeft => true,
+      GanonSTowerDMsRoomBottomRight => true,
+      GanonSTowerRandomizerRoomTopLeft => true,
+      GanonSTowerRandomizerRoomTopRight => true,
+      GanonSTowerRandomizerRoomBottomLeft => true,
+      GanonSTowerRandomizerRoomBottomRight => true,
+      GanonSTowerFiresnakeRoom => true,
+      GanonSTowerMapChest => true,
+      GanonSTowerBigChest => item != BigKeyA2,
+      GanonSTowerHopeRoomLeft => true,
+      GanonSTowerHopeRoomRight => true,
+      GanonSTowerBobSChest => true,
+      GanonSTowerTileRoom => true,
+      GanonSTowerCompassRoomTopLeft => true,
+      GanonSTowerCompassRoomTopRight => true,
+      GanonSTowerCompassRoomBottomLeft => true,
+      GanonSTowerCompassRoomBottomRight => true,
+      GanonSTowerBigKeyChest => true,
+      GanonSTowerBigKeyRoomLeft => true,
+      GanonSTowerBigKeyRoomRight => true,
+      GanonSTowerMiniHelmasaurRoomLeft => item != BigKeyA2,
+      GanonSTowerMiniHelmasaurRoomRight => item != BigKeyA2,
+      GanonSTowerPreMoldormChest => item != BigKeyA2,
+      GanonSTowerMoldormChest => item != KeyA2 && item != BigKeyA2,
       WaterfallBottle => todo,
       PyramidBottle => todo,
       Sanctuary => todo,
@@ -2010,7 +2004,17 @@ mod logic {
         && my_items.contains(&Hammer)
         && can_enter(EastDeathMountain, &my_items, &world)
       },
-      GanonsTower => todo,
+      GanonsTower => {
+        my_items.contains(&MoonPearl)
+        && my_items.contains(&Crystal1)
+        && my_items.contains(&Crystal2)
+        && my_items.contains(&Crystal3)
+        && my_items.contains(&Crystal4)
+        && my_items.contains(&Crystal5)
+        && my_items.contains(&Crystal6)
+        && my_items.contains(&Crystal7)
+        && can_enter(EastDarkWorldDeathMountain, &my_items, &world)
+      },
       Fountains => todo,
     }
   }
@@ -2417,33 +2421,147 @@ mod logic {
         )
       },
       TurtleRockPrize => can_access(TurtleRockTrinexx, &my_items, &world),
-      GanonSTowerBobSTorch => todo,
-      GanonSTowerDMsRoomTopLeft => todo,
-      GanonSTowerDMsRoomTopRight => todo,
-      GanonSTowerDMsRoomBottomLeft => todo,
-      GanonSTowerDMsRoomBottomRight => todo,
-      GanonSTowerRandomizerRoomTopLeft => todo,
-      GanonSTowerRandomizerRoomTopRight => todo,
-      GanonSTowerRandomizerRoomBottomLeft => todo,
-      GanonSTowerRandomizerRoomBottomRight => todo,
-      GanonSTowerFiresnakeRoom => todo,
-      GanonSTowerMapChest => todo,
-      GanonSTowerBigChest => todo,
-      GanonSTowerHopeRoomLeft => todo,
-      GanonSTowerHopeRoomRight => todo,
-      GanonSTowerBobSChest => todo,
-      GanonSTowerTileRoom => todo,
-      GanonSTowerCompassRoomTopLeft => todo,
-      GanonSTowerCompassRoomTopRight => todo,
-      GanonSTowerCompassRoomBottomLeft => todo,
-      GanonSTowerCompassRoomBottomRight => todo,
-      GanonSTowerBigKeyChest => todo,
-      GanonSTowerBigKeyRoomLeft => todo,
-      GanonSTowerBigKeyRoomRight => todo,
-      GanonSTowerMiniHelmasaurRoomLeft => todo,
-      GanonSTowerMiniHelmasaurRoomRight => todo,
-      GanonSTowerPreMoldormChest => todo,
-      GanonSTowerMoldormChest => todo,
+      GanonSTowerBobSTorch => my_items.contains(&PegasusBoots),
+      GanonSTowerDMsRoomTopLeft
+      | GanonSTowerDMsRoomTopRight
+      | GanonSTowerDMsRoomBottomLeft
+      | GanonSTowerDMsRoomBottomRight => {
+        my_items.contains(&Hammer)
+        && my_items.contains(&Hookshot)
+      },
+      GanonSTowerRandomizerRoomTopLeft
+      | GanonSTowerRandomizerRoomTopRight
+      | GanonSTowerRandomizerRoomBottomLeft
+      | GanonSTowerRandomizerRoomBottomRight => {
+        my_items.contains(&Hammer)
+        && my_items.contains(&Hookshot)
+        && (
+          (
+            item_in_locations(&BigKeyD5, vec![  // TODO: wtf why D5?? typo?
+              GanonSTowerRandomizerRoomTopLeft,
+              GanonSTowerRandomizerRoomTopRight,
+              GanonSTowerRandomizerRoomBottomLeft,
+              GanonSTowerRandomizerRoomBottomRight,
+            ], &world)
+            && count(&KeyA2, &my_items) >= 3
+          ) || count(&KeyA2, &my_items) >= 4
+        )
+      },
+      GanonSTowerFiresnakeRoom => {
+        my_items.contains(&Hammer)
+        && my_items.contains(&Hookshot)
+        && (
+          (
+            (
+              item_in_locations(&BigKeyD5, vec![  // TODO: wtf why D5?? typo?
+                GanonSTowerRandomizerRoomTopLeft,
+                GanonSTowerRandomizerRoomTopRight,
+                GanonSTowerRandomizerRoomBottomLeft,
+                GanonSTowerRandomizerRoomBottomRight,
+              ], &world)
+              || item_in_locations(&KeyA2, vec![GanonSTowerFiresnakeRoom], &world) // TODO: umm isn't this impossible since we haven't filled this location yet?
+            ) && count(&KeyA2, &my_items) >= 2
+          ) || count(&KeyA2, &my_items) >= 3
+        )
+      },
+      GanonSTowerMapChest => {
+        my_items.contains(&Hammer)
+        && (
+          my_items.contains(&PegasusBoots)
+          || my_items.contains(&Hookshot)
+        ) && count(&KeyA2, &my_items) >= 3
+      },
+      GanonSTowerBigChest => {
+        my_items.contains(&BigKeyA2)
+        && count(&KeyA2, &my_items) >= 3
+        && (
+          (
+            my_items.contains(&Hammer)
+            && my_items.contains(&Hookshot)
+          ) || (
+            my_items.contains(&FireRod)
+            && my_items.contains(&CaneOfSomaria)
+          )
+        )
+      },
+      GanonSTowerHopeRoomLeft => true,
+      GanonSTowerHopeRoomRight => true,
+      GanonSTowerBobSChest => {
+        (
+          (
+            my_items.contains(&Hammer)
+            && my_items.contains(&Hookshot)
+          ) || (
+            my_items.contains(&FireRod)
+            && my_items.contains(&CaneOfSomaria)
+          )
+        )
+        && count(&KeyA2, &my_items) >= 3
+      },
+      GanonSTowerTileRoom => my_items.contains(&CaneOfSomaria),
+      GanonSTowerCompassRoomTopLeft
+      | GanonSTowerCompassRoomTopRight
+      | GanonSTowerCompassRoomBottomLeft
+      | GanonSTowerCompassRoomBottomRight => {
+        my_items.contains(&FireRod)
+        && my_items.contains(&CaneOfSomaria)
+        && (
+          (
+            item_in_locations(&BigKeyD5, vec![  // TODO: wtf why D5?? typo?
+              GanonSTowerCompassRoomTopLeft,
+              GanonSTowerCompassRoomTopRight,
+              GanonSTowerCompassRoomBottomLeft,
+              GanonSTowerCompassRoomBottomRight,
+            ], &world)
+            && count(&KeyA2, &my_items) >= 3
+          ) || count(&KeyA2, &my_items) >= 4
+        )
+      },
+      GanonSTowerBigKeyChest => {
+        (
+          (
+            my_items.contains(&Hammer)
+            && my_items.contains(&Hookshot)
+          ) || (
+            my_items.contains(&FireRod)
+            && my_items.contains(&CaneOfSomaria)
+          )
+        )
+        && count(&KeyA2, &my_items) >= 3
+      },
+      GanonSTowerBigKeyRoomLeft
+      | GanonSTowerBigKeyRoomRight => {
+        (
+          (
+            my_items.contains(&Hammer)
+            && my_items.contains(&Hookshot)
+          ) || (
+            my_items.contains(&FireRod)
+            && my_items.contains(&CaneOfSomaria)
+          )
+        )
+        && count(&KeyA2, &my_items) >= 3
+      },
+      GanonSTowerMiniHelmasaurRoomLeft
+      | GanonSTowerMiniHelmasaurRoomRight => {
+        can_shoot_arrows(&my_items)
+        && can_light_torches(&my_items)
+        && my_items.contains(&BigKeyA2)
+        && count(&KeyA2, &my_items) >= 3
+      },
+      GanonSTowerPreMoldormChest => {
+        can_shoot_arrows(&my_items)
+        && can_light_torches(&my_items)
+        && my_items.contains(&BigKeyA2)
+        && count(&KeyA2, &my_items) >= 3
+      },
+      GanonSTowerMoldormChest => {
+        my_items.contains(&Hookshot)
+        && can_shoot_arrows(&my_items)
+        && can_light_torches(&my_items)
+        && my_items.contains(&BigKeyA2)
+        && count(&KeyA2, &my_items) >= 4
+      },
       WaterfallBottle => todo,
       PyramidBottle => todo,
       Sanctuary => todo,
