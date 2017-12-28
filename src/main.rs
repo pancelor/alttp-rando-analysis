@@ -1812,20 +1812,22 @@ mod logic {
       GanonSTowerMiniHelmasaurRoomRight => item != BigKeyA2,
       GanonSTowerPreMoldormChest => item != BigKeyA2,
       GanonSTowerMoldormChest => item != KeyA2 && item != BigKeyA2,
-      WaterfallBottle => todo,
-      PyramidBottle => todo,
-      Sanctuary => todo,
-      SewersSecretRoomLeft => todo,
-      SewersSecretRoomMiddle => todo,
-      SewersSecretRoomRight => todo,
-      SewersDarkCross => todo,
-      HyruleCastleBoomerangChest => todo,
-      HyruleCastleMapChest => todo,
-      HyruleCastleZeldaSCell => todo,
-      CastleTowerRoom03 => todo,
-      CastleTowerDarkMaze => todo,
-      MireShedLeft => todo,
-      MireShedRight => todo,
+      Agahnim2 => true,
+      WaterfallBottle => true,
+      PyramidBottle => true,
+      Sanctuary => true,
+      SewersSecretRoomLeft => true,
+      SewersSecretRoomMiddle => true,
+      SewersSecretRoomRight => true,
+      SewersDarkCross => true,
+      HyruleCastleBoomerangChest => item != KeyH2,
+      HyruleCastleMapChest => true,
+      HyruleCastleZeldaSCell => item != KeyH2,
+      CastleTowerRoom03 => true,
+      CastleTowerDarkMaze => true,
+      Agahnim => true,
+      MireShedLeft => true,
+      MireShedRight => true,
       Catfish => todo,
       Pyramid => todo,
       PyramidFairySword => todo,
@@ -1919,8 +1921,6 @@ mod logic {
       FluteSpot => todo,
       WaterfallFairyLeft => todo,
       WaterfallFairyRight => todo,
-      Agahnim => todo,
-      Agahnim2 => todo,
     }
   }
 
@@ -1935,7 +1935,7 @@ mod logic {
     let todo = true;
     match reg { // @TODO
       LightWorld => todo,
-      Escape => todo,
+      Escape => true,
       EasternPalace => true,
       DesertPalace => {
         my_items.contains(&BookOfMudora)
@@ -1956,13 +1956,19 @@ mod logic {
           )
         ) && can_enter(WestDeathMountain, &my_items, &world)
       },
-      HyruleCastleTower => todo,
+      HyruleCastleTower => {
+        my_items.contains(&Cape)
+        || has_upgraded_sword(&my_items)
+      },
       EastDarkWorldDeathMountain => todo,
       WestDarkWorldDeathMountain => todo,
       NorthEastDarkWorld => todo,
       NorthWestDarkWorld => todo,
       SouthDarkWorld => todo,
-      Mire => todo,
+      Mire => {
+        can_fly(&my_items)
+        && can_lift_dark_rocks(&my_items)
+      },
       PalaceofDarkness => {
         my_items.contains(&MoonPearl)
         && can_enter(NorthEastDarkWorld, &my_items, &world)
@@ -2015,7 +2021,7 @@ mod logic {
         && my_items.contains(&Crystal7)
         && can_enter(EastDarkWorldDeathMountain, &my_items, &world)
       },
-      Fountains => todo,
+      Fountains => true,
     }
   }
 
@@ -2562,20 +2568,46 @@ mod logic {
         && my_items.contains(&BigKeyA2)
         && count(&KeyA2, &my_items) >= 4
       },
-      WaterfallBottle => todo,
-      PyramidBottle => todo,
-      Sanctuary => todo,
-      SewersSecretRoomLeft => todo,
-      SewersSecretRoomMiddle => todo,
-      SewersSecretRoomRight => todo,
-      SewersDarkCross => todo,
-      HyruleCastleBoomerangChest => todo,
-      HyruleCastleMapChest => todo,
-      HyruleCastleZeldaSCell => todo,
-      CastleTowerRoom03 => todo,
-      CastleTowerDarkMaze => todo,
-      MireShedLeft => todo,
-      MireShedRight => todo,
+      Agahnim2 => {
+        my_items.contains(&Hookshot)
+        && can_shoot_arrows(&my_items)
+        && can_light_torches(&my_items)
+        && my_items.contains(&BigKeyA2)
+        && count(&KeyA2, &my_items) >= 4
+        && (
+          has_sword(&my_items)
+          || my_items.contains(&BugCatchingNet)
+          || my_items.contains(&Hammer)
+        )
+      },
+      WaterfallBottle => true,
+      PyramidBottle => true,
+      Sanctuary => true,
+      SewersSecretRoomLeft
+      | SewersSecretRoomMiddle
+      | SewersSecretRoomRight => {
+        can_lift_rocks(&my_items)
+        || (
+          my_items.contains(&Lamp)
+          && my_items.contains(&KeyH2)
+        )
+      },
+      SewersDarkCross => my_items.contains(&Lamp),
+      HyruleCastleBoomerangChest => true,
+      HyruleCastleMapChest => true,
+      HyruleCastleZeldaSCell => true,
+      CastleTowerRoom03 => true,
+      CastleTowerDarkMaze => {
+        my_items.contains(&Lamp)
+        && my_items.contains(&KeyA1)
+      },
+      Agahnim => {
+        count(&KeyA1, &my_items) >= 2
+        && my_items.contains(&Lamp)
+        && has_sword(&my_items)
+      },
+      MireShedLeft
+      | MireShedRight => my_items.contains(&MoonPearl),
       Catfish => todo,
       Pyramid => todo,
       PyramidFairySword => todo,
@@ -2669,8 +2701,6 @@ mod logic {
       FluteSpot => todo,
       WaterfallFairyLeft => todo,
       WaterfallFairyRight => todo,
-      Agahnim => todo,
-      Agahnim2 => todo,
     }
   }
 }
