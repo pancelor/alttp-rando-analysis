@@ -1749,15 +1749,15 @@ mod logic {
       PalaceOfDarknessShooterRoom => true,
       PalaceOfDarknessHelmasaurKing => item != KeyD1 && item != BigKeyD1,
       PalaceOfDarknessPrize => true,
-      SkullWoodsBigChest => todo,
-      SkullWoodsBigKeyChest => todo,
-      SkullWoodsCompassChest => todo,
-      SkullWoodsMapChest => todo,
-      SkullWoodsBridgeRoom => todo,
-      SkullWoodsPotPrison => todo,
-      SkullWoodsPinballRoom => todo,
-      SkullWoodsMothula => todo,
-      SkullWoodsPrize => todo,
+      SkullWoodsBigChest => item != BigKeyD3,
+      SkullWoodsBigKeyChest => true,
+      SkullWoodsCompassChest => true,
+      SkullWoodsMapChest => true,
+      SkullWoodsBridgeRoom => true,
+      SkullWoodsPotPrison => true,
+      SkullWoodsPinballRoom => item == KeyD3,
+      SkullWoodsMothula => item != KeyD3,
+      SkullWoodsPrize => true,
       SwampPalaceEntrance => todo,
       SwampPalaceBigChest => todo,
       SwampPalaceBigKeyChest => todo,
@@ -1974,7 +1974,10 @@ mod logic {
         && can_enter(NorthEastDarkWorld, &my_items, &world)
       },
       SwampPalace => todo,
-      SkullWoods => todo,
+      SkullWoods => {
+        my_items.contains(&MoonPearl)
+        && can_enter(NorthWestDarkWorld, &my_items, &world)
+      },
       ThievesTown => todo,
       IcePalace => {
         my_items.contains(&MoonPearl)
@@ -2264,15 +2267,30 @@ mod logic {
         && count(&KeyD1, &my_items) >= 6
       },
       PalaceOfDarknessPrize => can_access(PalaceOfDarknessHelmasaurKing, &my_items, &world),
-      SkullWoodsBigChest => todo,
+      SkullWoodsBigChest => my_items.contains(&BigKeyD3),
       SkullWoodsBigKeyChest => todo,
       SkullWoodsCompassChest => todo,
       SkullWoodsMapChest => todo,
-      SkullWoodsBridgeRoom => todo,
+      SkullWoodsBridgeRoom => {
+        my_items.contains(&MoonPearl)
+        && my_items.contains(&FireRod)
+      },
       SkullWoodsPotPrison => todo,
       SkullWoodsPinballRoom => todo,
-      SkullWoodsMothula => todo,
-      SkullWoodsPrize => can_access(SkullWoodsMothula, &my_items, &world),
+      SkullWoodsMothula => {
+        my_items.contains(&MoonPearl)
+        && my_items.contains(&FireRod)
+        && has_sword(&my_items)
+        && count(&KeyD3, &my_items) >= 3
+      },
+      SkullWoodsPrize => {
+        // TODO: not sure why this isn't just:
+        //   `can_access(SkullWoodsMothula, &my_items, &world)`
+        // probably something to do with `initOverworldGlitches`?
+        my_items.contains(&FireRod)
+        && has_sword(&my_items)
+        && count(&KeyD3, &my_items) >= 3
+      }
       SwampPalaceEntrance => todo,
       SwampPalaceBigChest => todo,
       SwampPalaceBigKeyChest => todo,
