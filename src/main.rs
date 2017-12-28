@@ -1734,21 +1734,21 @@ mod logic {
       MiseryMireSpikeChest => true,
       MiseryMireVitreous => item != BigKeyD6,
       MiseryMirePrize => true,
-      PalaceOfDarknessBigKeyChest => todo,
-      PalaceOfDarknessTheArenaLedge => todo,
-      PalaceOfDarknessTheArenaBridge => todo,
-      PalaceOfDarknessBigChest => todo,
-      PalaceOfDarknessCompassChest => todo,
-      PalaceOfDarknessHarmlessHellway => todo,
-      PalaceOfDarknessStalfosBasement => todo,
-      PalaceOfDarknessDarkBasementLeft => todo,
-      PalaceOfDarknessDarkBasementRight => todo,
-      PalaceOfDarknessMapChest => todo,
-      PalaceOfDarknessDarkMazeTop => todo,
-      PalaceOfDarknessDarkMazeBottom => todo,
-      PalaceOfDarknessShooterRoom => todo,
-      PalaceOfDarknessHelmasaurKing => todo,
-      PalaceOfDarknessPrize => todo,
+      PalaceOfDarknessBigKeyChest => true,
+      PalaceOfDarknessTheArenaLedge => true,
+      PalaceOfDarknessTheArenaBridge => true,
+      PalaceOfDarknessBigChest => item != KeyD1 && item != BigKeyD1,
+      PalaceOfDarknessCompassChest => true,
+      PalaceOfDarknessHarmlessHellway => true,
+      PalaceOfDarknessStalfosBasement => true,
+      PalaceOfDarknessDarkBasementLeft => true,
+      PalaceOfDarknessDarkBasementRight => true,
+      PalaceOfDarknessMapChest => true,
+      PalaceOfDarknessDarkMazeTop => item != KeyD1,
+      PalaceOfDarknessDarkMazeBottom => item != KeyD1,
+      PalaceOfDarknessShooterRoom => true,
+      PalaceOfDarknessHelmasaurKing => item != KeyD1 && item != BigKeyD1,
+      PalaceOfDarknessPrize => true,
       SkullWoodsBigChest => todo,
       SkullWoodsBigKeyChest => todo,
       SkullWoodsCompassChest => todo,
@@ -1969,7 +1969,10 @@ mod logic {
       NorthWestDarkWorld => todo,
       SouthDarkWorld => todo,
       Mire => todo,
-      PalaceofDarkness => todo,
+      PalaceofDarkness => {
+        my_items.contains(&MoonPearl)
+        && can_enter(NorthEastDarkWorld, &my_items, &world)
+      },
       SwampPalace => todo,
       SkullWoods => todo,
       ThievesTown => todo,
@@ -2182,20 +2185,84 @@ mod logic {
         )
       },
       MiseryMirePrize => can_access(MiseryMireVitreous, &my_items, &world),
-      PalaceOfDarknessBigKeyChest => todo,
-      PalaceOfDarknessTheArenaLedge => todo,
-      PalaceOfDarknessTheArenaBridge => todo,
-      PalaceOfDarknessBigChest => todo,
-      PalaceOfDarknessCompassChest => todo,
-      PalaceOfDarknessHarmlessHellway => todo,
-      PalaceOfDarknessStalfosBasement => todo,
-      PalaceOfDarknessDarkBasementLeft => todo,
-      PalaceOfDarknessDarkBasementRight => todo,
-      PalaceOfDarknessMapChest => todo,
-      PalaceOfDarknessDarkMazeTop => todo,
-      PalaceOfDarknessDarkMazeBottom => todo,
-      PalaceOfDarknessShooterRoom => todo,
-      PalaceOfDarknessHelmasaurKing => todo,
+      PalaceOfDarknessBigKeyChest => {
+        let key_count = if my_items.contains(&Hammer) && can_shoot_arrows(&my_items)
+          {5} else {4};
+
+        count(&KeyD1, &my_items) >= key_count
+      },
+      PalaceOfDarknessTheArenaLedge => can_shoot_arrows(&my_items),
+      PalaceOfDarknessTheArenaBridge => {
+        my_items.contains(&KeyD1)
+        || (
+          can_shoot_arrows(&my_items)
+          && my_items.contains(&Hammer)
+        )
+      },
+      PalaceOfDarknessBigChest => {
+        let key_count = if my_items.contains(&Hammer) && can_shoot_arrows(&my_items)
+          {5} else {4};
+
+        my_items.contains(&Lamp)
+        && my_items.contains(&BigKeyD1)
+        && count(&KeyD1, &my_items) >= key_count
+      },
+      PalaceOfDarknessCompassChest => {
+        let key_count = if my_items.contains(&Hammer) && can_shoot_arrows(&my_items)
+          {4} else {3};
+
+        count(&KeyD1, &my_items) >= key_count
+      },
+      PalaceOfDarknessHarmlessHellway => {
+        let key_count = if my_items.contains(&Hammer) && can_shoot_arrows(&my_items)
+          {5} else {4};
+
+        count(&KeyD1, &my_items) >= key_count
+      },
+      PalaceOfDarknessStalfosBasement => {
+        my_items.contains(&KeyD1)
+        || (
+          can_shoot_arrows(&my_items)
+          && my_items.contains(&Hammer)
+        )
+      },
+      PalaceOfDarknessDarkBasementLeft => {
+        let key_count = if my_items.contains(&Hammer) && can_shoot_arrows(&my_items)
+          {4} else {3};
+
+        my_items.contains(&Lamp)
+        && count(&KeyD1, &my_items) >= key_count
+      },
+      PalaceOfDarknessDarkBasementRight => {
+        let key_count = if my_items.contains(&Hammer) && can_shoot_arrows(&my_items)
+          {4} else {3};
+
+        my_items.contains(&Lamp)
+        && count(&KeyD1, &my_items) >= key_count
+      },
+      PalaceOfDarknessMapChest => can_shoot_arrows(&my_items),
+      PalaceOfDarknessDarkMazeTop => {
+        let key_count = if my_items.contains(&Hammer) && can_shoot_arrows(&my_items)
+          {5} else {4};
+
+        my_items.contains(&Lamp)
+        && count(&KeyD1, &my_items) >= key_count
+      },
+      PalaceOfDarknessDarkMazeBottom => {
+        let key_count = if my_items.contains(&Hammer) && can_shoot_arrows(&my_items)
+          {5} else {4};
+
+        my_items.contains(&Lamp)
+        && count(&KeyD1, &my_items) >= key_count
+      },
+      PalaceOfDarknessShooterRoom => true,
+      PalaceOfDarknessHelmasaurKing => {
+        my_items.contains(&Hammer)
+        && my_items.contains(&Lamp)
+        && can_shoot_arrows(&my_items)
+        && my_items.contains(&BigKeyD1)
+        && count(&KeyD1, &my_items) >= 6
+      },
       PalaceOfDarknessPrize => can_access(PalaceOfDarknessHelmasaurKing, &my_items, &world),
       SkullWoodsBigChest => todo,
       SkullWoodsBigKeyChest => todo,
