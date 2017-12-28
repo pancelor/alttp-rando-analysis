@@ -1758,26 +1758,26 @@ mod logic {
       SkullWoodsPinballRoom => item == KeyD3,
       SkullWoodsMothula => item != KeyD3,
       SkullWoodsPrize => true,
-      SwampPalaceEntrance => todo,
-      SwampPalaceBigChest => todo,
-      SwampPalaceBigKeyChest => todo,
-      SwampPalaceMapChest => todo,
-      SwampPalaceWestChest => todo,
-      SwampPalaceCompassChest => todo,
-      SwampPalaceFloodedRoomLeft => todo,
-      SwampPalaceFloodedRoomRight => todo,
-      SwampPalaceWaterfallRoom => todo,
-      SwampPalaceArrghus => todo,
-      SwampPalacePrize => todo,
-      ThievesTownAttic => todo,
-      ThievesTownBigKeyChest => todo,
-      ThievesTownMapChest => todo,
-      ThievesTownCompassChest => todo,
-      ThievesTownAmbushChest => todo,
-      ThievesTownBigChest => todo,
-      ThievesTownBlindSCell => todo,
-      ThievesTownBlind => todo,
-      ThievesTownPrize => todo,
+      SwampPalaceEntrance => item == KeyD2,
+      SwampPalaceBigChest => item != BigKeyD2,
+      SwampPalaceBigKeyChest => true,
+      SwampPalaceMapChest => true,
+      SwampPalaceWestChest => true,
+      SwampPalaceCompassChest => true,
+      SwampPalaceFloodedRoomLeft => true,
+      SwampPalaceFloodedRoomRight => true,
+      SwampPalaceWaterfallRoom => true,
+      SwampPalaceArrghus => true,
+      SwampPalacePrize => true,
+      ThievesTownAttic => item != KeyD4 && item != BigKeyD4,
+      ThievesTownBigKeyChest => item != KeyD4 && item != BigKeyD4,
+      ThievesTownMapChest => true,
+      ThievesTownCompassChest => true,
+      ThievesTownAmbushChest => true,
+      ThievesTownBigChest => true,
+      ThievesTownBlindSCell => item != BigKeyD4,
+      ThievesTownBlind => item != KeyD4 && item != BigKeyD4,
+      ThievesTownPrize => true,
       TurtleRockChainChomps => todo,
       TurtleRockCompassChest => todo,
       TurtleRockRollerRoomLeft => todo,
@@ -1973,12 +1973,20 @@ mod logic {
         my_items.contains(&MoonPearl)
         && can_enter(NorthEastDarkWorld, &my_items, &world)
       },
-      SwampPalace => todo,
+      SwampPalace => {
+        my_items.contains(&MoonPearl)
+        && my_items.contains(&MagicMirror)
+        && my_items.contains(&Flippers)
+        && can_enter(SouthDarkWorld, &my_items, &world)
+      },
       SkullWoods => {
         my_items.contains(&MoonPearl)
         && can_enter(NorthWestDarkWorld, &my_items, &world)
       },
-      ThievesTown => todo,
+      ThievesTown => {
+        my_items.contains(&MoonPearl)
+        && can_enter(NorthWestDarkWorld, &my_items, &world)
+      },
       IcePalace => {
         my_items.contains(&MoonPearl)
         && my_items.contains(&Flippers)
@@ -2268,15 +2276,15 @@ mod logic {
       },
       PalaceOfDarknessPrize => can_access(PalaceOfDarknessHelmasaurKing, &my_items, &world),
       SkullWoodsBigChest => my_items.contains(&BigKeyD3),
-      SkullWoodsBigKeyChest => todo,
-      SkullWoodsCompassChest => todo,
-      SkullWoodsMapChest => todo,
+      SkullWoodsBigKeyChest => true,
+      SkullWoodsCompassChest => true,
+      SkullWoodsMapChest => true,
       SkullWoodsBridgeRoom => {
         my_items.contains(&MoonPearl)
         && my_items.contains(&FireRod)
       },
-      SkullWoodsPotPrison => todo,
-      SkullWoodsPinballRoom => todo,
+      SkullWoodsPotPrison => true,
+      SkullWoodsPinballRoom => true,
       SkullWoodsMothula => {
         my_items.contains(&MoonPearl)
         && my_items.contains(&FireRod)
@@ -2291,25 +2299,70 @@ mod logic {
         && has_sword(&my_items)
         && count(&KeyD3, &my_items) >= 3
       }
-      SwampPalaceEntrance => todo,
-      SwampPalaceBigChest => todo,
-      SwampPalaceBigKeyChest => todo,
-      SwampPalaceMapChest => todo,
-      SwampPalaceWestChest => todo,
-      SwampPalaceCompassChest => todo,
-      SwampPalaceFloodedRoomLeft => todo,
-      SwampPalaceFloodedRoomRight => todo,
-      SwampPalaceWaterfallRoom => todo,
-      SwampPalaceArrghus => todo,
+      SwampPalaceEntrance => true,
+      SwampPalaceBigChest => {
+        my_items.contains(&KeyD2)
+        && my_items.contains(&Hammer)
+        && my_items.contains(&BigKeyD2)
+      },
+      SwampPalaceBigKeyChest => {
+        my_items.contains(&KeyD2)
+        && my_items.contains(&Hammer)
+      },
+      SwampPalaceMapChest => my_items.contains(&KeyD2),
+      SwampPalaceWestChest => {
+        my_items.contains(&KeyD2)
+        && my_items.contains(&Hammer)
+      },
+      SwampPalaceCompassChest => {
+        my_items.contains(&KeyD2)
+        && my_items.contains(&Hammer)
+      },
+      SwampPalaceFloodedRoomLeft => {
+        my_items.contains(&KeyD2)
+        && my_items.contains(&Hammer)
+        && my_items.contains(&Hookshot)
+      },
+      SwampPalaceFloodedRoomRight => {
+        my_items.contains(&KeyD2)
+        && my_items.contains(&Hammer)
+        && my_items.contains(&Hookshot)
+      },
+      SwampPalaceWaterfallRoom => {
+        my_items.contains(&KeyD2)
+        && my_items.contains(&Hammer)
+        && my_items.contains(&Hookshot)
+      },
+      SwampPalaceArrghus => {
+        my_items.contains(&KeyD2)
+        && my_items.contains(&Hammer)
+        && my_items.contains(&Hookshot)
+      },
       SwampPalacePrize => can_access(SwampPalaceArrghus, &my_items, &world),
-      ThievesTownAttic => todo,
-      ThievesTownBigKeyChest => todo,
-      ThievesTownMapChest => todo,
-      ThievesTownCompassChest => todo,
-      ThievesTownAmbushChest => todo,
-      ThievesTownBigChest => todo,
-      ThievesTownBlindSCell => todo,
-      ThievesTownBlind => todo,
+      ThievesTownAttic => {
+        my_items.contains(&KeyD4)
+        && my_items.contains(&BigKeyD4)
+      },
+      ThievesTownBigKeyChest => true,
+      ThievesTownMapChest => true,
+      ThievesTownCompassChest => true,
+      ThievesTownAmbushChest => true,
+      ThievesTownBigChest => {
+        my_items.contains(&Hammer)
+        && my_items.contains(&KeyD4)
+        && my_items.contains(&BigKeyD4)
+      },
+      ThievesTownBlindSCell => my_items.contains(&BigKeyD4),
+      ThievesTownBlind => {
+        my_items.contains(&KeyD4)
+        && my_items.contains(&BigKeyD4)
+        && (
+          has_sword(&my_items)
+          || my_items.contains(&Hammer)
+          || my_items.contains(&CaneOfSomaria)
+          || my_items.contains(&CaneOfByrna)
+        )
+      },
       ThievesTownPrize => can_access(ThievesTownBlind, &my_items, &world),
       TurtleRockChainChomps => todo,
       TurtleRockCompassChest => todo,
