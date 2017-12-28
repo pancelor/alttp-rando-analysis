@@ -1782,14 +1782,14 @@ mod logic {
       TurtleRockCompassChest => todo,
       TurtleRockRollerRoomLeft => todo,
       TurtleRockRollerRoomRight => todo,
-      TurtleRockBigChest => todo,
+      TurtleRockBigChest => item != BigKeyD7,
       TurtleRockBigKeyChest => todo,
-      TurtleRockCrystarollerRoom => todo,
-      TurtleRockEyeBridgeBottomLeft => todo,
-      TurtleRockEyeBridgeBottomRight => todo,
-      TurtleRockEyeBridgeTopLeft => todo,
-      TurtleRockEyeBridgeTopRight => todo,
-      TurtleRockTrinexx => todo,
+      TurtleRockCrystarollerRoom => item != BigKeyD7,
+      TurtleRockEyeBridgeBottomLeft => item != BigKeyD7,
+      TurtleRockEyeBridgeBottomRight => item != BigKeyD7,
+      TurtleRockEyeBridgeTopLeft => item != BigKeyD7,
+      TurtleRockEyeBridgeTopRight => item != BigKeyD7,
+      TurtleRockTrinexx => item != KeyD7 && item != BigKeyD7,
       TurtleRockPrize => todo,
       GanonSTowerBobSTorch => todo,
       GanonSTowerDMsRoomTopLeft => todo,
@@ -2002,7 +2002,14 @@ mod logic {
           || my_items.contains(&Hookshot)
         ) && can_enter(Mire, &my_items, &world)
       },
-      TurtleRock => todo,
+      TurtleRock => {
+        my_items.contains(&medallions::as_item(world.medallions.turtle_rock))
+        && has_sword(&my_items)
+        && my_items.contains(&MoonPearl)
+        && my_items.contains(&CaneOfSomaria)
+        && my_items.contains(&Hammer)
+        && can_enter(EastDeathMountain, &my_items, &world)
+      },
       GanonsTower => todo,
       Fountains => todo,
     }
@@ -2364,18 +2371,51 @@ mod logic {
         )
       },
       ThievesTownPrize => can_access(ThievesTownBlind, &my_items, &world),
-      TurtleRockChainChomps => todo,
-      TurtleRockCompassChest => todo,
-      TurtleRockRollerRoomLeft => todo,
-      TurtleRockRollerRoomRight => todo,
-      TurtleRockBigChest => todo,
-      TurtleRockBigKeyChest => todo,
-      TurtleRockCrystarollerRoom => todo,
-      TurtleRockEyeBridgeBottomLeft => todo,
-      TurtleRockEyeBridgeBottomRight => todo,
-      TurtleRockEyeBridgeTopLeft => todo,
-      TurtleRockEyeBridgeTopRight => todo,
-      TurtleRockTrinexx => todo,
+      TurtleRockChainChomps => my_items.contains(&KeyD7),
+      TurtleRockCompassChest => my_items.contains(&CaneOfSomaria),
+      TurtleRockRollerRoomLeft => {
+        my_items.contains(&FireRod)
+        && my_items.contains(&CaneOfSomaria)
+      },
+      TurtleRockRollerRoomRight => {
+        my_items.contains(&FireRod)
+        && my_items.contains(&CaneOfSomaria)
+      },
+      TurtleRockBigChest => {
+        my_items.contains(&BigKeyD7)
+        && count(&KeyD7, &my_items) >= 2
+      },
+      TurtleRockBigKeyChest => count(&KeyD7, &my_items) >= 2,
+      TurtleRockCrystarollerRoom => {
+        my_items.contains(&BigKeyD7)
+        && count(&KeyD7, &my_items) >= 2
+      },
+      TurtleRockEyeBridgeBottomLeft
+      | TurtleRockEyeBridgeBottomRight
+      | TurtleRockEyeBridgeTopLeft
+      | TurtleRockEyeBridgeTopRight => {
+        my_items.contains(&Lamp)
+        && my_items.contains(&CaneOfSomaria)
+        && my_items.contains(&BigKeyD7)
+        && count(&KeyD7, &my_items) >= 3
+        && (
+          my_items.contains(&Cape)
+          || my_items.contains(&CaneOfByrna)
+          || can_block_lasers(&my_items)
+        )
+      },
+      TurtleRockTrinexx => {
+        count(&KeyD7, &my_items) >= 4
+        && my_items.contains(&FireRod)
+        && my_items.contains(&IceRod)
+        && my_items.contains(&Lamp)
+        && my_items.contains(&BigKeyD7)
+        && my_items.contains(&CaneOfSomaria)
+        && (
+          my_items.contains(&Hammer)
+          || has_upgraded_sword(&my_items)
+        )
+      },
       TurtleRockPrize => can_access(TurtleRockTrinexx, &my_items, &world),
       GanonSTowerBobSTorch => todo,
       GanonSTowerDMsRoomTopLeft => todo,
