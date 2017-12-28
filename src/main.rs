@@ -1841,13 +1841,13 @@ mod logic {
       PyramidFairyLeft => true,
       PyramidFairyRight => true,
       Ganon => true,
-      Brewery => todo,
-      CShapedHouse => todo,
-      ChestGame => todo,
-      HammerPegs => todo,
-      BumperCave => todo,
-      Blacksmith => todo,
-      PurpleChest => todo,
+      Brewery => true,
+      CShapedHouse => true,
+      ChestGame => true,
+      HammerPegs => true,
+      BumperCave => true,
+      Blacksmith => true,
+      PurpleChest => true,
       HypeCaveTop => todo,
       HypeCaveMiddleRight => todo,
       HypeCaveMiddleLeft => todo,
@@ -1981,7 +1981,23 @@ mod logic {
           && my_items.contains(&MoonPearl)
           )
       },
-      NorthWestDarkWorld => todo,
+      NorthWestDarkWorld => {
+        my_items.contains(&MoonPearl)
+        && (
+          can_enter(NorthEastDarkWorld, &my_items, &world)
+          && (
+            my_items.contains(&Hookshot)
+            && (
+              my_items.contains(&Flippers)
+              || can_lift_rocks(&my_items)
+              || my_items.contains(&Hammer)
+            )
+          )
+        ) || (
+          my_items.contains(&Hammer)
+          && can_lift_rocks(&my_items)
+        ) || can_lift_dark_rocks(&my_items)
+      },
       SouthDarkWorld => todo,
       Mire => {
         can_fly(&my_items)
@@ -2667,13 +2683,19 @@ mod logic {
           || count(&ProgressiveSword, &my_items) >= 3
         )
       }
-      Brewery => todo,
-      CShapedHouse => todo,
-      ChestGame => todo,
-      HammerPegs => todo,
-      BumperCave => todo,
-      Blacksmith => todo,
-      PurpleChest => todo,
+      Brewery => true,
+      CShapedHouse => true,
+      ChestGame => true,
+      HammerPegs => {
+        can_lift_dark_rocks(&my_items)
+        && my_items.contains(&Hammer)
+      },
+      BumperCave => {
+        can_lift_rocks(&my_items)
+        && my_items.contains(&Cape)
+      },
+      Blacksmith => can_lift_dark_rocks(&my_items),
+      PurpleChest => can_lift_dark_rocks(&my_items),
       HypeCaveTop => todo,
       HypeCaveMiddleRight => todo,
       HypeCaveMiddleLeft => todo,
