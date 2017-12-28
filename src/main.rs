@@ -466,6 +466,7 @@ mod locations {
     GanonSTowerMiniHelmasaurRoomRight,
     GanonSTowerPreMoldormChest,
     GanonSTowerMoldormChest,
+    Agahnim2,
     WaterfallBottle,
     PyramidBottle,
     Sanctuary,
@@ -478,6 +479,7 @@ mod locations {
     HyruleCastleZeldaSCell,
     CastleTowerRoom03,
     CastleTowerDarkMaze,
+    Agahnim,
     MireShedLeft,
     MireShedRight,
     Catfish,
@@ -486,6 +488,7 @@ mod locations {
     PyramidFairyBow,
     PyramidFairyLeft,
     PyramidFairyRight,
+    Ganon,
     Brewery,
     CShapedHouse,
     ChestGame,
@@ -573,8 +576,6 @@ mod locations {
     FluteSpot,
     WaterfallFairyLeft,
     WaterfallFairyRight,
-    Agahnim,
-    Agahnim2,
   }
 
   pub fn get_all_locations() -> Vec<Location> {
@@ -703,6 +704,7 @@ mod locations {
       GanonSTowerMiniHelmasaurRoomRight,
       GanonSTowerPreMoldormChest,
       GanonSTowerMoldormChest,
+      Agahnim2,
       WaterfallBottle,
       PyramidBottle,
       Sanctuary,
@@ -715,6 +717,7 @@ mod locations {
       HyruleCastleZeldaSCell,
       CastleTowerRoom03,
       CastleTowerDarkMaze,
+      Agahnim,
       MireShedLeft,
       MireShedRight,
       Catfish,
@@ -723,6 +726,7 @@ mod locations {
       PyramidFairyBow,
       PyramidFairyLeft,
       PyramidFairyRight,
+      Ganon,
       Brewery,
       CShapedHouse,
       ChestGame,
@@ -978,6 +982,7 @@ mod locations {
       PyramidFairyBow                      => NorthEastDarkWorld,
       PyramidFairyLeft                     => NorthEastDarkWorld,
       PyramidFairyRight                    => NorthEastDarkWorld,
+      Ganon                                => NorthEastDarkWorld,
 
       Brewery                              => NorthWestDarkWorld,
       CShapedHouse                         => NorthWestDarkWorld,
@@ -1287,6 +1292,7 @@ mod regions {
         PyramidFairyBow,
         PyramidFairyLeft ,
         PyramidFairyRight,
+        Ganon,
       ],
       NorthWestDarkWorld => vec![
         Brewery,
@@ -1828,12 +1834,13 @@ mod logic {
       Agahnim => true,
       MireShedLeft => true,
       MireShedRight => true,
-      Catfish => todo,
-      Pyramid => todo,
-      PyramidFairySword => todo,
-      PyramidFairyBow => todo,
-      PyramidFairyLeft => todo,
-      PyramidFairyRight => todo,
+      Catfish => true,
+      Pyramid => true,
+      PyramidFairySword => true,
+      PyramidFairyBow => true,
+      PyramidFairyLeft => true,
+      PyramidFairyRight => true,
+      Ganon => true,
       Brewery => todo,
       CShapedHouse => todo,
       ChestGame => todo,
@@ -1962,7 +1969,18 @@ mod logic {
       },
       EastDarkWorldDeathMountain => todo,
       WestDarkWorldDeathMountain => todo,
-      NorthEastDarkWorld => todo,
+      NorthEastDarkWorld => {
+        my_items.contains(&DefeatAgahnim)
+        || (
+          my_items.contains(&Hammer)
+          && can_lift_rocks(&my_items)
+          && my_items.contains(&MoonPearl)
+        ) || (
+          can_lift_dark_rocks(&my_items)
+          && my_items.contains(&Flippers)
+          && my_items.contains(&MoonPearl)
+          )
+      },
       NorthWestDarkWorld => todo,
       SouthDarkWorld => todo,
       Mire => {
@@ -2608,12 +2626,47 @@ mod logic {
       },
       MireShedLeft
       | MireShedRight => my_items.contains(&MoonPearl),
-      Catfish => todo,
-      Pyramid => todo,
-      PyramidFairySword => todo,
-      PyramidFairyBow => todo,
-      PyramidFairyLeft => todo,
-      PyramidFairyRight => todo,
+      Catfish => {
+        my_items.contains(&MoonPearl)
+        && can_lift_rocks(&my_items)
+      },
+      Pyramid => true,
+      PyramidFairySword
+      | PyramidFairyBow
+      | PyramidFairyLeft
+      | PyramidFairyRight => {
+        has_sword(&my_items)
+        && my_items.contains(&Crystal5)
+        && my_items.contains(&Crystal6)
+        && my_items.contains(&MoonPearl)
+        && can_enter(SouthDarkWorld, &my_items, &world)
+        && (
+          my_items.contains(&Hammer)
+          || (
+            my_items.contains(&MagicMirror)
+            && my_items.contains(&DefeatAgahnim)
+          )
+        )
+      },
+      Ganon => {
+        my_items.contains(&MoonPearl)
+        && my_items.contains(&DefeatAgahnim2)
+        && can_light_torches(&my_items)
+        && (
+          my_items.contains(&BowAndSilverArrows)
+          || (
+            my_items.contains(&SilverArrowUpgrade)
+            && (
+              my_items.contains(&Bow)
+              || my_items.contains(&BowAndArrows)
+            )
+          )
+        ) && (
+          my_items.contains(&L3Sword)
+          || my_items.contains(&L4Sword)
+          || count(&ProgressiveSword, &my_items) >= 3
+        )
+      }
       Brewery => todo,
       CShapedHouse => todo,
       ChestGame => todo,
