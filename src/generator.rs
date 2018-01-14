@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use std::collections::HashMap;
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, world, locations, regions, items};

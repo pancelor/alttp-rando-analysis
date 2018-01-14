@@ -8,13 +8,14 @@ mod multiset;
 mod items;
 mod medallions;
 mod locations;
+mod locations2;
 mod regions;
 mod world;
 mod logic;
 mod generator;
 
 fn main() {
-  println!("{:?}", locations::DesertPalaceBigChest);
+  println!("{:?}", locations2::DesertPalaceBigChest);
   // real_main();
 }
 
