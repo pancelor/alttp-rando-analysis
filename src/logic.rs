@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::collections::HashMap;
 use super::{locations, regions, items};
 use locations::Location::*;
@@ -109,12 +111,6 @@ fn has_upgraded_sword(
   || count(&ProgressiveSword, &my_items) >= 2
 }
 
-fn has_bottle(
-  my_items: &Vec<items::Item>,
-) -> bool {
-  unimplemented!() // @TODO? only used in tests
-}
-
 fn has_a_bottle(
   my_items: &Vec<items::Item>,
 ) -> bool {
@@ -166,15 +162,15 @@ pub fn can_complete(
 pub fn can_fill(
   item: items::Item,
   loc: locations::Location,
-  my_items: &Vec<items::Item>,
-  assignments: &HashMap<locations::Location, items::Item>,
+  _my_items: &Vec<items::Item>,
+  _assignments: &HashMap<locations::Location, items::Item>,
 ) -> bool {
 
   // @TODO: some sort of logic in Region.php#canFill
   //   I assume it keeps keys where they belong but idk
   //   and I'm too tired right now to get this right.
   match regions::get_dungeon_items_for(locations::get_region_for(loc)) {
-    Some(dungeon_items) => {
+    Some(_dungeon_items) => {
 
     },
     None => {
@@ -422,7 +418,7 @@ pub fn can_fill(
 pub fn can_enter(
   reg: regions::Region,
   my_items: &Vec<items::Item>,
-  assignments: &HashMap<locations::Location, items::Item>,
+  _assignments: &HashMap<locations::Location, items::Item>,
 ) -> bool {
   use items::Item::*;
   use regions::Region::*;

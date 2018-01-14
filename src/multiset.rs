@@ -1,6 +1,7 @@
 // TODO: import with cargo `multiset = "0.0.5"` once that's published
 
 #![warn(missing_docs)]
+#![allow(dead_code)]
 
 use std::borrow::{Borrow};
 use std::collections::{HashMap};

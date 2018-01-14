@@ -1,3 +1,7 @@
+#![allow(non_upper_case_globals)]
+#![allow(non_camel_case_types)]
+#![allow(dead_code)]
+
 use multiset::HashMultiSet;
 
 #[allow(dead_code)]
@@ -320,7 +324,7 @@ impl Item2 {
 
 pub static Nothing : Item2 = Item2 {
   name: "Nothing",
-  can_access_callback: &|items: &HashMultiSet<Item2>| -> bool {
+  can_access_callback: &|_items: &HashMultiSet<Item2>| -> bool {
     true
   },
 };
