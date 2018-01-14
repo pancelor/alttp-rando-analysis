@@ -293,23 +293,49 @@ pub fn get_dungeon_pool() -> Vec<Item> {
   return res;
 }
 
+
+
+use std::fmt;
+
 pub struct Item2 {
-  name: String,
-  can_access_callback: Box<Fn(&HashMultiSet<Item2>) -> bool>,
+  name: &'static str,
+  can_access_callback: &'static (Fn(&HashMultiSet<Item2>) -> bool + Sync),
+}
+
+impl fmt::Debug for Item2 {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}", self.name)
+  }
 }
 
 impl Item2 {
-  pub fn new(
-    name: String,
-    can_access_callback: Box<Fn(&HashMultiSet<Item2>) -> bool>,
-  ) -> Self {
-    Self {
-      name,
-      can_access_callback,
-    }
-  }
+  // pub fn new(
+  //   name: &'static str,
+  //   // can_access_callback: Box<Fn(&HashMultiSet<Item2>) -> bool>,
+  //   can_access_callback: Box<usize>,
+  // ) -> Self {
+  //   Self {
+  //     name,
+  //     can_access_callback,
+  //   }
+  // }
 
   pub fn can_access(&self, items: &HashMultiSet<Item2>) -> bool {
-    (self.can_access_callback)(&items)
+    // (self.can_access_callback)(&items)
+    true
   }
 }
+
+// pub const LANGUAGE: &'static [&'static str] = &["firefox", "chrome"];
+
+pub static Nothing : Item2 = Item2 {
+  name: "Nothing",
+  can_access_callback: &|items: &HashMultiSet<Item2>| -> bool {
+    true
+  },
+};
+
+// pub static Nothing : &'static (Fn(usize) -> bool + Sync) =
+//   &(|items: usize| -> bool {
+//     true
+//   });

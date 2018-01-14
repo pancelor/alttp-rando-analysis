@@ -14,7 +14,8 @@ mod logic;
 mod generator;
 
 fn main() {
-  real_main();
+  println!("{:?}", items::Nothing);
+  // real_main();
 }
 
 fn real_main() {
