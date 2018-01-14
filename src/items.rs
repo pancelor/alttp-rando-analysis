@@ -1,3 +1,5 @@
+use multiset::HashMultiSet;
+
 #[allow(dead_code)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Item {
@@ -173,7 +175,7 @@ pub enum Item {
   DefeatGanon,
 }
 
-pub fn get_advancement_items() -> Vec<Item> {
+pub fn get_advancement_items() -> Vec<Item> { // TODO: HashMultiSet<Item> instead
   let mut res = Vec::new();
   for _ in 0..4 { res.push(Item::ProgressiveSword); }
   // @hack: the web code randomly chooses a specific bottle each seed
@@ -289,4 +291,25 @@ pub fn get_dungeon_pool() -> Vec<Item> {
   for _ in 0..1 { res.push(Item::CompassP2); }
   for _ in 0..1 { res.push(Item::CompassP3); }
   return res;
+}
+
+pub struct Item2 {
+  name: String,
+  can_access_callback: Box<Fn(&HashMultiSet<Item2>) -> bool>,
+}
+
+impl Item2 {
+  pub fn new(
+    name: String,
+    can_access_callback: Box<Fn(&HashMultiSet<Item2>) -> bool>,
+  ) -> Self {
+    Self {
+      name,
+      can_access_callback,
+    }
+  }
+
+  pub fn can_access(&self, items: &HashMultiSet<Item2>) -> bool {
+    (self.can_access_callback)(&items)
+  }
 }

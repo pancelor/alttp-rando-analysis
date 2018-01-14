@@ -3,6 +3,8 @@ extern crate env_logger;
 extern crate log;
 extern crate rand;
 
+mod multiset;
+
 mod items;
 mod medallions;
 mod locations;
@@ -12,6 +14,10 @@ mod logic;
 mod generator;
 
 fn main() {
+  real_main();
+}
+
+fn real_main() {
   env_logger::init().unwrap();
 
   let advancement_items = items::get_advancement_items();
