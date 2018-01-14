@@ -1,3 +1,6 @@
+
+#![allow(unused_imports)]
+
 extern crate env_logger;
 #[macro_use]
 extern crate log;
@@ -17,8 +20,7 @@ mod logic;
 mod generator;
 
 fn main() {
-  println!("{:?}", locations2::TempOverworld1);
-  println!("{:?}", locations2::TempOverworld1.can_access(&HashMultiSet::new()));
+  println!("{:?}", zones::PODCXNS);
   // real_main();
 }
 
