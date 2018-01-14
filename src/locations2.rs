@@ -40,39 +40,96 @@ macro_rules! loc {
   }
 }
 
-  loc!(TempOverworld1, &|items: &HashMultiSet<Item>| -> bool {
-    temp_allow_unused(&items); TODO
-  });
-  // TempOverworld2,
-  // TempOverworld3,
-  // TempOverworld4,
-  // TempOverworld5,
-  // TempOverworld6,
-  // TempOverworld7,
-  // TempOverworld8,
-  // TempOverworld9,
-  // TempOverworld10,
-  // TempOverworld11,
-  // TempOverworld12,
-  // PalaceOfDarknessBigKeyChest,
-  // PalaceOfDarknessTheArenaLedge,
-  // PalaceOfDarknessTheArenaBridge,
-  // PalaceOfDarknessBigChest,
-  // PalaceOfDarknessCompassChest,
-  // PalaceOfDarknessHarmlessHellway,
-  // PalaceOfDarknessStalfosBasement,
-  // PalaceOfDarknessDarkBasementLeft,
-  // PalaceOfDarknessDarkBasementRight,
-  // PalaceOfDarknessMapChest,
-  // PalaceOfDarknessDarkMazeTop,
-  // PalaceOfDarknessDarkMazeBottom,
-  // PalaceOfDarknessShooterRoom,
-  // PalaceOfDarknessHelmasaurKing,
-  // PalaceOfDarknessPrize,
-
-pub static DesertPalaceBigChest : Location2 = Location2 {
-  name: "DesertPalaceBigChest",
-  can_access_callback: &|items: &HashMultiSet<Item>| -> bool {
-    temp_allow_unused(&items); TODO
-  },
-};
+loc!(TempOverworld1, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld2, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld3, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld4, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld5, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld6, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld7, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld8, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld9, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld10, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld11, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(TempOverworld12, &|ref items| -> bool {
+  temp_allow_unused(&items);
+  true
+});
+loc!(PalaceOfDarknessBigKeyChest, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessTheArenaLedge, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessTheArenaBridge, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessBigChest, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessCompassChest, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessHarmlessHellway, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessStalfosBasement, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessDarkBasementLeft, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessDarkBasementRight, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessMapChest, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessDarkMazeTop, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessDarkMazeBottom, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessShooterRoom, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessHelmasaurKing, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
+loc!(PalaceOfDarknessPrize, &|ref items| -> bool {
+  temp_allow_unused(&items); TODO
+});
