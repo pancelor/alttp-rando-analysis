@@ -23,15 +23,29 @@ pub enum Zone {
 }
 pub use self::Zone::*;
 
-POD1   <=> POD2:   KeyPOD
-POD1   <=> POD8:   Bow
-POD8    => POD2:   Hammer
-POD2   <=> POD3:   KeyPOD
-POD2   <=> POD4:   KeyPOD
-POD4   <=> POD47:  KeyPOD
-POD47  <=> POD7:   Lamp
-POD4   <=> POD6:   Lamp
-POD4   <=> POD5:   KeyPOD
-POD2   <=> POD29A: Bow and Lamp and Hammer
-POD29A <=> POD29B: KeyPOD
-POD29B <=> POD9:   BigKeyPOD
+
+cxn!(POD1   <=key=> POD2)
+cxn!(POD1   <=> POD8:   &|ref items| {return true; /*Bow!*/})
+cxn!(POD8    => POD2:   &|ref items| {return true; /*Hammer*/})
+cxn!(POD2   <=key=> POD3)
+cxn!(POD2   <=key=> POD4)
+cxn!(POD4   <=key=> POD47)
+cxn!(POD47  <=> POD7:   &|ref items| {return true; /*Lamp*/})
+cxn!(POD4   <=> POD6:   &|ref items| {return true; /*Lamp*/})
+cxn!(POD4   <=key=> POD5)
+cxn!(POD2   <=> POD29A: &|ref items| {return true; /*Bow!, Lamp, Hammer*/})
+cxn!(POD29A <=key=> POD29B)
+cxn!(POD29B <=> POD9:   &|ref items| {return true; /*BigKeyPOD*/})
+
+pub struct ZoneConnection
+
+macro_rules! cxn {
+  // Creates a ZoneConnection in a compact form
+  ($z1:ident => $z2:ident: $cb:expr) => {
+    pub static $loc_name : Location2 = Location2 {
+      name: stringify!($loc_name),
+      zone: $zone,
+      can_access_callback: $cb,
+    };
+  }
+}
