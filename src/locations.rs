@@ -2,6 +2,7 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 
+use multiset::HashMultiSet;
 use super::{regions};
 
 // CamelCase versions of the php names for all locations
@@ -739,3 +740,32 @@ pub fn get_region_for(loc: Location) -> regions::Region {
     WaterfallFairyRight                  => LightWorld,
   }
 }
+
+
+
+type Closure = Fn(&HashMultiSet<Location2>) -> bool + Sync;
+
+pub struct Location2 {
+  name: &'static str,
+  can_access_callback: &'static Closure,
+}
+
+use std::fmt;
+impl fmt::Debug for Location2 {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}", self.name)
+  }
+}
+
+impl Location2 {
+  pub fn can_access(&self, items: &HashMultiSet<Location2>) -> bool {
+    (self.can_access_callback)(&items)
+  }
+}
+
+pub static DesertPalaceBigChest : Location2 = Location2 {
+  name: "DesertPalaceBigChest",
+  can_access_callback: &|_items: &HashMultiSet<Location2>| -> bool {
+    true
+  },
+};

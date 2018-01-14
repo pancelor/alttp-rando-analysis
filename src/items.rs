@@ -2,8 +2,6 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 
-use multiset::HashMultiSet;
-
 #[allow(dead_code)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Item {
@@ -296,36 +294,3 @@ pub fn get_dungeon_pool() -> Vec<Item> {
   for _ in 0..1 { res.push(Item::CompassP3); }
   return res;
 }
-
-
-
-use std::fmt;
-
-type Closure = Fn(&HashMultiSet<Item2>) -> bool + Sync;
-
-pub struct Item2 {
-  name: &'static str,
-  can_access_callback: &'static Closure,
-}
-
-impl fmt::Debug for Item2 {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "{}", self.name)
-  }
-}
-
-impl Item2 {
-  pub fn can_access(&self, items: &HashMultiSet<Item2>) -> bool {
-    (self.can_access_callback)(&items)
-  }
-}
-
-// pub const LANGUAGE: &'static [&'static str] = &["firefox", "chrome"];
-
-pub static Nothing : Item2 = Item2 {
-  name: "Nothing",
-  can_access_callback: &|_items: &HashMultiSet<Item2>| -> bool {
-    true
-  },
-};
-

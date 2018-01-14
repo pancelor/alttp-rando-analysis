@@ -14,7 +14,7 @@ mod logic;
 mod generator;
 
 fn main() {
-  println!("{:?}", items::Nothing);
+  println!("{:?}", locations::DesertPalaceBigChest);
   real_main();
 }
 
