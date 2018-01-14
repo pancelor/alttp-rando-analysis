@@ -30,6 +30,46 @@ impl Location2 {
 const TODO : bool = true;
 fn temp_allow_unused(_: &HashMultiSet<Item>) {}
 
+macro_rules! loc {
+  // Creates a Location2 in a compact form
+  ($loc_name:ident, $cb:expr) => {
+    pub static $loc_name : Location2 = Location2 {
+      name: stringify!($loc_name),
+      can_access_callback: $cb,
+    };
+  }
+}
+
+  loc!(TempOverworld1, &|items: &HashMultiSet<Item>| -> bool {
+    temp_allow_unused(&items); TODO
+  });
+  // TempOverworld2,
+  // TempOverworld3,
+  // TempOverworld4,
+  // TempOverworld5,
+  // TempOverworld6,
+  // TempOverworld7,
+  // TempOverworld8,
+  // TempOverworld9,
+  // TempOverworld10,
+  // TempOverworld11,
+  // TempOverworld12,
+  // PalaceOfDarknessBigKeyChest,
+  // PalaceOfDarknessTheArenaLedge,
+  // PalaceOfDarknessTheArenaBridge,
+  // PalaceOfDarknessBigChest,
+  // PalaceOfDarknessCompassChest,
+  // PalaceOfDarknessHarmlessHellway,
+  // PalaceOfDarknessStalfosBasement,
+  // PalaceOfDarknessDarkBasementLeft,
+  // PalaceOfDarknessDarkBasementRight,
+  // PalaceOfDarknessMapChest,
+  // PalaceOfDarknessDarkMazeTop,
+  // PalaceOfDarknessDarkMazeBottom,
+  // PalaceOfDarknessShooterRoom,
+  // PalaceOfDarknessHelmasaurKing,
+  // PalaceOfDarknessPrize,
+
 pub static DesertPalaceBigChest : Location2 = Location2 {
   name: "DesertPalaceBigChest",
   can_access_callback: &|items: &HashMultiSet<Item>| -> bool {

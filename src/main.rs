@@ -4,6 +4,7 @@ extern crate log;
 extern crate rand;
 
 mod multiset;
+use multiset::HashMultiSet;
 
 mod items;
 mod medallions;
@@ -15,7 +16,8 @@ mod logic;
 mod generator;
 
 fn main() {
-  println!("{:?}", locations2::DesertPalaceBigChest);
+  println!("{:?}", locations2::TempOverworld1);
+  println!("{:?}", locations2::TempOverworld1.can_access(&HashMultiSet::new()));
   // real_main();
 }
 
