@@ -27,13 +27,13 @@ pub use self::Zone::*;
 
 
 
-type CanAccessClosure = Fn(&HashMultiSet<Item>) -> bool + Sync;
+type CanPassClosure = Fn(&HashMultiSet<Item>) -> bool + Sync;
 
 pub struct ZoneConnection {
   zone1: Zone,
   zone2: Zone,
   one_way: bool,
-  can_pass_callback: &'static CanAccessClosure,
+  can_pass_callback: &'static CanPassClosure,
 }
 
 impl ZoneConnection {
@@ -46,7 +46,7 @@ use std::fmt;
 impl fmt::Debug for ZoneConnection {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     let op : &str =
-      if (self.one_way) {
+      if self.one_way {
         "==>"
       } else {
         "<=>"
@@ -75,6 +75,12 @@ macro_rules! cxn {
       can_pass_callback: $cb,
     }
   );
+  ($z1:ident ==> $z2:ident) => (
+    cxn!($z1 ==> $z2: &|ref _items| true)
+  );
+  ($z1:ident <=> $z2:ident) => (
+    cxn!($z1 <=> $z2: &|ref _items| true)
+  );
   ($z1:ident <k> $z2:ident) => (
     cxn!($z1 <=> $z2: &|ref items| {
       // TODO: check to be sure items has enough keys
@@ -89,7 +95,8 @@ macro_rules! cxn {
 
 fn todo(_: &HashMultiSet<Item>) -> bool { true } // for warning suppression
 
-pub static PODCXNS : &[ZoneConnection] = &[
+pub static TEMP_CXNS : &[ZoneConnection] = &[
+  cxn!(TempOverworld <=> POD1),
   cxn!(POD1   <k> POD2),
   cxn!(POD1   <=> POD8:   &|ref items| {todo(items) /*Bow!*/}),
   cxn!(POD8   ==> POD2:   &|ref items| {todo(items) /*Hammer*/}),

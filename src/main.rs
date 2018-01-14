@@ -20,7 +20,7 @@ mod logic;
 mod generator;
 
 fn main() {
-  println!("{:?}", zones::PODCXNS);
+  println!("{:?}", zones::TEMP_CXNS);
   // real_main();
 }
 
