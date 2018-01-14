@@ -4,13 +4,15 @@
 #![allow(unused_imports)]
 
 use multiset::HashMultiSet;
-use super::{regions};
+use super::zones;
+use super::zones::*;
 use super::items::Item;
 
 type CanAccessClosure = Fn(&HashMultiSet<Item>) -> bool + Sync;
 
 pub struct Location2 {
   name: &'static str,
+  zone: Zone,
   can_access_callback: &'static CanAccessClosure,
 }
 
@@ -32,104 +34,105 @@ fn temp_allow_unused(_: &HashMultiSet<Item>) {}
 
 macro_rules! loc {
   // Creates a Location2 in a compact form
-  ($loc_name:ident, $cb:expr) => {
+  ($loc_name:ident, $zone:ident, $cb:expr) => {
     pub static $loc_name : Location2 = Location2 {
       name: stringify!($loc_name),
+      zone: $zone,
       can_access_callback: $cb,
     };
   }
 }
 
-loc!(TempOverworld1, &|ref items| -> bool {
+loc!(TempOverworld1, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld2, &|ref items| -> bool {
+loc!(TempOverworld2, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld3, &|ref items| -> bool {
+loc!(TempOverworld3, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld4, &|ref items| -> bool {
+loc!(TempOverworld4, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld5, &|ref items| -> bool {
+loc!(TempOverworld5, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld6, &|ref items| -> bool {
+loc!(TempOverworld6, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld7, &|ref items| -> bool {
+loc!(TempOverworld7, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld8, &|ref items| -> bool {
+loc!(TempOverworld8, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld9, &|ref items| -> bool {
+loc!(TempOverworld9, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld10, &|ref items| -> bool {
+loc!(TempOverworld10, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld11, &|ref items| -> bool {
+loc!(TempOverworld11, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(TempOverworld12, &|ref items| -> bool {
+loc!(TempOverworld12, TempOverworld, &|ref items| -> bool {
   temp_allow_unused(&items);
   true
 });
-loc!(PalaceOfDarknessBigKeyChest, &|ref items| -> bool {
+loc!(PalaceOfDarknessBigKeyChest, POD3, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessTheArenaLedge, &|ref items| -> bool {
+loc!(PalaceOfDarknessTheArenaLedge, POD8, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessTheArenaBridge, &|ref items| -> bool {
+loc!(PalaceOfDarknessTheArenaBridge, POD2, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessBigChest, &|ref items| -> bool {
+loc!(PalaceOfDarknessBigChest, POD7, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessCompassChest, &|ref items| -> bool {
+loc!(PalaceOfDarknessCompassChest, POD4, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessHarmlessHellway, &|ref items| -> bool {
+loc!(PalaceOfDarknessHarmlessHellway, POD5, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessStalfosBasement, &|ref items| -> bool {
+loc!(PalaceOfDarknessStalfosBasement, POD2, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessDarkBasementLeft, &|ref items| -> bool {
+loc!(PalaceOfDarknessDarkBasementLeft, POD6, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessDarkBasementRight, &|ref items| -> bool {
+loc!(PalaceOfDarknessDarkBasementRight, POD6, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessMapChest, &|ref items| -> bool {
+loc!(PalaceOfDarknessMapChest, POD8, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessDarkMazeTop, &|ref items| -> bool {
+loc!(PalaceOfDarknessDarkMazeTop, POD7, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessDarkMazeBottom, &|ref items| -> bool {
+loc!(PalaceOfDarknessDarkMazeBottom, POD7, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessShooterRoom, &|ref items| -> bool {
+loc!(PalaceOfDarknessShooterRoom, POD1, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessHelmasaurKing, &|ref items| -> bool {
+loc!(PalaceOfDarknessHelmasaurKing, POD9, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });
-loc!(PalaceOfDarknessPrize, &|ref items| -> bool {
+loc!(PalaceOfDarknessPrize, POD9, &|ref items| -> bool {
   temp_allow_unused(&items); TODO
 });

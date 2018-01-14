@@ -11,6 +11,7 @@ mod medallions;
 mod locations;
 mod locations2;
 mod regions;
+mod zones;
 mod world;
 mod logic;
 mod generator;
