@@ -297,9 +297,11 @@ pub fn get_dungeon_pool() -> Vec<Item> {
 
 use std::fmt;
 
+type Closure = Fn(&HashMultiSet<Item2>) -> bool + Sync;
+
 pub struct Item2 {
   name: &'static str,
-  can_access_callback: &'static (Fn(&HashMultiSet<Item2>) -> bool + Sync),
+  can_access_callback: &'static Closure,
 }
 
 impl fmt::Debug for Item2 {
@@ -309,20 +311,8 @@ impl fmt::Debug for Item2 {
 }
 
 impl Item2 {
-  // pub fn new(
-  //   name: &'static str,
-  //   // can_access_callback: Box<Fn(&HashMultiSet<Item2>) -> bool>,
-  //   can_access_callback: Box<usize>,
-  // ) -> Self {
-  //   Self {
-  //     name,
-  //     can_access_callback,
-  //   }
-  // }
-
   pub fn can_access(&self, items: &HashMultiSet<Item2>) -> bool {
-    // (self.can_access_callback)(&items)
-    true
+    (self.can_access_callback)(&items)
   }
 }
 
@@ -335,7 +325,3 @@ pub static Nothing : Item2 = Item2 {
   },
 };
 
-// pub static Nothing : &'static (Fn(usize) -> bool + Sync) =
-//   &(|items: usize| -> bool {
-//     true
-//   });
