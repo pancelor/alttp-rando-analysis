@@ -212,6 +212,7 @@ pub fn get_locations_for(reg: Region) -> Vec<locations::Location> {
       PyramidFairyBow,
       PyramidFairyLeft ,
       PyramidFairyRight,
+      Ganon,
     ],
     NorthWestDarkWorld => vec![
       Brewery,

@@ -303,6 +303,7 @@ pub fn can_fill(
     GanonSTowerMiniHelmasaurRoomRight => todo,
     GanonSTowerPreMoldormChest => todo,
     GanonSTowerMoldormChest => todo,
+    Agahnim2 => todo,
     WaterfallBottle => todo,
     PyramidBottle => todo,
     Sanctuary => todo,
@@ -315,6 +316,7 @@ pub fn can_fill(
     HyruleCastleZeldaSCell => todo,
     CastleTowerRoom03 => todo,
     CastleTowerDarkMaze => todo,
+    Agahnim => todo,
     MireShedLeft => todo,
     MireShedRight => todo,
     Catfish => todo,
@@ -323,6 +325,7 @@ pub fn can_fill(
     PyramidFairyBow => todo,
     PyramidFairyLeft => todo,
     PyramidFairyRight => todo,
+    Ganon => todo,
     Brewery => todo,
     CShapedHouse => todo,
     ChestGame => todo,
@@ -410,8 +413,6 @@ pub fn can_fill(
     FluteSpot => todo,
     WaterfallFairyLeft => todo,
     WaterfallFairyRight => todo,
-    Agahnim => todo,
-    Agahnim2 => todo,
   }
 }
 
@@ -621,6 +622,7 @@ pub fn can_access(
     GanonSTowerMiniHelmasaurRoomRight => todo,
     GanonSTowerPreMoldormChest => todo,
     GanonSTowerMoldormChest => todo,
+    Agahnim2 => todo,
     WaterfallBottle => todo,
     PyramidBottle => todo,
     Sanctuary => todo,
@@ -633,6 +635,7 @@ pub fn can_access(
     HyruleCastleZeldaSCell => todo,
     CastleTowerRoom03 => todo,
     CastleTowerDarkMaze => todo,
+    Agahnim => todo,
     MireShedLeft => todo,
     MireShedRight => todo,
     Catfish => todo,
@@ -641,6 +644,7 @@ pub fn can_access(
     PyramidFairyBow => todo,
     PyramidFairyLeft => todo,
     PyramidFairyRight => todo,
+    Ganon => todo,
     Brewery => todo,
     CShapedHouse => todo,
     ChestGame => todo,
@@ -728,7 +732,5 @@ pub fn can_access(
     FluteSpot => todo,
     WaterfallFairyLeft => todo,
     WaterfallFairyRight => todo,
-    Agahnim => todo,
-    Agahnim2 => todo,
   }
 }
