@@ -16,8 +16,10 @@ mod locations2;
 mod regions;
 mod zones;
 mod world;
+mod world2;
 mod logic;
 mod generator;
+mod generator2;
 
 fn main() {
   println!("{:?}", zones::TEMP_CXNS);
