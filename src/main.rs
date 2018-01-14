@@ -15,9 +15,10 @@ mod generator;
 
 fn main() {
   println!("{:?}", locations::DesertPalaceBigChest);
-  real_main();
+  // real_main();
 }
 
+#[allow(dead_code)]
 fn real_main() {
   env_logger::init().unwrap();
 
