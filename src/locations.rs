@@ -7,7 +7,6 @@ use super::{regions};
 use super::items::Item;
 
 // CamelCase versions of the php names for all locations
-#[allow(dead_code)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Location {
   DesertPalaceBigChest,

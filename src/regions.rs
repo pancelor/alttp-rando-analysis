@@ -4,7 +4,6 @@
 
 use super::{locations, items};
 
-#[allow(dead_code)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Region {
   LightWorld,

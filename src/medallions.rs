@@ -2,7 +2,6 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 
-#[allow(dead_code)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum MedallionLock {
   BombosLock,
@@ -19,7 +18,6 @@ pub fn get_all_medallions() -> Vec<MedallionLock> {
   ]
 }
 
-#[allow(dead_code)]
 #[derive(Eq, PartialEq, Copy, Clone, Debug)]
 pub struct EntranceConfig {
   pub turtle_rock: MedallionLock,

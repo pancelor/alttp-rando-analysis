@@ -2,7 +2,6 @@
 #![allow(non_camel_case_types)]
 #![allow(dead_code)]
 
-#[allow(dead_code)]
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Item {
   Nothing,
