@@ -4,6 +4,7 @@
 extern crate env_logger;
 #[macro_use]
 extern crate group_by;
+#[macro_use]
 extern crate log;
 #[macro_use]
 extern crate maplit;

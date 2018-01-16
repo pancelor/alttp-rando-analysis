@@ -29,7 +29,6 @@ pub enum Zone {
 pub use self::Zone::*;
 
 
-pub type Zone = HashSet<Location2>;
 type CanPassClosure = Fn(&HashMultiSet<Item>) -> bool + Sync;
 
 #[derive(Eq, PartialEq, Hash)]
@@ -42,8 +41,8 @@ pub struct ItemDoor {
 
 #[derive(Eq, PartialEq, Hash, Debug)]
 pub struct KeyDoor {
-  z1: Zone,
-  z2: Zone,
+  zone1: Zone,
+  zone2: Zone,
   dungeon: dungeons::Dungeon,
 }
 

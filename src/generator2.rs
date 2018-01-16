@@ -114,7 +114,7 @@ fn place_item(
       .take(1)
       .collect(); // TODO: does this compile?
     let doors_to_explore: HashSet<KeyDoor> = keyfrontier_from_dungeon(dungeon) & f;
-    for door: KeyDoor in doors_to_explore {
+    for door in doors_to_explore {
       let mut new_dive: Dive = v.clone();
       new_dive.explore_keydoor(door, &assignments);
       queue.add(new_dive);
@@ -127,6 +127,9 @@ fn place_item(
     .map(|&dive| dive.zones)
     .for_each(|zone| glbZone = glbZone & zone);
 
-  let loc: locations2::Location2 = locations.iter().filter(|&&loc| glbZone.contains(&loc)).first();
-  assignments.insert(loc, item);
+  let loc: &locations2::Location2 = locations.iter()
+    .filter(|&&loc| glbZone.contains(&loc))
+    .next()
+    .expect("No locations left");
+  assignments.insert(*loc, item);
 }

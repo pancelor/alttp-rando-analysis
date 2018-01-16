@@ -176,6 +176,7 @@ pub enum Item {
   DefeatAgahnim2,
   DefeatGanon,
 }
+pub use self::Item::*;
 
 pub fn get_advancement_items() -> Vec<Item> { // TODO: HashMultiSet<Item> instead
   let mut res = Vec::new();
