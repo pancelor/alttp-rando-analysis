@@ -110,7 +110,7 @@ fn place_item(
       continue;
     }
 
-    let dungeon : &dungeons::Dungeon = dungeons::all().iter()
+    let dungeon : &dungeons::Dungeon = dungeons::ALL.iter()
       .filter(|&&dgn| !(&keyfrontier_from_dungeon(dgn) & &f).is_empty())
       .next()
       .expect("no dungeons or something");

@@ -25,20 +25,18 @@ pub enum Dungeon {
 }
 pub use self::Dungeon::*;
 
-pub fn all() -> Vec<Dungeon> { // TODO: make into a static var; &[Dungeon; 10] or w/e
-  vec![
-    EasternPalace,
-    DesertPalace,
-    TowerOfHera,
-    SkullWoods,
-    ThievesTown,
-    MiseryMire,
-    SwampPalace,
-    IcePalace,
-    PalaceOfDarkness,
-    TurtleRock,
+pub const ALL: &[Dungeon] = &[
+  EasternPalace,
+  DesertPalace,
+  TowerOfHera,
+  SkullWoods,
+  ThievesTown,
+  MiseryMire,
+  SwampPalace,
+  IcePalace,
+  PalaceOfDarkness,
+  TurtleRock,
 
-    GanonSTower,
-    // TODO: sync with enum list
-  ]
-}
+  GanonSTower,
+  // TODO: sync with enum list
+];
