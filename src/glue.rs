@@ -5,7 +5,7 @@
 #![allow(unused_variables)]
 
 use std::collections::{HashMap, HashSet};
-use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
+use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons, connections};
 use super::zones::{Zone, KeyDoor, ItemDoor};
 use super::zones::Zone::*;
 use super::dungeons::Dungeon;
@@ -34,10 +34,25 @@ pub fn keyfrontier_from_zone(zone: Zone) -> HashSet<KeyDoor> {
 }
 
 pub fn itemfrontier_from_zone(zone: Zone) -> Vec<ItemDoor> {
-  match zone {
-    // ah crap
-  }
-  vec![] // TODO: impl
+  // Overworld <=> POD1
+  // POD1   <=> POD8
+  // POD8   ==> POD2
+  // POD47  <=> POD7
+  // POD7   <=> POD10
+  // POD4   <=> POD6
+  // POD2   <=> POD29A
+  // POD29B <=> POD9
+  // match zone {
+  //   Overworld => vec!(POD1),
+  //   POD1 => vec!(),   <=> POD8
+  //   POD8 => vec!(),  ==> POD2
+  //   POD47 => vec!(), <=> POD7
+  //   POD7 => vec!(),  <=> POD10
+  //   POD4 => vec!(),  <=> POD6
+  //   POD2 => vec!(),  <=> POD29A
+  //   POD29B => vec!(),<=> POD9
+  // }
+  vec!() // TODO: impl
 }
 
 pub fn locations_from_zone(zone: Zone) -> HashSet<Location2> {

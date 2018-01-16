@@ -5,13 +5,12 @@ extern crate env_logger;
 #[macro_use]
 extern crate group_by;
 #[macro_use]
+extern crate lazy_static;
+#[macro_use]
 extern crate log;
 #[macro_use]
 extern crate maplit;
 extern crate rand;
-
-// mod multiset;
-// use multiset::HashMultiSet;
 
 mod items;
 mod medallions;
@@ -28,10 +27,9 @@ mod zones;
 mod glue;
 mod dungeons;
 mod dive;
+mod connections;
 
 fn main() {
-  println!("{:?}", zones::KEYDOORS);
-  println!("{:?}", zones::ITEMDOORS);
   // real_main();
 }
 
