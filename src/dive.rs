@@ -59,7 +59,7 @@ impl Dive {
         |&keydoor| dungeon_from_keydoor(keydoor)
       );
 
-    for (dungeon, keydoors) in all_doors {
+    for (&dungeon, keydoors) in all_doors.iter() {
       match all_keys.get(&dungeon) {
         Some(keys) => {
           if keydoors.len() < keys.len() {
@@ -71,8 +71,8 @@ impl Dive {
     }
 
     all_doors.into_iter()
-      .filter(|&(dung, keys)| dungeons_I_own_keys_for.contains(&dung))
-      .flat_map(|(dung, keys)| keys)
+      .filter(|&(dung, _keys)| dungeons_I_own_keys_for.contains(&dung))
+      .flat_map(|(_dung, keys)| keys)
       .collect()
 
     // TODO: use something built on this instead? slower, but idk if the current algo even works lol

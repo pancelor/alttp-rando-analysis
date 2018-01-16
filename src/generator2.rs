@@ -69,12 +69,11 @@ fn fast_fill_items_in_locations(
 }
 
 use std::vec::IntoIter;
-#[allow(unused_variables)]
 fn fill_items_in_locations(
   fill_items: IntoIter<items::Item>,
   locations: &Vec<locations2::Location2>,
   base_assumed_items: &Vec<items::Item>,
-  assignments: &mut Assignments,
+  mut assignments: &mut Assignments, // TODO WTF why do we need 2 `mut`s here?? and only here???
 ) {
   let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
   for _ in 0..remaining_fill_items.len() {

@@ -2,6 +2,8 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
+#![allow(unused_variables)]
+
 use std::collections::{HashMap, HashSet};
 use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
 use super::zones::{Zone, KeyDoor, ItemDoor};
