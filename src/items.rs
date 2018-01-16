@@ -294,3 +294,22 @@ pub fn get_dungeon_pool() -> Vec<Item> {
   for _ in 0..1 { res.push(Item::CompassP3); }
   return res;
 }
+
+pub fn all_small_keys() -> HashSet<Item> {
+  hashset!{
+    KeyH2,
+    KeyH1,
+    KeyP1,
+    KeyP2,
+    KeyA1,
+    KeyD2,
+    KeyD1,
+    KeyD6,
+    KeyD3,
+    KeyD5,
+    KeyP3,
+    KeyD4,
+    KeyD7,
+    KeyA2,
+  }
+}

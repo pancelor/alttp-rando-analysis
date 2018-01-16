@@ -3,7 +3,10 @@
 
 extern crate env_logger;
 #[macro_use]
+extern crate group_by;
 extern crate log;
+#[macro_use]
+extern crate maplit;
 extern crate rand;
 
 mod multiset;
@@ -17,12 +20,14 @@ mod regions;
 mod zones;
 mod world;
 mod world2;
+mod glue;
 mod logic;
 mod generator;
 mod generator2;
 
 fn main() {
-  println!("{:?}", zones::TEMP_CXNS);
+  println!("{:?}", zones::KEYDOORS);
+  println!("{:?}", zones::ITEMDOORS);
   // real_main();
 }
 

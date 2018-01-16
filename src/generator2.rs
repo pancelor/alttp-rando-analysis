@@ -1,9 +1,14 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet, VecDeque};
+use multiset::HashMultiSet;
 use rand::{Rng, ThreadRng};
-use super::{medallions, logic, world2, locations2, regions, items, zones};
+use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
+use super::glue::*;
+use super::locations2::*;
+use super::zones::{Zone, KeyDoor, ItemDoor};
+use super::dive::Dive;
 
 pub fn generate_world(
   advancement_items: &Vec<items::Item>,
@@ -77,21 +82,51 @@ fn fill_items_in_locations(
     let mut assumed_items = base_assumed_items.clone();
     assumed_items.append(&mut (remaining_fill_items.clone()));
 
-    // TODO: new algo instead here
-    // assumed_items = collect_items(&assumed_items, &assignments);
-
-    // let loc = locations.iter()
-    //   .filter(|&&loc| assignments.get(&loc) == None)
-    //   .filter(|&&loc| logic::can_fill(item, loc, &assumed_items, &assignments))
-    //   .next();
-    // match loc {
-    //   Some(loc) => {
-    //     debug!("Filling {:?} with {:?}", loc, item);
-    //     assignments.insert(*loc, item);
-    //   },
-    //   None => {
-    //     panic!("No available locations for {:?}", item); // TODO: ~s/panic/Result/
-    //   }
-    // }
+    place_item(item, &assumed_items, &locations, &assignments);
   }
+}
+
+fn place_item(
+  item: items::Item,
+  assumed: &HashMultiSet<items::Item>,
+  locations: &Vec<locations2::Location2>,
+  assignments: &mut HashMap<locations2::Location2, items::Item>,
+) {
+  let firstDive: Dive = Dive{
+    zones: hashset!{TempOverworld1},
+    items: assumed,
+    openDoors: Hashset::new(),
+  }.explore(&assignments);
+  let mut queue: VecDeque<Dive> = VecDeque::new();
+  queue.push_back(firstDive);
+  let mut maximal_dives: HashSet<Dive> = HashSet::new();
+
+  while queue.len() > 0 {
+    let v: Dive = queue.pop_front();
+    let mut f: HashSet<KeyDoor> = v.actual_key_frontier();
+    if f.len() == 0 {
+      maximal_dives.add(v);
+      continue;
+    }
+
+    let dungeon : dungeons::Dungeon = dungeons::all().iter()
+      .filter(|dgn| !(keyfrontier_from_dungeon(dgn) & f).empty())
+      .take(1)
+      .collect(); // TODO: does this compile?
+    let doors_to_explore: HashSet<KeyDoor> = keyfrontier_from_dungeon(dungeon) & f;
+    for door: KeyDoor in doors_to_explore {
+      let mut new_dive: Dive = v.clone();
+      new_dive.explore_keydoor(door, &assignments);
+      queue.add(new_dive);
+    }
+  }
+
+  // glbZone := intersection(maximal_dives)
+  let mut glbZone: HashSet<locations2::Location2> = HashSet::new();
+  maximal_dives.iter()
+    .map(|&dive| dive.zones)
+    .for_each(|zone| glbZone = glbZone & zone);
+
+  let loc: locations2::Location2 = locations.iter().filter(|&&loc| glbZone.contains(&loc)).first();
+  assignments.insert(loc, item);
 }

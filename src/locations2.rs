@@ -37,6 +37,7 @@ pub enum Location2 {
   PalaceOfDarknessHelmasaurKing,
   PalaceOfDarknessPrize,
 }
+pub use self::Location2::*;
 
 pub fn get_all_locations() -> Vec<Location2> {
   use self::Location2::*;
