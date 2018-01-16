@@ -4,14 +4,13 @@
 #![allow(unused_imports)]
 
 use std::collections::{HashMap, HashSet};
-use multiset::HashMultiSet;
 use super::locations;
 use super::dungeons;
 use super::items::Item;
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Zone {
-  TempOverworld,
+  Overworld,
   POD1,
   POD2,
   POD3,
@@ -29,25 +28,25 @@ pub enum Zone {
 pub use self::Zone::*;
 
 
-type CanPassClosure = Fn(&HashMultiSet<Item>) -> bool + Sync;
+type CanPassClosure = Fn(&Vec<Item>) -> bool + Sync;
 
-#[derive(Eq, PartialEq, Hash)]
+#[derive(Eq, PartialEq, Copy, Clone)]
 pub struct ItemDoor {
-  zone1: Zone,
-  zone2: Zone,
-  one_way: bool,
-  can_pass_callback: &'static CanPassClosure,
+  pub zone1: Zone,
+  pub zone2: Zone,
+  pub reversible: bool,
+  pub can_pass_callback: &'static CanPassClosure,
 }
 
-#[derive(Eq, PartialEq, Hash, Debug)]
+#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub struct KeyDoor {
-  zone1: Zone,
-  zone2: Zone,
-  dungeon: dungeons::Dungeon,
+  pub zone1: Zone,
+  pub zone2: Zone,
+  pub dungeon: dungeons::Dungeon,
 }
 
 impl ItemDoor {
-  pub fn can_pass(&self, items: &HashMultiSet<Item>) -> bool {
+  pub fn can_pass(&self, items: &Vec<Item>) -> bool {
     (self.can_pass_callback)(&items)
   }
 }
@@ -73,7 +72,7 @@ macro_rules! cxn {
     ItemDoor {
       zone1: $z1,
       zone2: $z2,
-      one_way: true,
+      reversible: false,
       can_pass_callback: $cb,
     }
   );
@@ -81,7 +80,7 @@ macro_rules! cxn {
     ItemDoor {
       zone1: $z1,
       zone2: $z2,
-      one_way: false,
+      reversible: true,
       can_pass_callback: $cb,
     }
   );
@@ -102,10 +101,10 @@ macro_rules! cxn {
 
 
 
-fn todo(_: &HashMultiSet<Item>) -> bool { true } // for warning suppression
+fn todo(_: &Vec<Item>) -> bool { true } // for warning suppression
 
 pub static ITEMDOORS : &[ItemDoor] = &[
-  cxn!(TempOverworld <=> POD1),
+  cxn!(Overworld <=> POD1),
   cxn!(POD1   <=> POD8:   &|ref items| {todo(items) /*Bow!*/}),
   cxn!(POD8   ==> POD2:   &|ref items| {todo(items) /*Hammer*/}),
   cxn!(POD47  <=> POD7:   &|ref items| {todo(items) /*Lamp*/}),

@@ -2,11 +2,11 @@
 #![allow(dead_code)]
 
 use std::collections::{HashMap, HashSet, VecDeque};
-use multiset::HashMultiSet;
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
 use super::glue::*;
 use super::locations2::*;
+use super::world2::Assignments;
 use super::zones::{Zone, KeyDoor, ItemDoor};
 use super::dive::Dive;
 
@@ -54,7 +54,7 @@ pub fn generate_world(
 fn fast_fill_items_in_locations(
   fill_items: &mut IntoIter<items::Item>,
   locations: &Vec<locations2::Location2>,
-  assignments: &mut HashMap<locations2::Location2, items::Item>,
+  assignments: &mut Assignments,
 ) {
   for &loc in locations.iter() {
     if assignments.contains_key(&loc) { continue };
@@ -74,7 +74,7 @@ fn fill_items_in_locations(
   fill_items: IntoIter<items::Item>,
   locations: &Vec<locations2::Location2>,
   base_assumed_items: &Vec<items::Item>,
-  assignments: &mut HashMap<locations2::Location2, items::Item>,
+  assignments: &mut Assignments,
 ) {
   let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
   for _ in 0..remaining_fill_items.len() {
@@ -82,52 +82,61 @@ fn fill_items_in_locations(
     let mut assumed_items = base_assumed_items.clone();
     assumed_items.append(&mut (remaining_fill_items.clone()));
 
-    place_item(item, &assumed_items, &locations, &assignments);
+    place_item(item, assumed_items, &locations, &mut assignments);
   }
 }
 
 fn place_item(
   item: items::Item,
-  assumed: &HashMultiSet<items::Item>,
+  assumed: Vec<items::Item>,
   locations: &Vec<locations2::Location2>,
-  assignments: &mut HashMap<locations2::Location2, items::Item>,
+  assignments: &mut Assignments,
 ) {
-  let firstDive: Dive = Dive{
-    zones: hashset!{TempOverworld1},
+  let mut firstDive: Dive = Dive{
+    zones: hashset!{Zone::Overworld},
     items: assumed,
-    openDoors: Hashset::new(),
-  }.explore(&assignments);
+    openDoors: HashSet::new(),
+  };
+  firstDive.explore(&assignments);
   let mut queue: VecDeque<Dive> = VecDeque::new();
   queue.push_back(firstDive);
   let mut maximal_dives: HashSet<Dive> = HashSet::new();
 
   while queue.len() > 0 {
-    let v: Dive = queue.pop_front();
+    let v: Dive = queue.pop_front().expect("idk man");
     let mut f: HashSet<KeyDoor> = v.actual_key_frontier();
     if f.len() == 0 {
-      maximal_dives.add(v);
+      maximal_dives.insert(v);
       continue;
     }
 
-    let dungeon : dungeons::Dungeon = dungeons::all().iter()
-      .filter(|dgn| !(keyfrontier_from_dungeon(dgn) & f).empty())
-      .take(1)
-      .collect(); // TODO: does this compile?
-    let doors_to_explore: HashSet<KeyDoor> = keyfrontier_from_dungeon(dungeon) & f;
+    let dungeon : &dungeons::Dungeon = dungeons::all().iter()
+      .filter(|&&dgn| !(&keyfrontier_from_dungeon(dgn) & &f).is_empty())
+      .next()
+      .expect("no dungeons or something");
+    let temp_g: HashSet<KeyDoor> = keyfrontier_from_dungeon(*dungeon);
+    let doors_to_explore: HashSet<KeyDoor> = &temp_g & &f;
     for door in doors_to_explore {
       let mut new_dive: Dive = v.clone();
       new_dive.explore_keydoor(door, &assignments);
-      queue.add(new_dive);
+      queue.push_back(new_dive);
     }
   }
 
   // glbZone := intersection(maximal_dives)
-  let mut glbZone: HashSet<locations2::Location2> = HashSet::new();
-  maximal_dives.iter()
-    .map(|&dive| dive.zones)
-    .for_each(|zone| glbZone = glbZone & zone);
+  let mut glbZone: Option<HashSet<Location2>> = None;
+  for dive in maximal_dives.iter() {
+    let new_locs: HashSet<Location2> = dive.zones.iter()
+      .flat_map(|&zone| locations_from_zone(zone))
+      .collect();
+    match glbZone {
+      None => { glbZone = Some(new_locs); }
+      Some(glb) => { glbZone = Some(&glb & &new_locs); }
+    }
+  }
+  let glbZone = glbZone.expect("no available locations");
 
-  let loc: &locations2::Location2 = locations.iter()
+  let loc: &Location2 = locations.iter()
     .filter(|&&loc| glbZone.contains(&loc))
     .next()
     .expect("No locations left");

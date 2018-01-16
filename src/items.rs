@@ -3,6 +3,8 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
+use std::collections::{HashMap, HashSet};
+
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Item {
   Nothing,
@@ -178,7 +180,7 @@ pub enum Item {
 }
 pub use self::Item::*;
 
-pub fn get_advancement_items() -> Vec<Item> { // TODO: HashMultiSet<Item> instead
+pub fn get_advancement_items() -> Vec<Item> {
   let mut res = Vec::new();
   for _ in 0..4 { res.push(Item::ProgressiveSword); }
   // @hack: the web code randomly chooses a specific bottle each seed
@@ -296,7 +298,7 @@ pub fn get_dungeon_pool() -> Vec<Item> {
   return res;
 }
 
-pub fn all_small_keys() -> HashSet<Item> {
+fn all_small_keys() -> HashSet<Item> {
   hashset!{
     KeyH2,
     KeyH1,
@@ -313,4 +315,8 @@ pub fn all_small_keys() -> HashSet<Item> {
     KeyD7,
     KeyA2,
   }
+}
+
+pub fn is_key(item: Item) -> bool {
+  all_small_keys().contains(&item)
 }

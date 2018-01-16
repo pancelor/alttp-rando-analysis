@@ -4,9 +4,12 @@
 #![allow(unused_imports)]
 
 use std::collections::HashMap;
-use super::{medallions, locations2, items};
+use super::locations2::Location2;
+use super::items::Item;
+
+pub type Assignments = HashMap<Location2, Item>;
 
 #[derive(Eq, PartialEq, Debug)]
 pub struct World2 {
-  pub assignments: HashMap<locations2::Location2, items::Item>,
+  pub assignments: Assignments,
 }

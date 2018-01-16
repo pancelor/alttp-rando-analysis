@@ -10,21 +10,24 @@ extern crate log;
 extern crate maplit;
 extern crate rand;
 
-mod multiset;
-use multiset::HashMultiSet;
+// mod multiset;
+// use multiset::HashMultiSet;
 
 mod items;
 mod medallions;
 mod locations;
-mod locations2;
 mod regions;
-mod zones;
 mod world;
-mod world2;
-mod glue;
 mod logic;
 mod generator;
+
+mod world2;
+mod locations2;
 mod generator2;
+mod zones;
+mod glue;
+mod dungeons;
+mod dive;
 
 fn main() {
   println!("{:?}", zones::KEYDOORS);
