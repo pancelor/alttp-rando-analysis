@@ -30,7 +30,7 @@ pub use self::Zone::*;
 
 type CanPassClosure = Fn(&Vec<Item>) -> bool + Sync;
 
-#[derive(Eq, PartialEq, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct ItemDoor {
   pub zone1: Zone,
   pub zone2: Zone,
