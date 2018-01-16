@@ -21,7 +21,7 @@ use group_by;
 pub struct Dive {
   pub zones: HashSet<Zone>,
   pub items: Vec<Item>, // includes big/small keys
-  pub openDoors: HashSet<KeyDoor>, // all open keydoors on the entire map, not just the immediately accessible ones
+  pub open_doors: HashSet<KeyDoor>, // all open keydoors on the entire map, not just the immediately accessible ones
 }
 
 // TODO: is this a horrible idea? why aren't HashSets Hash by default??
@@ -31,7 +31,7 @@ impl Hash for Dive {
   {
     for entry in self.zones.iter() { entry.hash(state); }
     self.items.hash(state);
-    for entry in self.openDoors.iter() { entry.hash(state); }
+    for entry in self.open_doors.iter() { entry.hash(state); }
   }
 }
 
@@ -45,7 +45,7 @@ impl Dive {
 
   /// all reachable keydoors, filtered to ones that we have keys for
   pub fn actual_key_frontier(&self) -> HashSet<KeyDoor> {
-    let mut dungeons_I_own_keys_for : HashSet<Dungeon> = HashSet::new();
+    let mut dungeons_i_own_keys_for : HashSet<Dungeon> = HashSet::new();
     let all_keys: HashMap<dungeons::Dungeon, Vec<items::Item>> =
       group_by::group_by(
         self.items.clone().into_iter()
@@ -63,7 +63,7 @@ impl Dive {
       match all_keys.get(&dungeon) {
         Some(keys) => {
           if keydoors.len() < keys.len() {
-            dungeons_I_own_keys_for.insert(dungeon);
+            dungeons_i_own_keys_for.insert(dungeon);
           }
         },
         None => {},
@@ -71,7 +71,7 @@ impl Dive {
     }
 
     all_doors.into_iter()
-      .filter(|&(dung, _keys)| dungeons_I_own_keys_for.contains(&dung))
+      .filter(|&(dung, ref _keys)| dungeons_i_own_keys_for.contains(&dung))
       .flat_map(|(_dung, keys)| keys)
       .collect()
 
@@ -79,7 +79,7 @@ impl Dive {
     // fn currently_has_key(key: Item, dive: Dive) -> bool {
     //   // TODO: assert key is one of the keys; add a fxn to Item prolly
     //   let num_keys = dive.items.count_of(&key);
-    //   let open_dungeon_doors: HashSet<KeyDoor> = keyfrontier_from_dungeon(dungeon_from_key(key)) & dive.openDoors;
+    //   let open_dungeon_doors: HashSet<KeyDoor> = keyfrontier_from_dungeon(dungeon_from_key(key)) & dive.open_doors;
     //   num_keys > open_dungeon_doors.len()
     // }
   }
@@ -130,7 +130,7 @@ impl Dive {
 
     // sanity check we have a key to open the door
     // TODO
-    // let keys_used : usize = self.openDoors.intersect(door.dungeon.keydoors_for()).len();
+    // let keys_used : usize = self.open_doors.intersect(door.dungeon.keydoors_for()).len();
     // if count()
 
 

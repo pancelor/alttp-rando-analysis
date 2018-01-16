@@ -91,19 +91,19 @@ fn place_item(
   locations: &Vec<locations2::Location2>,
   assignments: &mut Assignments,
 ) {
-  let mut firstDive: Dive = Dive{
+  let mut first_dive: Dive = Dive{
     zones: hashset!{Zone::Overworld},
     items: assumed,
-    openDoors: HashSet::new(),
+    open_doors: HashSet::new(),
   };
-  firstDive.explore(&assignments);
+  first_dive.explore(&assignments);
   let mut queue: VecDeque<Dive> = VecDeque::new();
-  queue.push_back(firstDive);
+  queue.push_back(first_dive);
   let mut maximal_dives: HashSet<Dive> = HashSet::new();
 
   while queue.len() > 0 {
     let v: Dive = queue.pop_front().expect("idk man");
-    let mut f: HashSet<KeyDoor> = v.actual_key_frontier();
+    let f: HashSet<KeyDoor> = v.actual_key_frontier();
     if f.len() == 0 {
       maximal_dives.insert(v);
       continue;
@@ -122,21 +122,21 @@ fn place_item(
     }
   }
 
-  // glbZone := intersection(maximal_dives)
-  let mut glbZone: Option<HashSet<Location2>> = None;
+  // glb_zone := intersection(maximal_dives)
+  let mut glb_zone: Option<HashSet<Location2>> = None;
   for dive in maximal_dives.iter() {
     let new_locs: HashSet<Location2> = dive.zones.iter()
       .flat_map(|&zone| locations_from_zone(zone))
       .collect();
-    match glbZone {
-      None => { glbZone = Some(new_locs); }
-      Some(glb) => { glbZone = Some(&glb & &new_locs); }
+    match glb_zone {
+      None => { glb_zone = Some(new_locs); }
+      Some(glb) => { glb_zone = Some(&glb & &new_locs); }
     }
   }
-  let glbZone = glbZone.expect("no available locations");
+  let glb_zone = glb_zone.expect("no available locations");
 
   let loc: &Location2 = locations.iter()
-    .filter(|&&loc| glbZone.contains(&loc))
+    .filter(|&&loc| glb_zone.contains(&loc))
     .next()
     .expect("No locations left");
   assignments.insert(*loc, item);
