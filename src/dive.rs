@@ -133,6 +133,10 @@ impl Dive {
     // let keys_used : usize = self.open_doors.intersect(door.dungeon.keydoors_for()).len();
     // if count()
 
+    let is_new: bool = self.open_doors.insert(door);
+    if !is_new {
+      panic!("pretty sure this shouldn't happen but idk i guess");
+    }
 
     // We only want to `insert` the items from unexplored zones (b/c `self.items` is a HashMultiSet)
     let new_zone: Zone;
