@@ -24,6 +24,20 @@ pub struct Dive {
 }
 
 impl Dive {
+  pub fn new(
+    items: Vec<Item>,
+    assignments: &Assignments,
+  ) -> Self {
+    let mut me = Self {
+      zones: btreeset!{Zone::TempEastLightWorld},
+      items,
+      open_doors: BTreeSet::new(),
+    };
+    me.loot_zone(Zone::TempEastLightWorld, &assignments);
+    me.explore(&assignments);
+    me
+  }
+
   /// all reachable keydoors
   pub fn key_frontier(&self) -> BTreeSet<KeyDoor> {
     self.zones.iter()

@@ -52,6 +52,12 @@ pub fn generate_world(
   world
 }
 
+// TODO: temp fxn
+pub fn can_win(world: &world2::World2) -> bool {
+  let dive = Dive::new(vec![], &world.assignments);
+  dive.zones.contains(&Zone::POD9) // TODO: s/POD/Ganon/
+}
+
 fn fast_fill_items_in_locations(
   fill_items: &mut IntoIter<items::Item>,
   locations: &Vec<locations2::Location2>,
@@ -95,13 +101,7 @@ fn place_item(
   assignments: &mut Assignments,
 ) {
   debug!("fn place_item(\nitem={:?},\n\tassumed={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", item, assumed, locations, assignments);
-  let mut first_dive: Dive = Dive{
-    zones: btreeset!{Zone::TempEastLightWorld},
-    items: assumed,
-    open_doors: BTreeSet::new(),
-  };
-  first_dive.loot_zone(Zone::TempEastLightWorld, &assignments);
-  first_dive.explore(&assignments);
+  let first_dive: Dive = Dive::new(assumed, &assignments);
   let mut stack: Vec<Dive> = Vec::new();
   stack.push(first_dive);
   let mut maximal_dives: Vec<Dive> = Vec::new();

@@ -72,19 +72,6 @@ fn real_main() {
   for _ in 0..sim_count {
     let world = generator2::generate_world(&advancement_items, &junk_items, &mut rng);
     info!("{:?}", world);
-
-    // { // @TODO: debug code; rm
-    //   for loc in vec![
-    //     locations::Location::DesertPalaceBigChest,
-    //     locations::Location::DesertPalaceMapChest,
-    //     locations::Location::DesertPalaceTorch,
-    //     locations::Location::DesertPalaceBigKeyChest,
-    //     locations::Location::DesertPalaceCompassChest,
-    //     locations::Location::DesertPalaceLanmolas,
-    //     locations::Location::DesertPalacePrize,
-    //   ] {
-    //     error!("{:?}: {:?}", loc, world.assignments.get(&loc));
-    //   }
-    // }
+    info!("Winnable? {:?}", generator2::can_win(&world));
   }
 }
