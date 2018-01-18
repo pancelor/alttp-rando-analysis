@@ -110,24 +110,36 @@ fn get_allowed_locations_to_place_next_item(
   let first_dive: Dive = Dive::new(assumed, &assignments);
   let mut stack: Vec<Dive> = Vec::new();
   stack.push(first_dive);
-  let mut maximal_dives: Vec<Dive> = Vec::new();
+  // The set of Locations that are common to every maximal dive
+  let mut common_locs: Option<BTreeSet<Location2>> = None;
 
   while stack.len() > 0 {
-    debug!("while stack (\n\tstack={:?},\n\tmaximal_dives={:?}\n)", stack, maximal_dives);
+    debug!("while stack (\n\tstack={:?},\n\tcommon_locs={:?}\n)", stack, common_locs);
 
     let v: Dive = stack.pop().expect("idk man");
     let f: BTreeSet<KeyDoor> = v.actual_key_frontier();
     if f.len() == 0 {
-      if !maximal_dives.contains(&v) {
-        maximal_dives.push(v);
+      // This is a maximal dive; restrict common_locs accordingly
+      let locs: BTreeSet<Location2> = v.zones.iter()
+        .flat_map(|&zone| locations_from_zone(zone))
+        .collect();
+      match common_locs {
+        None => { common_locs = Some(locs); }
+        Some(glb) => { common_locs = Some(&glb & &locs); }
       }
       continue;
     }
 
+    // Don't fan out into _every_ keydoor available;
+    //   only fan out into the ones in the _earliest available dungeon_.
+    //   E.g. if we have two POD keys and two EP keys; only fan out into the two
+    //   EP keydoors, because that dungeon comes earlier (in vanilla).
+    //   We'll end up going to POD later after there are no more EP keys
+    //   available.
     let dungeon : &dungeons::Dungeon = dungeons::ALL.iter()
       .filter(|&&dgn| !(&keyfrontier_from_dungeon(dgn) & &f).is_empty())
       .next()
-      .expect("no dungeons or something");
+      .expect("this dive has no keys");
     debug!("First dungeon w/ openable doors: {:?}", dungeon);
 
     let doors_to_explore: BTreeSet<KeyDoor> = &keyfrontier_from_dungeon(*dungeon) & &f;
@@ -138,16 +150,5 @@ fn get_allowed_locations_to_place_next_item(
     }
   }
 
-  // glb_zone := intersection(maximal_dives)
-  let mut glb_zone: Option<BTreeSet<Location2>> = None;
-  for dive in maximal_dives.iter() {
-    let new_locs: BTreeSet<Location2> = dive.zones.iter()
-      .flat_map(|&zone| locations_from_zone(zone))
-      .collect();
-    match glb_zone {
-      None => { glb_zone = Some(new_locs); }
-      Some(glb) => { glb_zone = Some(&glb & &new_locs); }
-    }
-  }
-  glb_zone.expect("no available locations")
+  common_locs.expect("there are no locations common to every maximal dive")
 }
