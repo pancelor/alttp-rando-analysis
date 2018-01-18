@@ -39,6 +39,25 @@ pub fn dungeon_from_key(key: Item) -> Dungeon {
   }
 }
 
+pub fn key_from_dungeon(dungeon: Dungeon) -> Item {
+  use super::items::*;
+  use super::dungeons::*;
+  match key {
+    Overworld => panic!("idk"),
+    EasternPalace => KeyP1,
+    DesertPalace => KeyP2,
+    TowerOfHera => KeyP3,
+    PalaceOfDarkness => KeyD1,
+    SwampPalace => KeyD2,
+    SkullWoods => KeyD3,
+    ThievesTown => KeyD4,
+    IcePalace => KeyD5,
+    MiseryMire => KeyD6,
+    TurtleRock => KeyD7,
+    GanonSTower => panic!("idk"),
+  }
+}
+
 pub fn dungeon_from_zone(zone: Zone) -> Dungeon {
   use super::dungeons::*;
   use super::zones::*;
