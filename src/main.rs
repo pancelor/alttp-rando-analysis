@@ -37,16 +37,34 @@ fn main() {
 fn real_main() {
   env_logger::init().unwrap();
 
-  let mut advancement_items = items::get_advancement_items();
-  trace!("advancement_items: {:?}", advancement_items);
+  use items::*;
+  let advancement_items = vec![
+    KeyD1,
+    KeyD1,
+    KeyD1,
+    KeyD1,
+    KeyD1,
+    KeyD1,
+    Bow,
+    Hammer,
+    BigKeyD1,
+    MapD1,
+    CompassD1,
+  ];
 
-  let mut dungeon_items = items::get_dungeon_pool();
-  trace!("dungeon_items: {:?}", dungeon_items);
+  let junk_items = vec![
+    BottleWithBee,
+    BottleWithBee,
+    BottleWithBee,
+    BottleWithBee,
+    BottleWithBee,
+    BottleWithBee,
+    BottleWithBee,
+    BottleWithBee,
+    BottleWithBee,
+  ];
 
-  advancement_items.append(&mut dungeon_items);
-
-  let junk_items = items::get_item_pool();
-  trace!("item_pool: {:?}", junk_items);
+  // need 14 + prize + 5 overworld = 20 items total
 
   let mut rng = rand::thread_rng();
 

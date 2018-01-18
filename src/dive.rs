@@ -152,9 +152,6 @@ impl Dive {
 
   fn loot_zone(&mut self, zone: Zone, assignments: &Assignments) {
     // TODO: make self.items a method, and calc it on the fly from zones? makes for easier debugging... yeah lets do it
-    if self.zones.contains(&zone) { panic!("Trying to re-add a zone"); }
-
-    self.zones.insert(zone);
     locations_from_zone(zone).iter()
       .filter_map(|loc| assignments.get(&loc))
       .for_each(|&item| self.items.push(item));
