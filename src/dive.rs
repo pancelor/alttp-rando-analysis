@@ -16,11 +16,27 @@ use group_by;
 // All `Dive`s are greedy wrt items
 // `Dive.explore` expands over itemdoor boundaries, but not keylock boundaries (besides the one door passed as an argument)
 
-#[derive(Eq, PartialEq, Hash, Clone, Debug)]
+#[derive(Eq, Clone, Debug)]
 pub struct Dive {
   pub zones: BTreeSet<Zone>,
   pub items: Vec<Item>, // includes big/small keys
   pub open_doors: BTreeSet<KeyDoor>, // all open keydoors on the entire map, not just the immediately accessible ones
+}
+
+impl PartialEq for Dive {
+  fn eq(&self, other: &Self) -> bool {
+    self.zones == other.zones
+    && self.open_doors == other.open_doors
+    && self.items.clone().sort() == other.items.clone().sort()
+  }
+}
+
+impl Hash for Dive {
+  fn hash<H: Hasher>(&self, state: &mut H) {
+    self.zones.hash(state);
+    self.open_doors.hash(state);
+    self.items.clone().sort().hash(state)
+  }
 }
 
 impl Dive {
