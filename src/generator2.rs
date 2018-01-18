@@ -54,8 +54,8 @@ pub fn generate_world(
 
 // TODO: temp fxn
 pub fn can_win(world: &world2::World2) -> bool {
-  let dive = Dive::new(vec![], &world.assignments);
-  dive.zones.contains(&Zone::POD9) // TODO: s/POD/Ganon/
+  let locs = get_allowed_locations_to_place_next_item(vec![], &world.assignments);
+  locs.contains(&Location2::PalaceOfDarknessPrize) // TODO: s/PalaceOfDarknessPrize/DefeatGanon/
 }
 
 fn fast_fill_items_in_locations(
@@ -90,17 +90,23 @@ fn fill_items_in_locations(
     let mut assumed_items = base_assumed_items.clone();
     assumed_items.append(&mut (remaining_fill_items.clone()));
 
-    place_item(item, assumed_items, &locations, &mut assignments);
+    debug!("About to place {:?}", item);
+    let allowed_locations = get_allowed_locations_to_place_next_item(assumed_items, &mut assignments);
+    let loc: &Location2 = locations.iter()
+      .filter(|&&loc| !assignments.contains_key(&loc))
+      .filter(|&&loc| allowed_locations.contains(&loc))
+      .next()
+      .expect("No locations left");
+    info!("Filling {:?} with {:?}", loc, item);
+    assignments.insert(*loc, item);
   }
 }
 
-fn place_item(
-  item: items::Item,
+fn get_allowed_locations_to_place_next_item(
   assumed: Vec<items::Item>,
-  locations: &Vec<locations2::Location2>,
-  assignments: &mut Assignments,
-) {
-  debug!("fn place_item(\nitem={:?},\n\tassumed={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", item, assumed, locations, assignments);
+  assignments: &Assignments,
+) -> BTreeSet<Location2> {
+  debug!("fn get_allowed_locations_to_place_next_item(\nassumed={:?},\n\tassignments={:?}\n)", assumed, assignments);
   let first_dive: Dive = Dive::new(assumed, &assignments);
   let mut stack: Vec<Dive> = Vec::new();
   stack.push(first_dive);
@@ -143,13 +149,5 @@ fn place_item(
       Some(glb) => { glb_zone = Some(&glb & &new_locs); }
     }
   }
-  let glb_zone = glb_zone.expect("no available locations");
-
-  let loc: &Location2 = locations.iter()
-    .filter(|&&loc| glb_zone.contains(&loc))
-    .filter(|&&loc| !assignments.contains_key(&loc))
-    .next()
-    .expect("No locations left");
-  info!("Filling {:?} with {:?}", loc, item);
-  assignments.insert(*loc, item);
+  glb_zone.expect("no available locations")
 }
