@@ -7,7 +7,7 @@ use super::zones;
 use super::zones::*;
 use super::items::Item;
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Location2 {
   TempOverworld1,
   TempOverworld2,

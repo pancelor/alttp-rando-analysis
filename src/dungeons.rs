@@ -3,10 +3,11 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
+use std::cmp::Ordering;
 use super::locations;
 use super::items::Item;
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Dungeon {
   Overworld,
 

@@ -3,9 +3,10 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
+use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Item {
   Nothing,
   L1Sword,

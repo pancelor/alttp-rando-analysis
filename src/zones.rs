@@ -3,12 +3,13 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
+use std::cmp::Ordering;
 use std::collections::{HashMap, HashSet};
 use super::locations;
 use super::dungeons;
 use super::items::Item;
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Zone {
   TempEastLightWorld,
   POD1,
@@ -58,7 +59,7 @@ pub struct ItemDoor {
   pub can_pass_callback: &'static CanPassClosure,
 }
 
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub struct KeyDoor {
   pub zone1: Zone,
   pub zone2: Zone,

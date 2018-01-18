@@ -3,10 +3,11 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
+use std::cmp::Ordering;
 use super::{regions};
 
 // CamelCase versions of the php names for all locations
-#[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Location {
   DesertPalaceBigChest,
   DesertPalaceMapChest,

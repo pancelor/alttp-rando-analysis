@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, BTreeSet};
 use std::collections::VecDeque;
 use rand::{Rng, ThreadRng};
 use std::hash::{Hash, Hasher};
@@ -19,34 +19,22 @@ use group_by;
 
 #[derive(Eq, PartialEq, Clone, Debug)]
 pub struct Dive {
-  pub zones: HashSet<Zone>,
+  pub zones: BTreeSet<Zone>,
   pub items: Vec<Item>, // includes big/small keys
-  pub open_doors: HashSet<KeyDoor>, // all open keydoors on the entire map, not just the immediately accessible ones
-}
-
-// TODO: is this a horrible idea? why aren't HashSets Hash by default??
-// answer: YES, b/c hashing elements needs to happen in the same order; doh
-impl Hash for Dive {
-  fn hash<H>(&self, state: &mut H)
-    where H: Hasher,
-  {
-    for entry in self.zones.iter() { entry.hash(state); }
-    self.items.hash(state);
-    for entry in self.open_doors.iter() { entry.hash(state); }
-  }
+  pub open_doors: BTreeSet<KeyDoor>, // all open keydoors on the entire map, not just the immediately accessible ones
 }
 
 impl Dive {
   /// all reachable keydoors
-  pub fn key_frontier(&self) -> HashSet<KeyDoor> {
+  pub fn key_frontier(&self) -> BTreeSet<KeyDoor> {
     self.zones.iter()
       .flat_map(|&zone| keyfrontier_from_zone(zone))
       .collect()
   }
 
   /// all reachable keydoors, filtered to ones that we have keys for
-  pub fn actual_key_frontier(&self) -> HashSet<KeyDoor> {
-    let mut dungeons_i_own_keys_for : HashSet<Dungeon> = HashSet::new();
+  pub fn actual_key_frontier(&self) -> BTreeSet<KeyDoor> {
+    let mut dungeons_i_own_keys_for : BTreeSet<Dungeon> = BTreeSet::new();
     let all_keys: HashMap<dungeons::Dungeon, Vec<items::Item>> =
       group_by::group_by(
         self.items.clone().into_iter()
@@ -80,7 +68,7 @@ impl Dive {
     // fn currently_has_key(key: Item, dive: Dive) -> bool {
     //   // TODO: assert key is one of the keys; add a fxn to Item prolly
     //   let num_keys = dive.items.count_of(&key);
-    //   let open_dungeon_doors: HashSet<KeyDoor> = keyfrontier_from_dungeon(dungeon_from_key(key)) & dive.open_doors;
+    //   let open_dungeon_doors: BTreeSet<KeyDoor> = keyfrontier_from_dungeon(dungeon_from_key(key)) & dive.open_doors;
     //   num_keys > open_dungeon_doors.len()
     // }
   }
@@ -99,7 +87,7 @@ impl Dive {
 
   pub fn explore(&mut self, assignments: &Assignments) {
     // assumes self is already greedy (i.e. wont re-explore self.zones)
-    // to calculate `frontier: HashSet<KeyDoor | ItemDoor> = self.zones.flat_map(.frontier)`
+    // to calculate `frontier: BTreeSet<KeyDoor | ItemDoor> = self.zones.flat_map(.frontier)`
 
     let mut item_frontier: VecDeque<ItemDoor> = self.item_frontier();
 
@@ -124,7 +112,7 @@ impl Dive {
 
   fn open_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
     // sanity check door is in frontier
-    let key_frontier: HashSet<KeyDoor> = self.zones.iter()
+    let key_frontier: BTreeSet<KeyDoor> = self.zones.iter()
       .flat_map(|&zone| keyfrontier_from_zone(zone))
       .collect();
     if !key_frontier.contains(&door) { panic!("trying to cross through a door not in the frontier"); }
