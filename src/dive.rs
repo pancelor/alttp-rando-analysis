@@ -86,6 +86,8 @@ impl Dive {
   }
 
   pub fn explore(&mut self, assignments: &Assignments) {
+    debug!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
+
     // assumes self is already greedy (i.e. wont re-explore self.zones)
     // to calculate `frontier: BTreeSet<KeyDoor | ItemDoor> = self.zones.flat_map(.frontier)`
 
@@ -111,6 +113,8 @@ impl Dive {
   }
 
   fn open_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
+    debug!("fn open_keydoor(\n\tself={:?},\n\tdoor={:?}\n\tassignments={:?}\n)", self, door, assignments);
+
     // sanity check door is in frontier
     let key_frontier: BTreeSet<KeyDoor> = self.zones.iter()
       .flat_map(|&zone| keyfrontier_from_zone(zone))
@@ -134,12 +138,15 @@ impl Dive {
     } else if self.zones.insert(door.zone1) {
       new_zone = door.zone2;
     } else {
-      panic!("umm something is wrong with the frontier");
+      trace!("opened a useless door (e.g. the left<->right keydoor in GT");
+      return
     }
     self.loot_zone(new_zone, &assignments);
   }
 
   fn loot_zone(&mut self, zone: Zone, assignments: &Assignments) {
+    debug!("fn loot_zone(\n\tself={:?},\nzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
+
     // TODO: make self.items a method, and calc it on the fly from zones? makes for easier debugging... yeah lets do it
     locations_from_zone(zone).iter()
       .filter_map(|loc| assignments.get(&loc))

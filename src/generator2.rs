@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use std::collections::{HashMap, HashSet, BTreeSet, VecDeque};
+use std::collections::{HashMap, HashSet, BTreeSet};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
 use super::glue::*;
@@ -94,19 +94,21 @@ fn place_item(
   locations: &Vec<locations2::Location2>,
   assignments: &mut Assignments,
 ) {
-  debug!("fn place_item(\n\item={:?},\n\tassumed={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", item, assumed, locations, assignments);
+  debug!("fn place_item(\nitem={:?},\n\tassumed={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", item, assumed, locations, assignments);
   let mut first_dive: Dive = Dive{
     zones: btreeset!{Zone::TempEastLightWorld},
     items: assumed,
     open_doors: BTreeSet::new(),
   };
   first_dive.explore(&assignments);
-  let mut queue: VecDeque<Dive> = VecDeque::new();
-  queue.push_back(first_dive);
+  let mut stack: Vec<Dive> = Vec::new();
+  stack.push(first_dive);
   let mut maximal_dives: Vec<Dive> = Vec::new();
 
-  while queue.len() > 0 {
-    let v: Dive = queue.pop_front().expect("idk man");
+  while stack.len() > 0 {
+    debug!("while stack (\n\tstack={:?},\n\tmaximal_dives={:?}\n)", stack, maximal_dives);
+
+    let v: Dive = stack.pop().expect("idk man");
     let f: BTreeSet<KeyDoor> = v.actual_key_frontier();
     if f.len() == 0 {
       maximal_dives.push(v);
@@ -122,7 +124,7 @@ fn place_item(
     for door in doors_to_explore {
       let mut new_dive: Dive = v.clone();
       new_dive.explore_keydoor(door, &assignments);
-      queue.push_back(new_dive);
+      stack.push(new_dive);
     }
   }
 
