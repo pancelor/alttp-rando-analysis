@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use std::collections::{HashMap, BTreeSet, VecDeque};
+use std::collections::{HashMap, HashSet, BTreeSet, VecDeque};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
 use super::glue::*;
@@ -100,13 +100,13 @@ fn place_item(
   first_dive.explore(&assignments);
   let mut queue: VecDeque<Dive> = VecDeque::new();
   queue.push_back(first_dive);
-  let mut maximal_dives: BTreeSet<Dive> = BTreeSet::new();
+  let mut maximal_dives: Vec<Dive> = Vec::new();
 
   while queue.len() > 0 {
     let v: Dive = queue.pop_front().expect("idk man");
     let f: BTreeSet<KeyDoor> = v.actual_key_frontier();
     if f.len() == 0 {
-      maximal_dives.insert(v);
+      maximal_dives.push(v);
       continue;
     }
 

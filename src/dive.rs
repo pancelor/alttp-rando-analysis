@@ -17,7 +17,7 @@ use group_by;
 // All `Dive`s are greedy wrt items
 // `Dive.explore` expands over itemdoor boundaries, but not keylock boundaries (besides the one door passed as an argument)
 
-#[derive(Eq, PartialEq, Clone, Debug)]
+#[derive(Eq, PartialEq, Hash, Clone, Debug)]
 pub struct Dive {
   pub zones: BTreeSet<Zone>,
   pub items: Vec<Item>, // includes big/small keys
