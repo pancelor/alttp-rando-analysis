@@ -177,11 +177,11 @@ impl<K> HashMultiSet<K> where
     ///
     /// ```
     /// use multiset::HashMultiSet;
-    /// use std::collections::HashSet;
+    /// use std::collections::BTreeSet;
     /// use std::iter::FromIterator;
     ///
     /// let multiset: HashMultiSet<i64> = FromIterator::from_iter(vec![1,1,2]);
-    /// let distinct = multiset.distinct_elements().collect::<HashSet<_>>();
+    /// let distinct = multiset.distinct_elements().collect::<BTreeSet<_>>();
     /// assert_eq!(2, distinct.len());
     /// assert!(distinct.contains(&1));
     /// assert!(distinct.contains(&2));

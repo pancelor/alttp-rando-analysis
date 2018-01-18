@@ -166,13 +166,13 @@ fn fill_items_in_locations(
   }
 }
 
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 fn collect_items(
   assumed_items: &Vec<items::Item>,
   assignments: &HashMap<locations::Location, items::Item>,
 ) -> Vec<items::Item> {
   let mut my_items = assumed_items.clone();
-  let mut available_locations: HashSet<locations::Location> = locations::get_all_locations()
+  let mut available_locations: BTreeSet<locations::Location> = locations::get_all_locations()
     .into_iter()
     .filter(|&loc| assignments.get(&loc).is_some())
     .collect();

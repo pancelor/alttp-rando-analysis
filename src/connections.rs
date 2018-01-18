@@ -3,7 +3,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, BTreeSet};
 use super::locations;
 use super::dungeons;
 use super::items::Item;

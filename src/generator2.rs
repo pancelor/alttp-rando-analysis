@@ -1,7 +1,7 @@
 #![allow(unused_imports)]
 #![allow(dead_code)]
 
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, BTreeSet, VecDeque};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
 use super::glue::*;
@@ -93,18 +93,18 @@ fn place_item(
   assignments: &mut Assignments,
 ) {
   let mut first_dive: Dive = Dive{
-    zones: hashset!{Zone::TempEastLightWorld},
+    zones: btreeset!{Zone::TempEastLightWorld},
     items: assumed,
-    open_doors: HashSet::new(),
+    open_doors: BTreeSet::new(),
   };
   first_dive.explore(&assignments);
   let mut queue: VecDeque<Dive> = VecDeque::new();
   queue.push_back(first_dive);
-  let mut maximal_dives: HashSet<Dive> = HashSet::new();
+  let mut maximal_dives: BTreeSet<Dive> = BTreeSet::new();
 
   while queue.len() > 0 {
     let v: Dive = queue.pop_front().expect("idk man");
-    let f: HashSet<KeyDoor> = v.actual_key_frontier();
+    let f: BTreeSet<KeyDoor> = v.actual_key_frontier();
     if f.len() == 0 {
       maximal_dives.insert(v);
       continue;
@@ -114,8 +114,8 @@ fn place_item(
       .filter(|&&dgn| !(&keyfrontier_from_dungeon(dgn) & &f).is_empty())
       .next()
       .expect("no dungeons or something");
-    let temp_g: HashSet<KeyDoor> = keyfrontier_from_dungeon(*dungeon);
-    let doors_to_explore: HashSet<KeyDoor> = &temp_g & &f;
+    let temp_g: BTreeSet<KeyDoor> = keyfrontier_from_dungeon(*dungeon);
+    let doors_to_explore: BTreeSet<KeyDoor> = &temp_g & &f;
     for door in doors_to_explore {
       let mut new_dive: Dive = v.clone();
       new_dive.explore_keydoor(door, &assignments);
@@ -124,9 +124,9 @@ fn place_item(
   }
 
   // glb_zone := intersection(maximal_dives)
-  let mut glb_zone: Option<HashSet<Location2>> = None;
+  let mut glb_zone: Option<BTreeSet<Location2>> = None;
   for dive in maximal_dives.iter() {
-    let new_locs: HashSet<Location2> = dive.zones.iter()
+    let new_locs: BTreeSet<Location2> = dive.zones.iter()
       .flat_map(|&zone| locations_from_zone(zone))
       .collect();
     match glb_zone {

@@ -4,7 +4,7 @@
 #![allow(unused_imports)]
 
 use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, BTreeSet};
 use super::locations;
 use super::dungeons;
 use super::items::Item;
@@ -29,8 +29,8 @@ pub enum Zone {
 }
 pub use self::Zone::*;
 
-pub fn all() -> HashSet<Zone> {
-  hashset!{
+pub fn all() -> BTreeSet<Zone> {
+  btreeset!{
     TempEastLightWorld,
     POD1,
     POD2,

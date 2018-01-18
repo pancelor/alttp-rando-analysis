@@ -4,14 +4,14 @@
 
 #![allow(unused_variables)]
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, BTreeSet};
 use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons, connections};
 use super::zones::{Zone, KeyDoor, ItemDoor};
 use super::dungeons::Dungeon;
 use super::locations2::Location2;
 use super::items::Item;
 
-pub fn keyfrontier_from_dungeon(dungeon: Dungeon) -> HashSet<KeyDoor> {
+pub fn keyfrontier_from_dungeon(dungeon: Dungeon) -> BTreeSet<KeyDoor> {
   zones_from_dungeon(dungeon).iter()
     .flat_map(|&zone| keyfrontier_from_zone(zone))
     .collect()
@@ -60,13 +60,13 @@ pub fn dungeon_from_zone(zone: Zone) -> Dungeon {
   }
 }
 
-pub fn zones_from_dungeon(dungeon: Dungeon) -> HashSet<Zone> {
+pub fn zones_from_dungeon(dungeon: Dungeon) -> BTreeSet<Zone> {
   zones::all().into_iter()
     .filter(|&zone| dungeon_from_zone(zone) == dungeon)
     .collect()
 }
 
-pub fn keyfrontier_from_zone(zone: Zone) -> HashSet<KeyDoor> {
+pub fn keyfrontier_from_zone(zone: Zone) -> BTreeSet<KeyDoor> {
   connections::ALL_KEYDOORS.clone().into_iter() // TODO: ew ew awful perf here
     .filter(|&idoor| idoor.zone1 == zone || idoor.zone2 == zone)
     .map(|&x| x)
@@ -80,55 +80,55 @@ pub fn itemfrontier_from_zone(zone: Zone) -> Vec<ItemDoor> {
     .collect()
 }
 
-pub fn locations_from_zone(zone: Zone) -> HashSet<Location2> {
+pub fn locations_from_zone(zone: Zone) -> BTreeSet<Location2> {
   use super::zones::*;
   use super::locations2::*;
   match zone {
-    TempEastLightWorld => hashset!{
+    TempEastLightWorld => btreeset!{
       TempOverworld1,
       TempOverworld2,
       TempOverworld3,
       TempOverworld4,
       TempOverworld5,
     },
-    POD1 => hashset!{
+    POD1 => btreeset!{
       PalaceOfDarknessShooterRoom,
     },
-    POD2 => hashset!{
+    POD2 => btreeset!{
       PalaceOfDarknessStalfosBasement,
       PalaceOfDarknessTheArenaBridge,
     },
-    POD3 => hashset!{
+    POD3 => btreeset!{
       PalaceOfDarknessBigKeyChest,
     },
-    POD4 => hashset!{
+    POD4 => btreeset!{
       PalaceOfDarknessCompassChest,
     },
-    POD5 => hashset!{
+    POD5 => btreeset!{
       PalaceOfDarknessHarmlessHellway,
     },
-    POD6 => hashset!{
+    POD6 => btreeset!{
       PalaceOfDarknessDarkBasementLeft,
       PalaceOfDarknessDarkBasementRight,
     },
-    POD7 => hashset!{
+    POD7 => btreeset!{
       PalaceOfDarknessDarkMazeTop,
       PalaceOfDarknessDarkMazeBottom,
     },
-    POD8 => hashset!{
+    POD8 => btreeset!{
       PalaceOfDarknessTheArenaLedge,
       PalaceOfDarknessMapChest,
     },
-    POD9 => hashset!{
+    POD9 => btreeset!{
       PalaceOfDarknessHelmasaurKing,
       PalaceOfDarknessPrize,
     },
-    POD10 => hashset!{
+    POD10 => btreeset!{
       PalaceOfDarknessBigChest,
     },
-    POD47 => hashset!{},
-    POD29A => hashset!{},
-    POD29B => hashset!{},
+    POD47 => btreeset!{},
+    POD29A => btreeset!{},
+    POD29B => btreeset!{},
   }
 }
 

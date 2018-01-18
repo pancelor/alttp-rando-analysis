@@ -4,7 +4,7 @@
 #![allow(unused_imports)]
 
 use std::cmp::Ordering;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, BTreeSet};
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Item {
@@ -299,8 +299,8 @@ pub fn get_dungeon_pool() -> Vec<Item> {
   return res;
 }
 
-fn all_small_keys() -> HashSet<Item> {
-  hashset!{
+fn all_small_keys() -> BTreeSet<Item> {
+  btreeset!{
     KeyH1,
     KeyH2,
     KeyP1,
