@@ -10,6 +10,6 @@ use super::items::Item;
 pub type Assignments = HashMap<Location2, Item>;
 
 #[derive(Eq, PartialEq, Debug)]
-pub struct World2 {
+pub struct World {
   pub assignments: Assignments,
 }

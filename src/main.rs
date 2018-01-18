@@ -20,9 +20,7 @@ mod world;
 mod logic;
 mod generator;
 
-mod world2;
 mod locations2;
-mod generator2;
 mod zones;
 mod glue;
 mod dungeons;
@@ -70,8 +68,8 @@ fn real_main() {
 
   let sim_count = 1;
   for _ in 0..sim_count {
-    let world = generator2::generate_world(&advancement_items, &junk_items, &mut rng);
+    let world = generator::generate_world(&advancement_items, &junk_items, &mut rng);
     info!("{:?}", world);
-    info!("Winnable? {:?}", generator2::can_win(&world));
+    info!("Winnable? {:?}", generator::can_win(&world));
   }
 }

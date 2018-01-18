@@ -3,10 +3,10 @@
 
 use std::collections::{HashMap, HashSet, BTreeSet};
 use rand::{Rng, ThreadRng};
-use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
+use super::{medallions, logic, locations2, regions, items, zones, dungeons};
 use super::glue::*;
 use super::locations2::*;
-use super::world2::Assignments;
+use super::world::{Assignments, World};
 use super::zones::{Zone, KeyDoor, ItemDoor};
 use super::dive::Dive;
 
@@ -15,7 +15,7 @@ pub fn generate_world(
   junk_items: &Vec<items::Item>,
   // TODO: add back in nice_items and do the ganon tower pre-fill thing
   rng: &mut ThreadRng,
-) -> world2::World2 {
+) -> World {
   debug!("fn generate_world(\nadvancement_items={:?},\n\tjunk_items={:?},\n\trng\n)", advancement_items, junk_items);
   let mut assignments;
   { // Set up assignments
@@ -46,14 +46,14 @@ pub fn generate_world(
     // assert_eq!(junk_items_iter.next(), None); // TODO uncomment?
   }
 
-  let world = world2::World2 {
+  let world = World {
     assignments,
   };
   world
 }
 
 // TODO: temp fxn
-pub fn can_win(world: &world2::World2) -> bool {
+pub fn can_win(world: &World) -> bool {
   let locs = get_allowed_locations_to_place_next_item(vec![], &world.assignments);
   locs.contains(&Location2::PalaceOfDarknessPrize) // TODO: s/PalaceOfDarknessPrize/DefeatGanon/
 }

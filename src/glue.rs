@@ -5,7 +5,7 @@
 #![allow(unused_variables)]
 
 use std::collections::{HashMap, BTreeSet};
-use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons, connections};
+use super::{medallions, logic, locations2, regions, items, zones, dungeons, connections};
 use super::zones::{Zone, KeyDoor, ItemDoor};
 use super::dungeons::Dungeon;
 use super::locations2::Location2;

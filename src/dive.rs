@@ -4,12 +4,12 @@
 use std::collections::{HashMap, BTreeSet};
 use rand::{Rng, ThreadRng};
 use std::hash::{Hash, Hasher};
-use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
+use super::{medallions, logic, locations2, regions, items, zones, dungeons};
 use super::glue::*;
 use super::zones::{Zone, KeyDoor, ItemDoor};
 use super::items::Item;
 use super::dungeons::Dungeon;
-use super::world2::Assignments;
+use super::world::Assignments;
 use super::locations2::Location2;
 use group_by;
 
