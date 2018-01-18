@@ -10,7 +10,7 @@ use super::items::Item;
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Zone {
-  Overworld,
+  TempEastLightWorld,
   POD1,
   POD2,
   POD3,
@@ -24,9 +24,29 @@ pub enum Zone {
   POD47,
   POD29A,
   POD29B,
+  // TODO: sync
 }
 pub use self::Zone::*;
 
+pub fn all() -> HashSet<Zone> {
+  hashset!{
+    TempEastLightWorld,
+    POD1,
+    POD2,
+    POD3,
+    POD4,
+    POD5,
+    POD6,
+    POD7,
+    POD8,
+    POD9,
+    POD10,
+    POD47,
+    POD29A,
+    POD29B,
+    // TODO: sync
+  }
+}
 
 type CanPassClosure = Fn(&Vec<Item>) -> bool + Sync;
 
@@ -42,7 +62,7 @@ pub struct ItemDoor {
 pub struct KeyDoor {
   pub zone1: Zone,
   pub zone2: Zone,
-  pub dungeon: dungeons::Dungeon,
+  // pub dungeon: dungeons::Dungeon,
 }
 
 impl ItemDoor {

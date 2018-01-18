@@ -30,30 +30,29 @@ mod dive;
 mod connections;
 
 fn main() {
-  // real_main();
+  real_main();
 }
 
 #[allow(dead_code)]
 fn real_main() {
   env_logger::init().unwrap();
 
-  let advancement_items = items::get_advancement_items();
+  let mut advancement_items = items::get_advancement_items();
   trace!("advancement_items: {:?}", advancement_items);
 
-  let nice_items = items::get_nice_items();
-  trace!("nice_items: {:?}", nice_items);
+  let mut dungeon_items = items::get_dungeon_pool();
+  trace!("dungeon_items: {:?}", dungeon_items);
+
+  advancement_items.append(&mut dungeon_items);
 
   let junk_items = items::get_item_pool();
   trace!("item_pool: {:?}", junk_items);
-
-  let dungeon_items = items::get_dungeon_pool();
-  trace!("dungeon_items: {:?}", dungeon_items);
 
   let mut rng = rand::thread_rng();
 
   let sim_count = 1;
   for _ in 0..sim_count {
-    let world = generator::generate_world(&advancement_items, &nice_items, &junk_items, &dungeon_items, &mut rng);
+    let world = generator2::generate_world(&advancement_items, &junk_items, &mut rng);
     info!("{:?}", world);
 
     // { // @TODO: debug code; rm

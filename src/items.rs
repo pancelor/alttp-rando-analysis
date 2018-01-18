@@ -300,19 +300,19 @@ pub fn get_dungeon_pool() -> Vec<Item> {
 
 fn all_small_keys() -> HashSet<Item> {
   hashset!{
-    KeyH2,
     KeyH1,
+    KeyH2,
     KeyP1,
     KeyP2,
-    KeyA1,
-    KeyD2,
-    KeyD1,
-    KeyD6,
-    KeyD3,
-    KeyD5,
     KeyP3,
+    KeyD1,
+    KeyD2,
+    KeyD3,
     KeyD4,
+    KeyD5,
+    KeyD6,
     KeyD7,
+    KeyA1,
     KeyA2,
   }
 }

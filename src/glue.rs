@@ -7,57 +7,84 @@
 use std::collections::{HashMap, HashSet};
 use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons, connections};
 use super::zones::{Zone, KeyDoor, ItemDoor};
-use super::zones::Zone::*;
 use super::dungeons::Dungeon;
 use super::locations2::Location2;
-use super::locations2::Location2::*;
 use super::items::Item;
 
 pub fn keyfrontier_from_dungeon(dungeon: Dungeon) -> HashSet<KeyDoor> {
-  hashset!{} // TODO: impl
+  zones_from_dungeon(dungeon).iter()
+    .flat_map(|&zone| keyfrontier_from_zone(zone))
+    .collect()
 }
 
 pub fn dungeon_from_key(key: Item) -> Dungeon {
-  if !items::is_key(key) {
-    panic!("bad arg"); // TODO: rm?
+  use super::items::*;
+  use super::dungeons::*;
+  match key {
+    KeyH1 => panic!("idk"),
+    KeyH2 => panic!("idk"),
+    KeyP1 => EasternPalace,
+    KeyP2 => DesertPalace,
+    KeyP3 => TowerOfHera,
+    KeyD1 => PalaceOfDarkness,
+    KeyD2 => SwampPalace,
+    KeyD3 => SkullWoods,
+    KeyD4 => ThievesTown,
+    KeyD5 => IcePalace,
+    KeyD6 => MiseryMire,
+    KeyD7 => TurtleRock,
+    KeyA1 => panic!("idk"),
+    KeyA2 => panic!("idk"),
+    _     => panic!("bad arg"), // TODO: rm?
   }
-  dungeons::EasternPalace // TODO: impl FRD
 }
 
 pub fn dungeon_from_zone(zone: Zone) -> Dungeon {
-  // TODO: type check to be sure it's an actual dungeon and not overworld?
-  dungeons::EasternPalace // TODO: impl FRD
+  use super::dungeons::*;
+  use super::zones::*;
+  match zone {
+    TempEastLightWorld => Overworld,
+    POD1 |
+    POD2 |
+    POD3 |
+    POD4 |
+    POD5 |
+    POD6 |
+    POD7 |
+    POD8 |
+    POD9 |
+    POD10 |
+    POD47 |
+    POD29A |
+    POD29B => PalaceOfDarkness,
+  }
+}
+
+pub fn zones_from_dungeon(dungeon: Dungeon) -> HashSet<Zone> {
+  zones::all().into_iter()
+    .filter(|&zone| dungeon_from_zone(zone) == dungeon)
+    .collect()
 }
 
 pub fn keyfrontier_from_zone(zone: Zone) -> HashSet<KeyDoor> {
-  hashset!{} // TODO: impl
+  connections::ALL_KEYDOORS.clone().into_iter() // TODO: ew ew awful perf here
+    .filter(|&idoor| idoor.zone1 == zone || idoor.zone2 == zone)
+    .map(|&x| x)
+    .collect()
 }
 
 pub fn itemfrontier_from_zone(zone: Zone) -> Vec<ItemDoor> {
-  // Overworld <=> POD1
-  // POD1   <=> POD8
-  // POD8   ==> POD2
-  // POD47  <=> POD7
-  // POD7   <=> POD10
-  // POD4   <=> POD6
-  // POD2   <=> POD29A
-  // POD29B <=> POD9
-  // match zone {
-  //   Overworld => vec!(POD1),
-  //   POD1 => vec!(),   <=> POD8
-  //   POD8 => vec!(),  ==> POD2
-  //   POD47 => vec!(), <=> POD7
-  //   POD7 => vec!(),  <=> POD10
-  //   POD4 => vec!(),  <=> POD6
-  //   POD2 => vec!(),  <=> POD29A
-  //   POD29B => vec!(),<=> POD9
-  // }
-  vec!() // TODO: impl
+  connections::ALL_ITEMDOORS.clone().into_iter() // TODO: ew ew awful perf here
+    .filter(|&idoor| idoor.zone1 == zone || idoor.zone2 == zone)
+    .map(|&x| x)
+    .collect()
 }
 
 pub fn locations_from_zone(zone: Zone) -> HashSet<Location2> {
+  use super::zones::*;
+  use super::locations2::*;
   match zone {
-    Overworld => hashset!{
+    TempEastLightWorld => hashset!{
       TempOverworld1,
       TempOverworld2,
       TempOverworld3,

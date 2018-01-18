@@ -13,6 +13,7 @@ use super::dive::Dive;
 pub fn generate_world(
   advancement_items: &Vec<items::Item>,
   junk_items: &Vec<items::Item>,
+  // TODO: add back in nice_items and do the ganon tower pre-fill thing
   rng: &mut ThreadRng,
 ) -> world2::World2 {
   let mut assignments;
@@ -92,7 +93,7 @@ fn place_item(
   assignments: &mut Assignments,
 ) {
   let mut first_dive: Dive = Dive{
-    zones: hashset!{Zone::Overworld},
+    zones: hashset!{Zone::TempEastLightWorld},
     items: assumed,
     open_doors: HashSet::new(),
   };

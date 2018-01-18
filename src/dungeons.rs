@@ -8,6 +8,8 @@ use super::items::Item;
 
 #[derive(Eq, PartialEq, Hash, Copy, Clone, Debug)]
 pub enum Dungeon {
+  Overworld,
+
   EasternPalace,
   DesertPalace,
   TowerOfHera,
@@ -26,6 +28,8 @@ pub enum Dungeon {
 pub use self::Dungeon::*;
 
 pub const ALL: &[Dungeon] = &[
+  Overworld,
+
   EasternPalace,
   DesertPalace,
   TowerOfHera,
