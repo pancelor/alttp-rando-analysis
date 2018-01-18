@@ -16,6 +16,7 @@ pub fn generate_world(
   // TODO: add back in nice_items and do the ganon tower pre-fill thing
   rng: &mut ThreadRng,
 ) -> world2::World2 {
+  debug!("fn generate_world(\nadvancement_items={:?},\n\tjunk_items={:?},\n\trng\n)", advancement_items, junk_items);
   let mut assignments;
   { // Set up assignments
     assignments = HashMap::new();
@@ -36,7 +37,6 @@ pub fn generate_world(
 
     let mut randomized_order_locations = locations2::get_all_locations();
     rng.shuffle(&mut randomized_order_locations);
-    trace!("randomized_order_locations: {:?}", randomized_order_locations);
 
     fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![], &mut assignments);
 
@@ -57,6 +57,7 @@ fn fast_fill_items_in_locations(
   locations: &Vec<locations2::Location2>,
   assignments: &mut Assignments,
 ) {
+  debug!("fn fast_fill_items_in_locations(\nfill_items={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", fill_items, locations, assignments);
   for &loc in locations.iter() {
     if assignments.contains_key(&loc) { continue };
     match fill_items.next() {
@@ -76,6 +77,7 @@ fn fill_items_in_locations(
   base_assumed_items: &Vec<items::Item>,
   mut assignments: &mut Assignments, // TODO WTF why do we need 2 `mut`s here?? and only here???
 ) {
+  debug!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tassignments={:?}\n)", fill_items, locations, base_assumed_items, assignments);
   let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
   for _ in 0..remaining_fill_items.len() {
     let item = remaining_fill_items.pop().expect("bad for loop sync");
@@ -92,6 +94,7 @@ fn place_item(
   locations: &Vec<locations2::Location2>,
   assignments: &mut Assignments,
 ) {
+  debug!("fn place_item(\n\item={:?},\n\tassumed={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", item, assumed, locations, assignments);
   let mut first_dive: Dive = Dive{
     zones: btreeset!{Zone::TempEastLightWorld},
     items: assumed,
