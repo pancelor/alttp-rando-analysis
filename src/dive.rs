@@ -64,35 +64,37 @@ impl Dive {
   /// all reachable keydoors, filtered to ones that we 1. have keys for and 2. haven't opened yet
   pub fn actual_key_frontier(&self) -> BTreeSet<KeyDoor> {
     let mut dungeons_i_own_keys_for : BTreeSet<Dungeon> = BTreeSet::new();
-    let all_keys: HashMap<dungeons::Dungeon, Vec<items::Item>> =
+    let my_keys_by_dungeon: HashMap<dungeons::Dungeon, Vec<items::Item>> =
       group_by::group_by(
         self.items.clone().into_iter()
           .filter(|&item| items::is_key(item)),
         |&item| dungeon_from_key(item)
       );
 
-    let all_doors: HashMap<dungeons::Dungeon, Vec<zones::KeyDoor>> =
+    let opened_doors_by_dungeon: HashMap<dungeons::Dungeon, Vec<zones::KeyDoor>> =
       group_by::group_by(
-        self.key_frontier().into_iter(),
-        |&keydoor| dungeon_from_keydoor(keydoor)
+        self.open_doors.clone().into_iter(),
+        |&kdoor| dungeon_from_keydoor(kdoor)
       );
 
-    for (&dungeon, keydoors) in all_doors.iter() {
-      match all_keys.get(&dungeon) {
-        Some(keys) => {
-          if keydoors.len() < keys.len() {
-            dungeons_i_own_keys_for.insert(dungeon);
-          }
-        },
-        None => {},
+    for (&dungeon, my_keys) in my_keys_by_dungeon.iter() {
+      trace!("checking keycounts for dungeon={:?}", dungeon);
+      let num_keys = my_keys.len();
+      let num_opened_doors = match opened_doors_by_dungeon.get(&dungeon) {
+        Some(opened_doors) => opened_doors.len(),
+        None => 0,
+      };
+      if num_opened_doors < num_keys {
+        dungeons_i_own_keys_for.insert(dungeon);
       }
     }
 
-    all_doors.into_iter()
-      .filter(|&(dung, ref _keys)| dungeons_i_own_keys_for.contains(&dung))
-      .flat_map(|(_dung, keys)| keys)
-      .filter(|key| !self.open_doors.contains(&key))
-      .collect()
+    let res = self.key_frontier().into_iter()
+      .filter(|&kdoor| dungeons_i_own_keys_for.contains(&dungeon_from_keydoor(kdoor)))
+      .filter(|kdoor| !self.open_doors.contains(&kdoor))
+      .collect();
+    debug!("in actual_key_frontier(\n\tself={:?}\n\topened_doors_by_dungeon={:?}\n\tmy_keys_by_dungeon={:?}\n\tres={:?}\n)", self, opened_doors_by_dungeon, my_keys_by_dungeon, res);
+    res
 
     // TODO: use something built on this instead? slower, but idk if the current algo even works lol
     // fn currently_has_key(key: Item, dive: Dive) -> bool {
