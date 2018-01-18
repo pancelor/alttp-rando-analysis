@@ -59,7 +59,7 @@ pub struct ItemDoor {
   pub can_pass_callback: &'static CanPassClosure,
 }
 
-#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
+#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone)]
 pub struct KeyDoor {
   pub zone1: Zone,
   pub zone2: Zone,
@@ -72,7 +72,14 @@ impl ItemDoor {
   }
 }
 
+
 use std::fmt;
+impl fmt::Debug for KeyDoor {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{:?} <k> {:?}", self.zone1, self.zone2)
+  }
+}
+
 impl fmt::Debug for ItemDoor {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     let op : &str =
