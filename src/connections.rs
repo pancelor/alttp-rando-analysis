@@ -95,7 +95,7 @@ pub static ALL_ITEMDOORS : &[ItemDoor] = &[
   cxn!(POD47  <=> POD7:   &|ref items| { items.contains(&Lamp) }),
   cxn!(POD7   <=> POD10:  &|ref items| { items.contains(&BigKeyD1) }),
   cxn!(POD4   <=> POD6:   &|ref items| { items.contains(&Lamp) }),
-  cxn!(POD2   <=> POD29A: &|ref items| { items.contains(&Bow) && items.contains(&Lamp) && items.contains(&Hammer) }),
+  cxn!(POD2   <=> POD29A: &|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) }),
   cxn!(POD29B <=> POD9:   &|ref items| { items.contains(&BigKeyD1) }),
 ];
 
