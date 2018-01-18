@@ -25,6 +25,7 @@ pub struct Dive {
 }
 
 // TODO: is this a horrible idea? why aren't HashSets Hash by default??
+// answer: YES, b/c hashing elements needs to happen in the same order; doh
 impl Hash for Dive {
   fn hash<H>(&self, state: &mut H)
     where H: Hasher,
