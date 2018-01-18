@@ -47,13 +47,13 @@ fn real_main() {
     KeyD1,
     Bow,
     Hammer,
+    Lamp,
     BigKeyD1,
     MapD1,
     CompassD1,
   ];
 
   let junk_items = vec![
-    BottleWithBee,
     BottleWithBee,
     BottleWithBee,
     BottleWithBee,
