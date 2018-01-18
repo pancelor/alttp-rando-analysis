@@ -42,7 +42,7 @@ pub fn dungeon_from_key(key: Item) -> Dungeon {
 pub fn key_from_dungeon(dungeon: Dungeon) -> Item {
   use super::items::*;
   use super::dungeons::*;
-  match key {
+  match dungeon {
     Overworld => panic!("idk"),
     EasternPalace => KeyP1,
     DesertPalace => KeyP2,

@@ -63,15 +63,18 @@ impl Dive {
 
   /// all reachable keydoors, filtered to ones that we 1. have keys for and 2. haven't opened yet
   pub fn actual_key_frontier(&self) -> BTreeSet<KeyDoor> {
-    let results = BTreeSet::new();
-    let dungeons_i_own_keys_for : BTreeSet<Dungeon> = dungeons::ALL.iter()
+    let dungeons_i_own_keys_for : BTreeSet<&Dungeon> = dungeons::ALL.iter()
       .filter(|&&dungeon| {
+        if dungeon == Dungeon::Overworld || dungeon == Dungeon::GanonSTower {// TODO huuurk this is the grosssest; figure out exactly what you mean by dungeon and stop this madness
+          return false
+        }
         let target_key = key_from_dungeon(dungeon);
         let num_keys = self.items.iter()
           .filter(|&&item| item == target_key)
-          .len();
+          .count();
         let num_opened_doors = self.open_doors.iter()
           .filter(|&&kdoor| dungeon_from_keydoor(kdoor) == dungeon)
+          .count();
         num_opened_doors < num_keys
       }).collect();
 
