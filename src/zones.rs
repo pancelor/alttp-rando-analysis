@@ -1,13 +1,6 @@
-#![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
-#![allow(dead_code)]
-#![allow(unused_imports)]
 
-use std::cmp::Ordering;
-use std::collections::{HashMap, BTreeSet};
-use super::locations;
-use super::dungeons;
-use super::items::Item;
+use std::collections::BTreeSet;
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Zone {

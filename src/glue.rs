@@ -1,11 +1,8 @@
 //! Various conversion functions
 #![allow(unused_imports)]
-#![allow(dead_code)]
 
-#![allow(unused_variables)]
-
-use std::collections::{HashMap, BTreeSet};
-use super::{medallions, logic, locations2, regions, items, zones, dungeons, connections};
+use std::collections::BTreeSet;
+use super::{medallions, logic, locations2, items, zones, dungeons, connections};
 use super::zones::Zone;
 use super::connections::{KeyDoor, ItemDoor};
 use super::dungeons::Dungeon;
@@ -18,25 +15,26 @@ pub fn keyfrontier_from_dungeon(dungeon: Dungeon) -> BTreeSet<KeyDoor> {
     .collect()
 }
 
-pub fn dungeon_from_key(key: Item) -> Dungeon {
+#[allow(dead_code)] // TODO: rm?
+pub fn dungeon_from_key(key: Item) -> Option<Dungeon> {
   use super::items::*;
   use super::dungeons::*;
   match key {
-    KeyH1 => panic!("idk"),
-    KeyH2 => panic!("idk"),
-    KeyP1 => EasternPalace,
-    KeyP2 => DesertPalace,
-    KeyP3 => TowerOfHera,
-    KeyD1 => PalaceOfDarkness,
-    KeyD2 => SwampPalace,
-    KeyD3 => SkullWoods,
-    KeyD4 => ThievesTown,
-    KeyD5 => IcePalace,
-    KeyD6 => MiseryMire,
-    KeyD7 => TurtleRock,
-    KeyA1 => panic!("idk"),
-    KeyA2 => panic!("idk"),
-    _     => panic!("bad arg"), // TODO: rm?
+    KeyH1 => None, // TODO: change later
+    KeyH2 => None, // TODO: change later
+    KeyP1 => Some(EasternPalace),
+    KeyP2 => Some(DesertPalace),
+    KeyP3 => Some(TowerOfHera),
+    KeyD1 => Some(PalaceOfDarkness),
+    KeyD2 => Some(SwampPalace),
+    KeyD3 => Some(SkullWoods),
+    KeyD4 => Some(ThievesTown),
+    KeyD5 => Some(IcePalace),
+    KeyD6 => Some(MiseryMire),
+    KeyD7 => Some(TurtleRock),
+    KeyA1 => None, // TODO: change later
+    KeyA2 => None, // TODO: change later
+    _     => panic!("bad arg"), // TODO: rm? return None?
   }
 }
 
@@ -44,7 +42,6 @@ pub fn key_from_dungeon(dungeon: Dungeon) -> Item {
   use super::items::*;
   use super::dungeons::*;
   match dungeon {
-    Overworld => panic!("idk"),
     EasternPalace => KeyP1,
     DesertPalace => KeyP2,
     TowerOfHera => KeyP3,
@@ -55,15 +52,13 @@ pub fn key_from_dungeon(dungeon: Dungeon) -> Item {
     IcePalace => KeyD5,
     MiseryMire => KeyD6,
     TurtleRock => KeyD7,
-    GanonSTower => panic!("idk"),
   }
 }
 
-pub fn dungeon_from_zone(zone: Zone) -> Dungeon {
+pub fn dungeon_from_zone(zone: Zone) -> Option<Dungeon> {
   use super::dungeons::*;
   use super::zones::*;
   match zone {
-    TempEastLightWorld => Overworld,
     POD1 |
     POD2 |
     POD3 |
@@ -76,13 +71,14 @@ pub fn dungeon_from_zone(zone: Zone) -> Dungeon {
     POD10 |
     POD47 |
     POD29A |
-    POD29B => PalaceOfDarkness,
+    POD29B => Some(PalaceOfDarkness),
+    _ => None,
   }
 }
 
 pub fn zones_from_dungeon(dungeon: Dungeon) -> BTreeSet<Zone> {
   zones::all().into_iter()
-    .filter(|&zone| dungeon_from_zone(zone) == dungeon)
+    .filter(|&zone| dungeon_from_zone(zone) == Some(dungeon))
     .collect()
 }
 
@@ -155,5 +151,5 @@ pub fn locations_from_zone(zone: Zone) -> BTreeSet<Location2> {
 
 
 pub fn dungeon_from_keydoor(keydoor: KeyDoor) -> Dungeon {
-  dungeon_from_zone(keydoor.zone1)
+  dungeon_from_zone(keydoor.zone1).expect("your keydoor is outside")
 }

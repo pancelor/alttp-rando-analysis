@@ -1,11 +1,7 @@
-
-#![allow(unused_imports)]
-
 extern crate env_logger;
-#[macro_use]
 extern crate group_by;
-#[macro_use]
-extern crate lazy_static;
+// #[macro_use]
+// extern crate lazy_static;
 #[macro_use]
 extern crate log;
 #[macro_use]
@@ -13,26 +9,20 @@ extern crate maplit;
 extern crate rand;
 
 mod items;
-mod medallions;
 mod locations;
-mod regions;
-mod world;
-mod logic;
-mod generator;
-
 mod locations2;
 mod zones;
-mod glue;
 mod dungeons;
+
+mod medallions;
+mod world;
+mod generator;
+mod glue;
 mod dive;
 mod connections;
+mod logic;
 
 fn main() {
-  real_main();
-}
-
-#[allow(dead_code)]
-fn real_main() {
   env_logger::init().unwrap();
 
   use items::*;
@@ -70,6 +60,8 @@ fn real_main() {
   for _ in 0..sim_count {
     let world = generator::generate_world(&advancement_items, &junk_items, &mut rng);
     info!("{:?}", world);
-    info!("Winnable? {:?}", generator::can_win(&world));
+    if !generator::can_win(&world) {
+      panic!("uh oh, this world isn't beatable");
+    }
   }
 }

@@ -1,11 +1,10 @@
-#![allow(non_upper_case_globals)]
 #![allow(non_camel_case_types)]
-#![allow(dead_code)]
 #![allow(unused_imports)]
 
 use std::collections::{HashMap, BTreeSet};
 use super::locations;
 use super::dungeons;
+use super::logic::*;
 use super::items::*;
 use super::zones::*;
 
@@ -91,7 +90,7 @@ macro_rules! cxn {
 
 pub static ALL_ITEMDOORS : &[ItemDoor] = &[
   cxn!(TempEastLightWorld <=> POD1),
-  cxn!(POD1   <=> POD8:   &|ref items| { items.contains(&Bow) }),
+  cxn!(POD1   <=> POD8:   &|ref items| { can_shoot_arrows(&items) }),
   cxn!(POD8   ==> POD2:   &|ref items| { items.contains(&Hammer) }),
   cxn!(POD47  <=> POD7:   &|ref items| { items.contains(&Lamp) }),
   cxn!(POD7   <=> POD10:  &|ref items| { items.contains(&BigKeyD1) }),
