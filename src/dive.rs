@@ -81,6 +81,7 @@ impl Dive {
   }
 
   pub fn explore_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
+    debug!("fn explore_keydoor()");
     self.open_keydoor(door, &assignments);
     self.explore(&assignments);
   }
@@ -130,18 +131,18 @@ impl Dive {
 
     let is_new: bool = self.open_doors.insert(door);
     if !is_new {
-      panic!("pretty sure this shouldn't happen but idk i guess");
+      panic!("trying to re-open an open door");
     }
 
     // We only want to `insert` the items from unexplored zones (b/c `self.items` is a HashMultiSet)
     let new_zone: Zone;
     if self.zones.insert(door.zone1) {
       new_zone = door.zone1;
-    } else if self.zones.insert(door.zone1) {
+    } else if self.zones.insert(door.zone2) {
       new_zone = door.zone2;
     } else {
       trace!("opened a useless door (e.g. the left<->right keydoor in GT");
-      return
+      return;
     }
     self.loot_zone(new_zone, &assignments);
   }
