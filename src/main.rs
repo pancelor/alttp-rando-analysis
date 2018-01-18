@@ -71,7 +71,6 @@ fn real_main() {
   let sim_count = 1;
   for _ in 0..sim_count {
     let world = generator2::generate_world(&advancement_items, &junk_items, &mut rng);
-    info!("\n\n\n\n\nthinking\n\n\n");
     info!("{:?}", world);
     info!("Winnable? {:?}", generator2::can_win(&world));
   }
