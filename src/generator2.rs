@@ -119,8 +119,9 @@ fn place_item(
       .filter(|&&dgn| !(&keyfrontier_from_dungeon(dgn) & &f).is_empty())
       .next()
       .expect("no dungeons or something");
-    let temp_g: BTreeSet<KeyDoor> = keyfrontier_from_dungeon(*dungeon);
-    let doors_to_explore: BTreeSet<KeyDoor> = &temp_g & &f;
+    debug!("First dungeon w/ openable doors: {:?}", dungeon);
+
+    let doors_to_explore: BTreeSet<KeyDoor> = &keyfrontier_from_dungeon(*dungeon) & &f;
     for door in doors_to_explore {
       let mut new_dive: Dive = v.clone();
       new_dive.explore_keydoor(door, &assignments);

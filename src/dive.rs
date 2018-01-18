@@ -32,7 +32,7 @@ impl Dive {
       .collect()
   }
 
-  /// all reachable keydoors, filtered to ones that we have keys for
+  /// all reachable keydoors, filtered to ones that we 1. have keys for and 2. haven't opened yet
   pub fn actual_key_frontier(&self) -> BTreeSet<KeyDoor> {
     let mut dungeons_i_own_keys_for : BTreeSet<Dungeon> = BTreeSet::new();
     let all_keys: HashMap<dungeons::Dungeon, Vec<items::Item>> =
@@ -62,6 +62,7 @@ impl Dive {
     all_doors.into_iter()
       .filter(|&(dung, ref _keys)| dungeons_i_own_keys_for.contains(&dung))
       .flat_map(|(_dung, keys)| keys)
+      .filter(|key| !self.open_doors.contains(&key))
       .collect()
 
     // TODO: use something built on this instead? slower, but idk if the current algo even works lol
