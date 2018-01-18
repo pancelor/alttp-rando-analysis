@@ -43,7 +43,7 @@ pub fn generate_world(
     // rng.shuffle(&mut randomized_order_locations); // TODO: does this even do anything?
 
     fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut assignments);
-    assert_eq!(junk_items_iter.next(), None);
+    // assert_eq!(junk_items_iter.next(), None); // TODO uncomment?
   }
 
   let world = world2::World2 {
@@ -62,7 +62,7 @@ fn fast_fill_items_in_locations(
     if assignments.contains_key(&loc) { continue };
     match fill_items.next() {
       Some(item) => {
-        debug!("Filling {:?} with {:?}", loc, item);
+        info!("Fast filling {:?} with {:?}", loc, item);
         assignments.insert(loc, item)
       },
       None => break,
@@ -100,6 +100,7 @@ fn place_item(
     items: assumed,
     open_doors: BTreeSet::new(),
   };
+  first_dive.loot_zone(Zone::TempEastLightWorld, &assignments);
   first_dive.explore(&assignments);
   let mut stack: Vec<Dive> = Vec::new();
   stack.push(first_dive);
@@ -111,7 +112,9 @@ fn place_item(
     let v: Dive = stack.pop().expect("idk man");
     let f: BTreeSet<KeyDoor> = v.actual_key_frontier();
     if f.len() == 0 {
-      maximal_dives.push(v);
+      if !maximal_dives.contains(&v) {
+        maximal_dives.push(v);
+      }
       continue;
     }
 
@@ -144,7 +147,9 @@ fn place_item(
 
   let loc: &Location2 = locations.iter()
     .filter(|&&loc| glb_zone.contains(&loc))
+    .filter(|&&loc| !assignments.contains_key(&loc))
     .next()
     .expect("No locations left");
+  info!("Filling {:?} with {:?}", loc, item);
   assignments.insert(*loc, item);
 }

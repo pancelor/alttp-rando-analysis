@@ -95,6 +95,8 @@ impl Dive {
     let mut item_frontier: VecDeque<ItemDoor> = self.item_frontier();
 
     while item_frontier.len() > 0 {
+      debug!("while item_frontier(\n\titem_frontier={:?},\n)", item_frontier);
+
       let current_edge: ItemDoor = item_frontier.pop_front().expect("not sure what went wrong");
       if !current_edge.can_pass(&self.items) { continue; }
       let zone: Zone = if self.zones.insert(current_edge.zone2) {
@@ -145,12 +147,13 @@ impl Dive {
     self.loot_zone(new_zone, &assignments);
   }
 
-  fn loot_zone(&mut self, zone: Zone, assignments: &Assignments) {
-    debug!("fn loot_zone(\n\tself={:?},\nzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
-
+  // TODO: ew this shouldn't be pub
+  pub fn loot_zone(&mut self, zone: Zone, assignments: &Assignments) {
     // TODO: make self.items a method, and calc it on the fly from zones? makes for easier debugging... yeah lets do it
     locations_from_zone(zone).iter()
       .filter_map(|loc| assignments.get(&loc))
       .for_each(|&item| self.items.push(item));
+
+    debug!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
   }
 }

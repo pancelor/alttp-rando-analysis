@@ -6,9 +6,9 @@
 use std::collections::{HashMap, BTreeSet};
 use super::locations;
 use super::dungeons;
-use super::items::Item;
+use super::items::*;
 use super::zones::{Zone, ItemDoor, KeyDoor};
-use super::zones::Zone::*;
+use super::zones::*;
 
 macro_rules! cxn {
   ($z1:ident ==> $z2:ident: $cb:expr) => ({
@@ -44,17 +44,17 @@ macro_rules! cxn {
 
 
 
-fn todo(_: &Vec<Item>) -> bool { true } // for warning suppression
+// fn todo(_: &Vec<Item>) -> bool { true } // for warning suppression
 
 pub static ALL_ITEMDOORS : &[ItemDoor] = &[
   cxn!(TempEastLightWorld <=> POD1),
-  cxn!(POD1   <=> POD8:   &|ref items| {todo(items) /*Bow!*/}),
-  cxn!(POD8   ==> POD2:   &|ref items| {todo(items) /*Hammer*/}),
-  cxn!(POD47  <=> POD7:   &|ref items| {todo(items) /*Lamp*/}),
-  cxn!(POD7   <=> POD10:  &|ref items| {todo(items) /*BigKeyPOD*/}),
-  cxn!(POD4   <=> POD6:   &|ref items| {todo(items) /*Lamp*/}),
-  cxn!(POD2   <=> POD29A: &|ref items| {todo(items) /*Bow!, Lamp, Hammer*/}),
-  cxn!(POD29B <=> POD9:   &|ref items| {todo(items) /*BigKeyPOD*/}),
+  cxn!(POD1   <=> POD8:   &|ref items| { items.contains(&Bow) }),
+  cxn!(POD8   ==> POD2:   &|ref items| { items.contains(&Hammer) }),
+  cxn!(POD47  <=> POD7:   &|ref items| { items.contains(&Lamp) }),
+  cxn!(POD7   <=> POD10:  &|ref items| { items.contains(&BigKeyD1) }),
+  cxn!(POD4   <=> POD6:   &|ref items| { items.contains(&Lamp) }),
+  cxn!(POD2   <=> POD29A: &|ref items| { items.contains(&Bow) && items.contains(&Lamp) && items.contains(&Hammer) }),
+  cxn!(POD29B <=> POD9:   &|ref items| { items.contains(&BigKeyD1) }),
 ];
 
 pub static ALL_KEYDOORS : &[KeyDoor] = &[
