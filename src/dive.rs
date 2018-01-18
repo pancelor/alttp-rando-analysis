@@ -2,7 +2,6 @@
 #![allow(dead_code)]
 
 use std::collections::{HashMap, BTreeSet};
-use std::collections::VecDeque;
 use rand::{Rng, ThreadRng};
 use std::hash::{Hash, Hasher};
 use super::{medallions, logic, world2, locations2, regions, items, zones, dungeons};
@@ -75,7 +74,7 @@ impl Dive {
   }
 
   /// all reachable itemdoors
-  pub fn item_frontier(&self) -> VecDeque<ItemDoor> {
+  pub fn item_frontier(&self) -> Vec<ItemDoor> {
     self.zones.iter()
       .flat_map(|&zone| itemfrontier_from_zone(zone))
       .collect()
@@ -92,12 +91,12 @@ impl Dive {
     // assumes self is already greedy (i.e. wont re-explore self.zones)
     // to calculate `frontier: BTreeSet<KeyDoor | ItemDoor> = self.zones.flat_map(.frontier)`
 
-    let mut item_frontier: VecDeque<ItemDoor> = self.item_frontier();
+    let mut item_frontier_stack: Vec<ItemDoor> = self.item_frontier();
 
-    while item_frontier.len() > 0 {
-      debug!("while item_frontier(\n\titem_frontier={:?},\n)", item_frontier);
+    while item_frontier_stack.len() > 0 {
+      debug!("while item_frontier_stack(\n\titem_frontier_stack={:?},\n)", item_frontier_stack);
 
-      let current_edge: ItemDoor = item_frontier.pop_front().expect("not sure what went wrong");
+      let current_edge: ItemDoor = item_frontier_stack.pop().expect("not sure what went wrong");
       if !current_edge.can_pass(&self.items) { continue; }
       let zone: Zone = if self.zones.insert(current_edge.zone2) {
         current_edge.zone2
@@ -108,7 +107,7 @@ impl Dive {
       };
       for &idoor in itemfrontier_from_zone(zone).iter() {
         // if idoor != current_edge { // not necessary actually; the continue; above will filter it out when we hit it
-          item_frontier.push_back(idoor);
+          item_frontier_stack.push(idoor);
         // }
       }
       self.loot_zone(zone, &assignments);
