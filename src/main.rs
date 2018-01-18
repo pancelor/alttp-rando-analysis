@@ -68,10 +68,23 @@ fn real_main() {
 
   let mut rng = rand::thread_rng();
 
-  let sim_count = 1;
-  for _ in 0..sim_count {
+  let sim_count = 50;
+  for ii in 0..sim_count {
+    info!("ii: {:?}", ii);
     let world = generator2::generate_world(&advancement_items, &junk_items, &mut rng);
-    info!("{:?}", world);
-    info!("Winnable? {:?}", generator2::can_win(&world));
+    if key_in_dark_maze(&world) {
+      info!("{:?}", world);
+      info!("Winnable? {:?}", generator2::can_win(&world));
+    }
   }
+}
+
+fn key_in_dark_maze(world: &world2::World2) -> bool{
+  use locations2::*;
+  use items::*;
+  (
+    world.assignments.get(&PalaceOfDarknessBigChest) == Some(&KeyD1)
+    || world.assignments.get(&PalaceOfDarknessDarkMazeTop) == Some(&KeyD1)
+    || world.assignments.get(&PalaceOfDarknessDarkMazeBottom) == Some(&KeyD1)
+  )
 }
