@@ -105,23 +105,24 @@ impl Dive {
     debug!("Explore: ()");
     trace!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
 
-    let item_frontier: Vec<ItemDoor> = self.item_frontier();
+    let mut item_frontier: Vec<ItemDoor> = self.item_frontier();
     let mut num_passes = 0;
     loop {
       num_passes += 1;
-      if !self.do_one_exploration_pass_on_frontier(&item_frontier, &assignments) {
+      let mut new_frontier = self.do_one_exploration_pass_on_frontier(&item_frontier, &assignments);
+      if new_frontier.len() == 0 {
         break;
       }
+      item_frontier.append(&mut new_frontier)
     }
     debug!("Explore finished after {} passes", num_passes);
   }
 
-  /// Returns whether any new zones were added during this pass
-  /// TODO: it's probably a lot better to instead return a list of new idoors; esp when the dive is beatable
-  fn do_one_exploration_pass_on_frontier(&mut self, ifront: &Vec<ItemDoor>, assignments: &Assignments) -> bool {
+  /// Returns any new idoors that this pass added to the frontier
+  fn do_one_exploration_pass_on_frontier(&mut self, ifront: &Vec<ItemDoor>, assignments: &Assignments) -> Vec<ItemDoor> {
     trace!("do_one_exploration_pass_on_frontier(\n\tifront={:?},\n)", ifront);
 
-    let mut new_zones = false;
+    let mut new_idoors = vec![];
     for &current_edge in ifront.iter() {
       if !current_edge.can_pass(&self.items) { continue; }
       let zone: Zone = if !self.zones.contains(&current_edge.zone2) {
@@ -131,11 +132,11 @@ impl Dive {
       } else {
         continue;
       };
-      new_zones = true;
       debug!("Exploring {:?}", current_edge);
       self.loot_zone(zone, &assignments);
+      new_idoors.append(&mut itemfrontier_from_zone(zone));
     }
-    new_zones
+    new_idoors
   }
 
   fn open_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
