@@ -61,9 +61,8 @@ impl Dive {
       .collect()
   }
 
-  /// all reachable keydoors, filtered to ones that we 1. have keys for and 2. haven't opened yet
-  pub fn key_frontier(&self) -> BTreeSet<KeyDoor> {
-    let dungeons_i_own_keys_for : BTreeSet<&Dungeon> = dungeons::ALL.iter()
+  fn dungeons_i_own_keys_for(&self) -> BTreeSet<&Dungeon> {
+    dungeons::ALL.iter()
       .filter(|&&dungeon| {
         let target_key = key_from_dungeon(dungeon);
         let num_keys = self.items.iter()
@@ -73,8 +72,12 @@ impl Dive {
           .filter(|&&kdoor| dungeon_from_keydoor(kdoor) == dungeon)
           .count();
         num_opened_doors < num_keys
-      }).collect();
+      }).collect()
+  }
 
+  /// all reachable keydoors, filtered to ones that we 1. have keys for and 2. haven't opened yet
+  pub fn key_frontier(&self) -> BTreeSet<KeyDoor> {
+    let dungeons_i_own_keys_for = self.dungeons_i_own_keys_for();
     self.all_keydoors().into_iter()
       .filter(|&kdoor| dungeons_i_own_keys_for.contains(&dungeon_from_keydoor(kdoor)))
       .filter(|kdoor| !self.open_doors.contains(&kdoor))
@@ -148,9 +151,10 @@ impl Dive {
     if !key_frontier.contains(&door) { panic!("trying to cross through a door not in the frontier"); }
 
     // sanity check we have a key to open the door
-    // TODO
-    // let keys_used : usize = self.open_doors.intersect(door.dungeon.keydoors_for()).len();
-    // if count()
+    let dungeon = dungeon_from_keydoor(door);
+    if !self.dungeons_i_own_keys_for().contains(&dungeon) {
+      panic!("Trying to open a door you don't have a key for");
+    }
 
     let is_new: bool = self.open_doors.insert(door);
     if !is_new {

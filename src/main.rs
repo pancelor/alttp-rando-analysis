@@ -70,9 +70,9 @@ fn real_main() {
 
   let mut rng = rand::thread_rng();
 
-  let sim_count = 1000;
+  let sim_count = 500;
   for ii in 0..sim_count {
-    info!("simulation number: {:?}", ii);
+    info!("sim #{:?}", ii);
     let world = generator::generate_world(&advancement_items, &junk_items, &mut rng);
     if key_in_dark_maze(&world) {
       info!("Hey, this one has a key in dark maze!\n\t{:?}", world);
