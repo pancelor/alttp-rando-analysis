@@ -25,7 +25,7 @@ mod logic;
 
 fn main() {
   env_logger::init().unwrap();
-  temp_main();
+  real_main();
 }
 
 #[allow(dead_code)]
@@ -70,12 +70,12 @@ fn real_main() {
 
   let mut rng = rand::thread_rng();
 
-  let sim_count = 100;
+  let sim_count = 1000;
   for ii in 0..sim_count {
-    println!("ii: {:?}", ii);
+    info!("simulation number: {:?}", ii);
     let world = generator::generate_world(&advancement_items, &junk_items, &mut rng);
     if key_in_dark_maze(&world) {
-      println!("{:?}", world);
+      info!("Hey, this one has a key in dark maze!\n\t{:?}", world);
     }
     if !generator::can_win(&world) {
       println!("{:?}", world);

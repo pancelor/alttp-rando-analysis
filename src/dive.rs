@@ -55,14 +55,14 @@ impl Dive {
   }
 
   /// all reachable keydoors
-  pub fn key_frontier(&self) -> BTreeSet<KeyDoor> {
-    self.zones.iter()
+  fn all_keydoors(&self) -> BTreeSet<KeyDoor> {
+    self.zones.iter() // TODO squash; it'll be good
       .flat_map(|&zone| keyfrontier_from_zone(zone))
       .collect()
   }
 
   /// all reachable keydoors, filtered to ones that we 1. have keys for and 2. haven't opened yet
-  pub fn actual_key_frontier(&self) -> BTreeSet<KeyDoor> {
+  pub fn key_frontier(&self) -> BTreeSet<KeyDoor> {
     let dungeons_i_own_keys_for : BTreeSet<&Dungeon> = dungeons::ALL.iter()
       .filter(|&&dungeon| {
         let target_key = key_from_dungeon(dungeon);
@@ -75,16 +75,22 @@ impl Dive {
         num_opened_doors < num_keys
       }).collect();
 
-    self.key_frontier().into_iter()
+    self.all_keydoors().into_iter()
       .filter(|&kdoor| dungeons_i_own_keys_for.contains(&dungeon_from_keydoor(kdoor)))
       .filter(|kdoor| !self.open_doors.contains(&kdoor))
       .collect()
   }
 
-  /// all reachable itemdoors; only used internally when `explore()`ing
+  /// all reachable itemdoors, filtered to ones that we haven't opened yet.
+  ///   This DOES include itemdoors we currently can't pass through
+  ///   Only used internally when `explore()`ing
+  /// Note: there's still some internal confusion on reversible doors;
+  ///   this function currently will include 1-way idoors that look _into_
+  ///   self but are not actually reachable from self
   fn item_frontier(&self) -> Vec<ItemDoor> {
     self.zones.iter()
       .flat_map(|&zone| itemfrontier_from_zone(zone))
+      .filter(|&idoor| !(self.zones.contains(&idoor.zone1) && self.zones.contains(&idoor.zone2)))
       .collect()
   }
 
@@ -99,11 +105,24 @@ impl Dive {
     debug!("Explore: ()");
     trace!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
 
-    let mut item_frontier_stack: Vec<ItemDoor> = self.item_frontier();
-    while item_frontier_stack.len() > 0 {
-      trace!("while item_frontier_stack(\n\titem_frontier_stack={:?},\n)", item_frontier_stack);
+    let item_frontier: Vec<ItemDoor> = self.item_frontier();
+    let mut num_passes = 0;
+    loop {
+      num_passes += 1;
+      if !self.do_one_exploration_pass_on_frontier(&item_frontier, &assignments) {
+        break;
+      }
+    }
+    debug!("Explore finished after {} passes", num_passes);
+  }
 
-      let current_edge: ItemDoor = item_frontier_stack.pop().expect("not sure what went wrong");
+  /// Returns whether any new zones were added during this pass
+  /// TODO: it's probably a lot better to instead return a list of new idoors; esp when the dive is beatable
+  fn do_one_exploration_pass_on_frontier(&mut self, ifront: &Vec<ItemDoor>, assignments: &Assignments) -> bool {
+    trace!("do_one_exploration_pass_on_frontier(\n\tifront={:?},\n)", ifront);
+
+    let mut new_zones = false;
+    for &current_edge in ifront.iter() {
       if !current_edge.can_pass(&self.items) { continue; }
       let zone: Zone = if !self.zones.contains(&current_edge.zone2) {
         current_edge.zone2
@@ -112,14 +131,11 @@ impl Dive {
       } else {
         continue;
       };
-      self.loot_zone(zone, &assignments);
+      new_zones = true;
       debug!("Exploring {:?}", current_edge);
-      for &idoor in itemfrontier_from_zone(zone).iter() {
-        // if idoor != current_edge { // not necessary actually; the continue; above will filter it out when we hit it
-          item_frontier_stack.push(idoor);
-        // }
-      }
+      self.loot_zone(zone, &assignments);
     }
+    new_zones
   }
 
   fn open_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
