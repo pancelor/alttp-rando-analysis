@@ -8,6 +8,8 @@ extern crate log;
 extern crate maplit;
 extern crate rand;
 
+use std::env;
+
 mod items;
 mod locations;
 mod locations2;
@@ -70,7 +72,10 @@ fn real_main() {
 
   let mut rng = rand::thread_rng();
 
-  let sim_count = 500;
+  let sim_count = match env::var("NSIM") {
+    Ok(val) => val.parse().expect("bad NSIM format"),
+    Err(_) => 1,
+  };
   for ii in 0..sim_count {
     info!("sim #{:?}", ii);
     let world = generator::generate_world(&advancement_items, &junk_items, &mut rng);
