@@ -45,7 +45,7 @@ impl Dive {
     assignments: &Assignments,
   ) -> Self {
     let mut me = Self {
-      zones: btreeset!{Zone::TempEastLightWorld},
+      zones: BTreeSet::new(),
       items,
       open_doors: BTreeSet::new(),
     };
@@ -99,26 +99,25 @@ impl Dive {
     trace!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
 
     let mut item_frontier_stack: Vec<ItemDoor> = self.item_frontier();
-    debug!("self={:?}", self);
-    debug!("item_frontier_stack={:?}", item_frontier_stack);
     while item_frontier_stack.len() > 0 {
       trace!("while item_frontier_stack(\n\titem_frontier_stack={:?},\n)", item_frontier_stack);
 
       let current_edge: ItemDoor = item_frontier_stack.pop().expect("not sure what went wrong");
       if !current_edge.can_pass(&self.items) { continue; }
-      let zone: Zone = if self.zones.insert(current_edge.zone2) {
+      let zone: Zone = if !self.zones.contains(&current_edge.zone2) {
         current_edge.zone2
-      } else if current_edge.reversible && self.zones.insert(current_edge.zone1) {
+      } else if current_edge.reversible && !self.zones.contains(&current_edge.zone1) {
         current_edge.zone1
       } else {
         continue;
       };
+      self.loot_zone(zone, &assignments);
+      debug!("Exploring:\n\tcurrent_edge={:?}\n\t(post) self={:?}", current_edge, self);
       for &idoor in itemfrontier_from_zone(zone).iter() {
         // if idoor != current_edge { // not necessary actually; the continue; above will filter it out when we hit it
           item_frontier_stack.push(idoor);
         // }
       }
-      self.loot_zone(zone, &assignments);
     }
   }
 
@@ -143,9 +142,9 @@ impl Dive {
 
     // We only want to `insert` the items from unexplored zones (b/c `self.items` is a HashMultiSet)
     let new_zone: Zone;
-    if self.zones.insert(door.zone1) {
+    if !self.zones.contains(&door.zone1) {
       new_zone = door.zone1;
-    } else if self.zones.insert(door.zone2) {
+    } else if !self.zones.contains(&door.zone2) {
       new_zone = door.zone2;
     } else {
       trace!("opened a useless door (e.g. the left<->right keydoor in GT");
@@ -156,6 +155,10 @@ impl Dive {
 
   fn loot_zone(&mut self, zone: Zone, assignments: &Assignments) {
     // TODO: make self.items a method, and calc it on the fly from zones? makes for easier debugging... yeah lets do it
+    if !self.zones.insert(zone) {
+      panic!("Trying to re-loot a zone");
+    }
+
     locations_from_zone(zone).iter()
       .filter_map(|loc| assignments.get(&loc))
       .for_each(|&item| self.items.push(item));
