@@ -81,8 +81,8 @@ impl Dive {
       .collect()
   }
 
-  /// all reachable itemdoors
-  pub fn item_frontier(&self) -> Vec<ItemDoor> {
+  /// all reachable itemdoors; only used internally when `explore()`ing
+  fn item_frontier(&self) -> Vec<ItemDoor> {
     self.zones.iter()
       .flat_map(|&zone| itemfrontier_from_zone(zone))
       .collect()
@@ -95,13 +95,12 @@ impl Dive {
   }
 
   pub fn explore(&mut self, assignments: &Assignments) {
+    // assumes self is already greedy (i.e. wont re-explore self.zones)
     trace!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
 
-    // assumes self is already greedy (i.e. wont re-explore self.zones)
-    // to calculate `frontier: BTreeSet<KeyDoor | ItemDoor> = self.zones.flat_map(.frontier)`
-
     let mut item_frontier_stack: Vec<ItemDoor> = self.item_frontier();
-
+    debug!("self={:?}", self);
+    debug!("item_frontier_stack={:?}", item_frontier_stack);
     while item_frontier_stack.len() > 0 {
       trace!("while item_frontier_stack(\n\titem_frontier_stack={:?},\n)", item_frontier_stack);
 

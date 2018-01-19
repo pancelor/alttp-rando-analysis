@@ -91,8 +91,8 @@ pub fn keyfrontier_from_zone(zone: Zone) -> BTreeSet<KeyDoor> {
 
 pub fn itemfrontier_from_zone(zone: Zone) -> Vec<ItemDoor> {
   connections::ALL_ITEMDOORS.clone().into_iter() // TODO: ew ew awful perf here
-    .filter(|&idoor| idoor.zone1 == zone || idoor.zone2 == zone)
-    .map(|&x| x)
+    .filter(|&idoor| idoor.zone1 == zone || (idoor.zone2 == zone && idoor.reversible))
+    .cloned()
     .collect()
 }
 
