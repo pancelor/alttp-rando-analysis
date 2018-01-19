@@ -96,6 +96,7 @@ impl Dive {
 
   pub fn explore(&mut self, assignments: &Assignments) {
     // assumes self is already greedy (i.e. wont re-explore self.zones)
+    debug!("Explore: ()");
     trace!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
 
     let mut item_frontier_stack: Vec<ItemDoor> = self.item_frontier();
@@ -112,7 +113,7 @@ impl Dive {
         continue;
       };
       self.loot_zone(zone, &assignments);
-      debug!("Exploring:\n\tcurrent_edge={:?}\n\t(post) self={:?}", current_edge, self);
+      debug!("Exploring {:?}", current_edge);
       for &idoor in itemfrontier_from_zone(zone).iter() {
         // if idoor != current_edge { // not necessary actually; the continue; above will filter it out when we hit it
           item_frontier_stack.push(idoor);
@@ -163,6 +164,7 @@ impl Dive {
       .filter_map(|loc| assignments.get(&loc))
       .for_each(|&item| self.items.push(item));
 
+    debug!("Looting:\n\tzone={:?}\n\t(post) self.items={:?}", zone, self.items);
     trace!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
   }
 }
