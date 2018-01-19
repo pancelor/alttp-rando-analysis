@@ -16,7 +16,7 @@ pub fn generate_world(
   // TODO: add back in nice_items and do the ganon tower pre-fill thing
   rng: &mut ThreadRng,
 ) -> World {
-  debug!("fn generate_world(\nadvancement_items={:?},\n\tjunk_items={:?},\n\trng\n)", advancement_items, junk_items);
+  trace!("fn generate_world(\nadvancement_items={:?},\n\tjunk_items={:?},\n\trng\n)", advancement_items, junk_items);
   let mut assignments;
   { // Set up assignments
     assignments = HashMap::new();
@@ -63,7 +63,7 @@ fn fast_fill_items_in_locations(
   locations: &Vec<locations2::Location2>,
   assignments: &mut Assignments,
 ) {
-  debug!("fn fast_fill_items_in_locations(\nfill_items={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", fill_items, locations, assignments);
+  trace!("fn fast_fill_items_in_locations(\nfill_items={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", fill_items, locations, assignments);
   for &loc in locations.iter() {
     if assignments.contains_key(&loc) { continue };
     match fill_items.next() {
@@ -83,15 +83,16 @@ fn fill_items_in_locations(
   base_assumed_items: &Vec<items::Item>,
   mut assignments: &mut Assignments, // TODO WTF why do we need 2 `mut`s here?? and only here???
 ) {
-  debug!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tassignments={:?}\n)", fill_items, locations, base_assumed_items, assignments);
+  trace!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tassignments={:?}\n)", fill_items, locations, base_assumed_items, assignments);
   let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
   for _ in 0..remaining_fill_items.len() {
     let item = remaining_fill_items.pop().expect("bad for loop sync");
     let mut assumed_items = base_assumed_items.clone();
     assumed_items.append(&mut (remaining_fill_items.clone()));
 
-    debug!("About to place {:?}", item);
+    let assumed_items_str = format!("{:?}", assumed_items); // avoid move-checker memes
     let allowed_locations = get_allowed_locations_to_place_next_item(assumed_items, &mut assignments);
+    debug!("Found locations:\n\tassumed_items={:?}\n\tallowed_locations={:?}", assumed_items_str, allowed_locations);
     let loc: &Location2 = locations.iter()
       .filter(|&&loc| !assignments.contains_key(&loc))
       .filter(|&&loc| allowed_locations.contains(&loc))
@@ -106,7 +107,7 @@ fn get_allowed_locations_to_place_next_item(
   assumed: Vec<items::Item>,
   assignments: &Assignments,
 ) -> BTreeSet<Location2> {
-  debug!("fn get_allowed_locations_to_place_next_item(\nassumed={:?},\n\tassignments={:?}\n)", assumed, assignments);
+  trace!("fn get_allowed_locations_to_place_next_item(\n\tassumed={:?},\n\tassignments={:?}\n)", assumed, assignments);
   let first_dive: Dive = Dive::new(assumed, &assignments);
   let mut stack: Vec<Dive> = Vec::new();
   stack.push(first_dive);
@@ -114,19 +115,20 @@ fn get_allowed_locations_to_place_next_item(
   let mut common_locs: Option<BTreeSet<Location2>> = None;
 
   while stack.len() > 0 {
-    debug!("while stack (\n\tstack={:?},\n\tcommon_locs={:?}\n)", stack, common_locs);
-
-    let v: Dive = stack.pop().expect("idk man");
-    let f: BTreeSet<KeyDoor> = v.actual_key_frontier();
-    if f.len() == 0 {
+    trace!("while stack (\n\tstack={:?},\n\tcommon_locs={:?}\n)", stack, common_locs);
+    let current_dive: Dive = stack.pop().expect("idk man");
+    let keyfrontier: BTreeSet<KeyDoor> = current_dive.actual_key_frontier();
+    debug!("Popping dive stack ({} left):\n\tpopped_dive={:?}\n\tkeyfrontier={:?}", stack.len()+1, current_dive, keyfrontier);
+    if keyfrontier.len() == 0 {
       // This is a maximal dive; restrict common_locs accordingly
-      let locs: BTreeSet<Location2> = v.zones.iter()
+      let current_locs: BTreeSet<Location2> = current_dive.zones.iter()
         .flat_map(|&zone| locations_from_zone(zone))
         .collect();
       match common_locs {
-        None => { common_locs = Some(locs); }
-        Some(glb) => { common_locs = Some(&glb & &locs); }
+        None => { common_locs = Some(current_locs); }
+        Some(common) => { common_locs = Some(&common & &current_locs); }
       }
+      debug!("Restricting common_locs:\n\tcommon_locs={:?}", common_locs);
       continue;
     }
 
@@ -137,14 +139,16 @@ fn get_allowed_locations_to_place_next_item(
     //   We'll end up going to POD later after there are no more EP keys
     //   available.
     let dungeon : &dungeons::Dungeon = dungeons::ALL.iter()
-      .filter(|&&dgn| !(&keyfrontier_from_dungeon(dgn) & &f).is_empty())
+      .filter(|&&dgn| !(&keyfrontier_from_dungeon(dgn) & &keyfrontier).is_empty())
       .next()
       .expect("this dive has no keys");
-    debug!("First dungeon w/ openable doors: {:?}", dungeon);
 
-    let doors_to_explore: BTreeSet<KeyDoor> = &keyfrontier_from_dungeon(*dungeon) & &f;
+    let doors_to_explore: BTreeSet<KeyDoor> = &keyfrontier_from_dungeon(*dungeon) & &keyfrontier;
+
+    debug!("Pushing dive stack:");
     for door in doors_to_explore {
-      let mut new_dive: Dive = v.clone();
+      debug!("\t{:?}", door);
+      let mut new_dive: Dive = current_dive.clone();
       new_dive.explore_keydoor(door, &assignments);
       stack.push(new_dive);
     }

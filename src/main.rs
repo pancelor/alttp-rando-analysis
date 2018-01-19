@@ -22,9 +22,23 @@ mod dive;
 mod connections;
 mod logic;
 
+
 fn main() {
   env_logger::init().unwrap();
+  temp_main();
+}
 
+#[allow(dead_code)]
+fn temp_main() {
+  use locations2::*;
+  use items::*;
+  let assignments = hashmap!{TempOverworld4 => KeyD1, PalaceOfDarknessHelmasaurKing => BottleWithBee, TempOverworld3 => BottleWithBee, PalaceOfDarknessDarkMazeTop => BottleWithBee, PalaceOfDarknessBigKeyChest => BottleWithBee, PalaceOfDarknessTheArenaBridge => BottleWithBee, PalaceOfDarknessHarmlessHellway => Bow, TempOverworld1 => KeyD1, PalaceOfDarknessDarkBasementLeft => BottleWithBee, PalaceOfDarknessMapChest => KeyD1, PalaceOfDarknessDarkMazeBottom => BigKeyD1, PalaceOfDarknessStalfosBasement => KeyD1, TempOverworld5 => Lamp, PalaceOfDarknessCompassChest => CompassD1, PalaceOfDarknessDarkBasementRight => KeyD1, PalaceOfDarknessPrize => BottleWithBee, PalaceOfDarknessBigChest => MapD1, TempOverworld2 => KeyD1, PalaceOfDarknessTheArenaLedge => Hammer, PalaceOfDarknessShooterRoom => BottleWithBee};
+  let wrd = world::World{assignments};
+  println!("can win {:?}", generator::can_win(&wrd));
+}
+
+#[allow(dead_code)]
+fn real_main() {
   use items::*;
   let advancement_items = vec![
     KeyD1,

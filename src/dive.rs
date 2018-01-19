@@ -89,13 +89,13 @@ impl Dive {
   }
 
   pub fn explore_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
-    debug!("fn explore_keydoor()");
+    trace!("fn explore_keydoor()");
     self.open_keydoor(door, &assignments);
     self.explore(&assignments);
   }
 
   pub fn explore(&mut self, assignments: &Assignments) {
-    debug!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
+    trace!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
 
     // assumes self is already greedy (i.e. wont re-explore self.zones)
     // to calculate `frontier: BTreeSet<KeyDoor | ItemDoor> = self.zones.flat_map(.frontier)`
@@ -103,7 +103,7 @@ impl Dive {
     let mut item_frontier_stack: Vec<ItemDoor> = self.item_frontier();
 
     while item_frontier_stack.len() > 0 {
-      debug!("while item_frontier_stack(\n\titem_frontier_stack={:?},\n)", item_frontier_stack);
+      trace!("while item_frontier_stack(\n\titem_frontier_stack={:?},\n)", item_frontier_stack);
 
       let current_edge: ItemDoor = item_frontier_stack.pop().expect("not sure what went wrong");
       if !current_edge.can_pass(&self.items) { continue; }
@@ -124,7 +124,7 @@ impl Dive {
   }
 
   fn open_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
-    debug!("fn open_keydoor(\n\tself={:?},\n\tdoor={:?}\n\tassignments={:?}\n)", self, door, assignments);
+    trace!("fn open_keydoor(\n\tself={:?},\n\tdoor={:?}\n\tassignments={:?}\n)", self, door, assignments);
 
     // sanity check door is in frontier
     let key_frontier: BTreeSet<KeyDoor> = self.zones.iter()
@@ -155,13 +155,12 @@ impl Dive {
     self.loot_zone(new_zone, &assignments);
   }
 
-  // TODO: ew this shouldn't be pub
-  pub fn loot_zone(&mut self, zone: Zone, assignments: &Assignments) {
+  fn loot_zone(&mut self, zone: Zone, assignments: &Assignments) {
     // TODO: make self.items a method, and calc it on the fly from zones? makes for easier debugging... yeah lets do it
     locations_from_zone(zone).iter()
       .filter_map(|loc| assignments.get(&loc))
       .for_each(|&item| self.items.push(item));
 
-    debug!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
+    trace!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
   }
 }
