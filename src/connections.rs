@@ -19,11 +19,22 @@ pub struct ItemDoor {
   pub can_pass_callback: &'static CanPassClosure,
 }
 
-#[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone)]
+#[derive(Eq, PartialOrd, Ord, Hash, Copy, Clone)]
 pub struct KeyDoor {
   pub zone1: Zone,
   pub zone2: Zone,
-  // pub dungeon: dungeons::Dungeon,
+}
+
+impl PartialEq for KeyDoor {
+  fn eq(&self, other: &Self) -> bool {
+    (
+         self.zone1 == other.zone1
+      && self.zone2 == other.zone2
+    ) || (
+         self.zone1 == other.zone2
+      && self.zone2 == other.zone1
+    )
+  }
 }
 
 impl ItemDoor {
@@ -79,7 +90,6 @@ macro_rules! cxn {
     KeyDoor {
       zone1: $z1,
       zone2: $z2,
-      // dungeon: dungeons::EasternPalace, // TODO?
     }
   });
 }
