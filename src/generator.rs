@@ -167,6 +167,6 @@ fn get_allowed_locations_to_place_next_item(
     }
   }
 
-  // info!("Num dives: (total, duplicates, %) = ({}, {}, {})", num_dives_seen, num_duplicate_dives_seen, (num_duplicate_dives_seen as f64) / (num_dives_seen as f64));
+  info!("Num dives: (total, duplicates, %) = ({}, {}, {})", num_dives_seen, num_duplicate_dives_seen, (num_duplicate_dives_seen as f64) / (num_dives_seen as f64));
   common_locs.expect("there are no locations common to every maximal dive")
 }
