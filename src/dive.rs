@@ -105,13 +105,15 @@ impl Dive {
 
   pub fn explore(&mut self, assignments: &Assignments) {
     // assumes self is already greedy (i.e. wont re-explore self.zones)
-    debug!("Explore: ()");
+    debug!("Explore:\n\titems={:?}", self.items);
     trace!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
 
-    let item_frontier: Vec<ItemDoor> = self.item_frontier();
     let mut num_passes = 0;
     loop {
       num_passes += 1;
+      // gotta set item_frontier here b/c this algo will otherwise fail if there are two ItemDoors in sequence (e.g. with a key spoke also connected to the hub of those three connections)
+      // TODO: make it smarterrr probs (i.e. that reverted commit)
+      let item_frontier: Vec<ItemDoor> = self.item_frontier();
       if !self.do_one_exploration_pass_on_frontier(&item_frontier, &assignments) {
         break;
       }
@@ -135,7 +137,6 @@ impl Dive {
         continue;
       };
       new_zones = true;
-      debug!("Exploring {:?}", current_edge);
       self.loot_zone(zone, &assignments);
     }
     new_zones
@@ -184,6 +185,7 @@ impl Dive {
       .filter_map(|loc| assignments.get(&loc))
       .for_each(|&item| self.items.push(item));
 
+    debug!("Looting {:?}", zone);
     // debug!("Looting:\n\tzone={:?}\n\t(post) self.items={:?}", zone, self.items);
     trace!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
   }
