@@ -2,11 +2,11 @@
 #![allow(unused_imports)]
 
 use std::collections::{HashMap, BTreeSet};
-use super::locations;
-use super::dungeons;
+use super::locations2::*;
+use super::zones::*;
+use super::dungeons::*;
 use super::logic::*;
 use super::items::*;
-use super::zones::*;
 
 
 type CanPassClosure = Fn(&Vec<Item>) -> bool + Sync;
@@ -65,56 +65,154 @@ impl fmt::Debug for ItemDoor {
 }
 
 macro_rules! cxn {
-  ($z1:ident ==> $z2:ident: $cb:expr) => ({
-    ItemDoor {
+  ($gr:ident, $z1:ident ==> $z2:ident: $cb:expr) => ({
+    let idoor = ItemDoor {
       zone1: $z1,
       zone2: $z2,
       reversible: false,
       can_pass_callback: $cb,
-    }
+    };
+    gr.itemfrontier_from_zone.entry($z1)
+      .or_insert(Vec::new())
+      .insert(idoor);
+    gr.itemfrontier_from_zone.entry($z2)
+      .or_insert(Vec::new())
+      .insert(idoor);
   });
-  ($z1:ident <=> $z2:ident: $cb:expr) => ({
-    ItemDoor {
+  ($gr:ident, $z1:ident <=> $z2:ident: $cb:expr) => ({
+    let idoor = ItemDoor {
       zone1: $z1,
       zone2: $z2,
       reversible: true,
       can_pass_callback: $cb,
-    }
+    };
+    gr.itemfrontier_from_zone.entry($z1)
+      .or_insert(Vec::new())
+      .insert(idoor);
+    gr.itemfrontier_from_zone.entry($z2)
+      .or_insert(Vec::new())
+      .insert(idoor);
   });
-  ($z1:ident ==> $z2:ident) => (
-    cxn!($z1 ==> $z2: &|ref _items| true);
+  ($gr:ident, $z1:ident ==> $z2:ident) => (
+    cxn!($gr, $z1 ==> $z2: &|ref _items| true);
   );
-  ($z1:ident <=> $z2:ident) => (
-    cxn!($z1 <=> $z2: &|ref _items| true);
+  ($gr:ident, $z1:ident <=> $z2:ident) => (
+    cxn!($gr, $z1 <=> $z2: &|ref _items| true);
   );
-  ($z1:ident <k> $z2:ident) => ({
-    KeyDoor {
+  ($gr:ident, $z1:ident <k> $z2:ident) => ({
+    let kdoor = KeyDoor {
       zone1: $z1,
       zone2: $z2,
-    }
+    };
+    gr.keyfrontier_from_zone.entry($z1)
+      .or_insert(BTreeSet::new())
+      .insert(kdoor);
+    gr.keyfrontier_from_zone.entry($z2)
+      .or_insert(BTreeSet::new())
+      .insert(kdoor);
   });
 }
 
 
+/// A master record of connections in the world
+pub struct WorldGraph {
+  // add_zone fields
+  zones_from_dungeon: HashMap<Dungeon, BTreeSet<Zone>>,
+  dungeon_from_zone: HashMap<Zone, Dungeon>,
+  locations_from_zone: HashMap<Zone, BTreeSet<Location2>>,
+
+  // connection fields
+  keyfrontier_from_zone: HashMap<Zone, BTreeSet<KeyDoor>>,
+  itemfrontier_from_zone: HashMap<Zone, Vec<ItemDoor>>,
+}
+
+impl WorldGraph {
+  fn get() -> Self {
+    // TODO cache cache cache pleeease. using lazy_static?
+    Self::new()
+  }
+
+  fn new() -> Self {
+    let gr = Self {
+      zones_from_dungeon: HashMap::new(),
+      dungeon_from_zone: HashMap::new(),
+      locations_from_zone: HashMap::new(),
+      keyfrontier_from_zone: HashMap::new(),
+      itemfrontier_from_zone: HashMap::new(),
+    };
+
+    cxn!(gr, TempEastLightWorld <=> POD1);
+    cxn!(gr, POD1   <=> POD8:   &|ref items| { can_shoot_arrows(&items) });
+    cxn!(gr, POD8   ==> POD2:   &|ref items| { items.contains(&Hammer) });
+    cxn!(gr, POD47  <=> POD7:   &|ref items| { items.contains(&Lamp) });
+    cxn!(gr, POD7   <=> POD10:  &|ref items| { items.contains(&BigKeyD1) });
+    cxn!(gr, POD4   <=> POD6:   &|ref items| { items.contains(&Lamp) });
+    cxn!(gr, POD2   <=> POD29A: &|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) });
+    cxn!(gr, POD29B <=> POD9:   &|ref items| { items.contains(&BigKeyD1) });
+
+    cxn!(gr, POD1   <k> POD2);
+    cxn!(gr, POD2   <k> POD3);
+    cxn!(gr, POD2   <k> POD4);
+    cxn!(gr, POD4   <k> POD47);
+    cxn!(gr, POD4   <k> POD5);
+    cxn!(gr, POD29A <k> POD29B);
+
+    gr.set_foo(
+      Overworld => {
+        TempEastLightWorld => [
+          TempOverworld1,
+          TempOverworld2,
+          TempOverworld3,
+          TempOverworld4,
+          TempOverworld5,
+        ],
+      },
+      PalaceOfDarkness => {
+        POD1 => [PalaceOfDarknessShooterRoom],
+        POD2 => [PalaceOfDarknessStalfosBasement, PalaceOfDarknessTheArenaBridge],
+        // etc
+      },
+    );
+  }
+}
+
+
+gr.add_zone(
+  zone=POD8,
+  locations=[
+    PalaceOfDarknessTheArenaLedge,
+    PalaceOfDarknessMapChest,
+  ],
+  dungeon=PalaceOfDarkness,
+)
+
+gr.add_keydoor(
+  z1, z2
+)
+
+gr.add_itemdoor(
+  z1, z2, reversible=true, cb=()=>true
+)
+
+/*
+Stuff to replicate:
+
+index also has methods that replace glue.rs:
+  // only deals with add_zone info
+  zones_from_dungeon
+  dungeon_from_zone
+  locations_from_zone
+
+  // deals with connections
+  keyfrontier_from_zone
+  itemfrontier_from_zone
+
+  // easy
+  keyfrontier_from_dungeon
+  dungeon_from_keydoor
+  // maybe shouldnt live here
+    dungeon_from_key
+    key_from_dungeon
+*/
 
 // fn todo(_: &Vec<Item>) -> bool { true } // for warning suppression
-
-pub static ALL_ITEMDOORS : &[ItemDoor] = &[
-  cxn!(TempEastLightWorld <=> POD1),
-  cxn!(POD1   <=> POD8:   &|ref items| { can_shoot_arrows(&items) }),
-  cxn!(POD8   ==> POD2:   &|ref items| { items.contains(&Hammer) }),
-  cxn!(POD47  <=> POD7:   &|ref items| { items.contains(&Lamp) }),
-  cxn!(POD7   <=> POD10:  &|ref items| { items.contains(&BigKeyD1) }),
-  cxn!(POD4   <=> POD6:   &|ref items| { items.contains(&Lamp) }),
-  cxn!(POD2   <=> POD29A: &|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) }),
-  cxn!(POD29B <=> POD9:   &|ref items| { items.contains(&BigKeyD1) }),
-];
-
-pub static ALL_KEYDOORS : &[KeyDoor] = &[
-  cxn!(POD1   <k> POD2),
-  cxn!(POD2   <k> POD3),
-  cxn!(POD2   <k> POD4),
-  cxn!(POD4   <k> POD47),
-  cxn!(POD4   <k> POD5),
-  cxn!(POD29A <k> POD29B),
-];
