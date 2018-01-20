@@ -92,7 +92,7 @@ fn fill_items_in_locations(
 
     let assumed_items_str = format!("{:?}", assumed_items); // avoid move-checker memes
     let allowed_locations = get_allowed_locations_to_place_next_item(assumed_items, &mut assignments);
-    debug!("Found locations:\n\tassumed_items={:?}\n\tallowed_locations={:?}", assumed_items_str, allowed_locations);
+    debug!("Found locations:\n\tassumed_items={:?}\n\tallowed_locations={:?}\n\tallowed_locations.len()={}", assumed_items_str, allowed_locations, allowed_locations.len());
     let loc: &Location2 = locations.iter()
       .filter(|&&loc| !assignments.contains_key(&loc))
       .filter(|&&loc| allowed_locations.contains(&loc))
