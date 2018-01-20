@@ -27,16 +27,30 @@ mod logic;
 
 fn main() {
   env_logger::init().unwrap();
-  real_main();
+  temp_main();
 }
 
 #[allow(dead_code)]
 fn temp_main() {
   use locations2::*;
   use items::*;
-  let assignments = hashmap!{TempOverworld4 => KeyD1, PalaceOfDarknessHelmasaurKing => BottleWithBee, TempOverworld3 => BottleWithBee, PalaceOfDarknessDarkMazeTop => BottleWithBee, PalaceOfDarknessBigKeyChest => BottleWithBee, PalaceOfDarknessTheArenaBridge => BottleWithBee, PalaceOfDarknessHarmlessHellway => Bow, TempOverworld1 => KeyD1, PalaceOfDarknessDarkBasementLeft => BottleWithBee, PalaceOfDarknessMapChest => KeyD1, PalaceOfDarknessDarkMazeBottom => BigKeyD1, PalaceOfDarknessStalfosBasement => KeyD1, TempOverworld5 => Lamp, PalaceOfDarknessCompassChest => CompassD1, PalaceOfDarknessDarkBasementRight => KeyD1, PalaceOfDarknessPrize => BottleWithBee, PalaceOfDarknessBigChest => MapD1, TempOverworld2 => KeyD1, PalaceOfDarknessTheArenaLedge => Hammer, PalaceOfDarknessShooterRoom => BottleWithBee};
-  let wrd = world::World{assignments};
-  println!("can win {:?}", generator::can_win(&wrd));
+  use zones::*;
+  use connections::KeyDoor;
+  use dive::Dive;
+
+  let mut dive = Dive{
+    zones: btreeset!{TempEastLightWorld, POD1},
+    items: vec![KeyD1],
+    // items: vec![Lamp, KeyD1, KeyD1],
+    open_doors: btreeset!{},
+  };
+
+  let assigments = hashmap!{PalaceOfDarknessTheArenaBridge => Bow};
+
+  dive.explore_keydoor(KeyDoor{zone1:POD1,zone2:POD2}, &assigments);
+
+  println!("{:?}", dive);
+  assert!(dive.zones.contains(&POD8));
 }
 
 #[allow(dead_code)]
