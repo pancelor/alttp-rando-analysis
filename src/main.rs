@@ -88,16 +88,12 @@ fn real_main() {
 
   let sim_count = match env::var("NSIM") {
     Ok(val) => val.parse().expect("bad NSIM format"),
-    Err(_) => 100,
+    Err(_) => 1,
   };
   for ii in 0..sim_count {
     info!("sim #{:?}", ii);
     let world = generator::generate_world(&advancement_items, &junk_items, &mut rng);
     info!("worldgen finished: {:?}", world);
-    if bow_in_pod2(&world) {
-      info!("^ bow in pod2");
-      break;
-    }
     if !generator::can_win(&world) {
       println!("{:?}", world);
       panic!("uh oh, this world isn't beatable");
@@ -105,10 +101,8 @@ fn real_main() {
   }
 }
 
-fn bow_in_pod2(world: &world::World) -> bool{
-  world.assignments.get(&locations2::PalaceOfDarknessStalfosBasement) == Some(&items::Bow) || world.assignments.get(&locations2::PalaceOfDarknessTheArenaBridge) == Some(&items::Bow)
-}
-
+// TODO rm
+#[allow(dead_code)]
 fn key_in_dark_maze(world: &world::World) -> bool{
   use locations2::*;
   use items::*;
