@@ -118,7 +118,7 @@ fn get_allowed_locations_to_place_next_item(
     trace!("while stack (\n\tstack={:?},\n\tcommon_locs={:?}\n)", stack, common_locs);
     let current_dive: Dive = stack.pop().expect("idk man");
     let keyfrontier: BTreeSet<KeyDoor> = current_dive.key_frontier();
-    debug!("Popping dive stack (size {}):\n\tdive:\n\t\tzones={:?}\n\t\titems={:?}\n\t\topen_doors={:?}\n\tkeyfrontier={:?}", stack.len()+1, current_dive.zones, current_dive.items, current_dive.open_doors, keyfrontier);
+    debug!("Popping dive stack (size {}):\n\tdive.zones={:?}\n\tkeyfrontier={:?}", stack.len()+1, current_dive.zones, keyfrontier);
     if keyfrontier.len() == 0 {
       // This is a maximal dive; restrict common_locs accordingly
       let current_locs: BTreeSet<Location2> = current_dive.zones.iter()

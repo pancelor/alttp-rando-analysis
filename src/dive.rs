@@ -184,7 +184,7 @@ impl Dive {
       .filter_map(|loc| assignments.get(&loc))
       .for_each(|&item| self.items.push(item));
 
-    debug!("Looting:\n\tzone={:?}\n\t(post) self.items={:?}", zone, self.items);
+    // debug!("Looting:\n\tzone={:?}\n\t(post) self.items={:?}", zone, self.items);
     trace!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
   }
 }

@@ -79,8 +79,9 @@ fn real_main() {
   for ii in 0..sim_count {
     info!("sim #{:?}", ii);
     let world = generator::generate_world(&advancement_items, &junk_items, &mut rng);
+    info!("worldgen finished: {:?}", world);
     if key_in_dark_maze(&world) {
-      info!("Hey, this one has a key in dark maze!\n\t{:?}", world);
+      info!("^ Hey, this one has a key in dark maze!");
     }
     if !generator::can_win(&world) {
       println!("{:?}", world);
