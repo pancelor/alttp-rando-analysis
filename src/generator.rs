@@ -110,13 +110,26 @@ fn get_allowed_locations_to_place_next_item(
   trace!("fn get_allowed_locations_to_place_next_item(\n\tassumed={:?},\n\tassignments={:?}\n)", assumed, assignments);
   let first_dive: Dive = Dive::new(assumed, &assignments);
   let mut stack: Vec<Dive> = Vec::new();
-  stack.push(first_dive);
+
+  let mut num_dives_seen: u64 = 1;
+  let mut num_duplicate_dives_seen: u64 = 0;
+  let mut dive_hashes_seen: HashSet<u64> = HashSet::new();
+
   // The set of Locations that are common to every maximal dive
   let mut common_locs: Option<BTreeSet<Location2>> = None;
 
+  stack.push(first_dive);
   while stack.len() > 0 {
     trace!("while stack (\n\tstack={:?},\n\tcommon_locs={:?}\n)", stack, common_locs);
-    let current_dive: Dive = stack.pop().expect("idk man");
+    let current_dive: Dive = stack.pop().expect("umm this is impossible");
+    num_dives_seen += 1;
+
+    if !dive_hashes_seen.insert(current_dive.hash_value()) {
+      // this is a duplicate
+      num_duplicate_dives_seen += 1;
+      continue;
+    }
+
     let keyfrontier: BTreeSet<KeyDoor> = current_dive.key_frontier();
     debug!("Popping dive stack (size {}):\n\tdive.zones={:?}\n\tkeyfrontier={:?}", stack.len()+1, current_dive.zones, keyfrontier);
     if keyfrontier.len() == 0 {
@@ -154,5 +167,6 @@ fn get_allowed_locations_to_place_next_item(
     }
   }
 
+  // info!("Num dives: (total, duplicates, %) = ({}, {}, {})", num_dives_seen, num_duplicate_dives_seen, (num_duplicate_dives_seen as f64) / (num_dives_seen as f64));
   common_locs.expect("there are no locations common to every maximal dive")
 }

@@ -1,8 +1,9 @@
 #![allow(unused_imports)]
 
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use std::collections::{HashMap, BTreeSet};
 use rand::{Rng, ThreadRng};
-use std::hash::{Hash, Hasher};
 use super::{medallions, logic, locations2, items, zones, dungeons};
 use super::glue::*;
 use super::zones::Zone;
@@ -52,6 +53,12 @@ impl Dive {
     me.loot_zone(Zone::TempEastLightWorld, &assignments);
     me.explore(&assignments);
     me
+  }
+
+  pub fn hash_value(&self) -> u64 {
+    let mut hasher = DefaultHasher::new();
+    self.hash(&mut hasher);
+    hasher.finish()
   }
 
   /// all reachable keydoors

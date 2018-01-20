@@ -31,6 +31,7 @@ fn main() {
 }
 
 #[allow(dead_code)]
+#[allow(unused_imports)]
 fn temp_main() {
   use locations2::*;
   use items::*;
@@ -38,19 +39,18 @@ fn temp_main() {
   use connections::KeyDoor;
   use dive::Dive;
 
-  let mut dive = Dive{
-    zones: btreeset!{TempEastLightWorld, POD1},
-    items: vec![KeyD1],
-    // items: vec![Lamp, KeyD1, KeyD1],
+  let d1 = Dive{
+    zones: btreeset!{POD47, TempEastLightWorld, POD1},
+    items: vec![Lamp, KeyD1, KeyD1, Hammer, Bow],
+    open_doors: btreeset!{},
+  };
+  let d2 = Dive{
+    zones: btreeset!{TempEastLightWorld, POD1, POD47},
+    items: vec![KeyD1, Bow, Lamp, Hammer, KeyD1],
     open_doors: btreeset!{},
   };
 
-  let assigments = hashmap!{PalaceOfDarknessTheArenaBridge => Bow};
-
-  dive.explore_keydoor(KeyDoor{zone1:POD1,zone2:POD2}, &assigments);
-
-  println!("{:?}", dive);
-  assert!(dive.zones.contains(&POD8));
+  println!("eq={} h1={} h2={}", (d1==d2), d1.hash_value(), d2.hash_value());
 }
 
 #[allow(dead_code)]
