@@ -9,14 +9,12 @@ use super::logic::*;
 use super::items::*;
 
 
-type CanPassClosure = Fn(&Vec<Item>) -> bool + Sync;
-
 #[derive(Copy, Clone)]
 pub struct ItemDoor {
   pub zone1: Zone,
   pub zone2: Zone,
   pub reversible: bool,
-  pub can_pass_callback: &'static CanPassClosure,
+  pub can_pass_callback: CanPassRequirements,
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone)]
@@ -40,10 +38,9 @@ pub struct KeyDoor {
 
 impl ItemDoor {
   pub fn can_pass(&self, items: &Vec<Item>) -> bool {
-    (self.can_pass_callback)(&items)
+    self.can_pass_callback.can_pass(&items)
   }
 }
-
 
 use std::fmt;
 impl fmt::Debug for KeyDoor {
@@ -94,10 +91,10 @@ macro_rules! cxn {
       .push(idoor);
   });
   ($gr:ident, $z1:ident ==> $z2:ident) => (
-    cxn!($gr, $z1 ==> $z2: &|ref _items| true);
+    cxn!($gr, $z1 ==> $z2: Always);
   );
   ($gr:ident, $z1:ident <=> $z2:ident) => (
-    cxn!($gr, $z1 <=> $z2: &|ref _items| true);
+    cxn!($gr, $z1 <=> $z2: Always);
   );
   ($gr:ident, $z1:ident <k> $z2:ident) => ({
     let kdoor = KeyDoor {
@@ -114,29 +111,8 @@ macro_rules! cxn {
 }
 
 lazy_static! {
-  pub static ref WG: WorldGraph = WorldGraph::get();
-}
-
-/// A master record of connections in the world
-pub struct WorldGraph {
-  // add_zone fields
-  zones_from_dungeon: HashMap<Dungeon, BTreeSet<Zone>>,
-  dungeon_from_zone: HashMap<Zone, Dungeon>,
-  locations_from_zone: HashMap<Zone, BTreeSet<Location2>>,
-
-  // connection fields
-  keyfrontier_from_zone: HashMap<Zone, BTreeSet<KeyDoor>>,
-  itemfrontier_from_zone: HashMap<Zone, Vec<ItemDoor>>,
-}
-
-impl WorldGraph {
-  pub fn get() -> Self {
-    // TODO cache cache cache pleeease. using lazy_static?
-    Self::new()
-  }
-
-  fn new() -> Self {
-    let mut gr = Self {
+  pub static ref WG: WorldGraph = {
+    let mut gr = WorldGraph {
       zones_from_dungeon: HashMap::new(),
       dungeon_from_zone: HashMap::new(),
       locations_from_zone: HashMap::new(),
@@ -198,8 +174,22 @@ impl WorldGraph {
 
     // TODO other dungeons; overworld
     gr
-  }
+  };
+}
 
+/// A master record of connections in the world
+pub struct WorldGraph {
+  // add_zone fields
+  zones_from_dungeon: HashMap<Dungeon, BTreeSet<Zone>>,
+  dungeon_from_zone: HashMap<Zone, Dungeon>,
+  locations_from_zone: HashMap<Zone, BTreeSet<Location2>>,
+
+  // connection fields
+  keyfrontier_from_zone: HashMap<Zone, BTreeSet<KeyDoor>>,
+  itemfrontier_from_zone: HashMap<Zone, Vec<ItemDoor>>,
+}
+
+impl WorldGraph {
   fn register_zone(&mut self, dungeon: Option<Dungeon>, zone: Zone, locs: BTreeSet<Location2>) {
     if let Some(dung) = dungeon {
       self.zones_from_dungeon.entry(dung)
