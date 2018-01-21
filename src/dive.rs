@@ -90,11 +90,12 @@ impl Dive {
   /// Note: there's still some internal confusion on reversible doors;
   ///   this function currently will include 1-way idoors that look _into_
   ///   self but are not actually reachable from self
-  fn item_frontier(&self) -> Vec<ItemDoor> {
+  fn item_frontier(&self) -> Vec<&ItemDoor> {
     self.zones.iter()
       .flat_map(|&zone| WG.itemfrontier_from_zone(zone))
-      .filter(|&&idoor| !(self.zones.contains(&idoor.zone1) && self.zones.contains(&idoor.zone2)))
-      .cloned()
+      .filter(|&idoor_ref| {
+        !(self.zones.contains(&idoor_ref.zone1) && self.zones.contains(&idoor_ref.zone2))
+      })
       .collect()
   }
 
@@ -114,7 +115,7 @@ impl Dive {
       num_passes += 1;
       // gotta set item_frontier here b/c this algo will otherwise fail if there are two ItemDoors in sequence (e.g. with a key spoke also connected to the hub of those three connections)
       // TODO: make it smarterrr probs (i.e. that reverted commit)
-      let item_frontier: Vec<ItemDoor> = self.item_frontier();
+      let item_frontier: Vec<&ItemDoor> = self.item_frontier();
       if !self.do_one_exploration_pass_on_frontier(&item_frontier, &assignments) {
         break;
       }
@@ -124,7 +125,7 @@ impl Dive {
 
   /// Returns whether any new zones were added during this pass
   /// TODO: it's probably a lot better to instead return a list of new idoors; esp when the dive is beatable
-  fn do_one_exploration_pass_on_frontier(&mut self, ifront: &Vec<ItemDoor>, assignments: &Assignments) -> bool {
+  fn do_one_exploration_pass_on_frontier(&mut self, ifront: &Vec<&ItemDoor>, assignments: &Assignments) -> bool {
     trace!("do_one_exploration_pass_on_frontier(\n\tifront={:?},\n)", ifront);
 
     let mut new_zones = false;

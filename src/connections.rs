@@ -9,12 +9,13 @@ use super::logic::*;
 use super::items::*;
 
 
-#[derive(Copy, Clone)]
+type CanPassClosure = Fn(&Vec<Item>) -> bool + Sync;
+
 pub struct ItemDoor {
   pub zone1: Zone,
   pub zone2: Zone,
   pub reversible: bool,
-  pub can_pass_callback: CanPassRequirements,
+  pub can_pass_callback: Box<CanPassClosure>,
 }
 
 #[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone)]
@@ -38,9 +39,10 @@ pub struct KeyDoor {
 
 impl ItemDoor {
   pub fn can_pass(&self, items: &Vec<Item>) -> bool {
-    self.can_pass_callback.can_pass(&items)
+    (self.can_pass_callback)(&items)
   }
 }
+
 
 use std::fmt;
 impl fmt::Debug for KeyDoor {
@@ -91,10 +93,10 @@ macro_rules! cxn {
       .push(idoor);
   });
   ($gr:ident, $z1:ident ==> $z2:ident) => (
-    cxn!($gr, $z1 ==> $z2: Always);
+    cxn!($gr, $z1 ==> $z2: Box::new(|ref _items| true));
   );
   ($gr:ident, $z1:ident <=> $z2:ident) => (
-    cxn!($gr, $z1 <=> $z2: Always);
+    cxn!($gr, $z1 <=> $z2: Box::new(|ref _items| true));
   );
   ($gr:ident, $z1:ident <k> $z2:ident) => ({
     let kdoor = KeyDoor {
@@ -122,13 +124,13 @@ lazy_static! {
 
     // PalaceOfDarkness
     cxn!(gr, TempEastLightWorld <=> POD1);
-    cxn!(gr, POD1   <=> POD8:   &|ref items| { can_shoot_arrows(&items) });
-    cxn!(gr, POD8   ==> POD2:   &|ref items| { items.contains(&Hammer) });
-    cxn!(gr, POD47  <=> POD7:   &|ref items| { items.contains(&Lamp) });
-    cxn!(gr, POD7   <=> POD10:  &|ref items| { items.contains(&BigKeyD1) });
-    cxn!(gr, POD4   <=> POD6:   &|ref items| { items.contains(&Lamp) });
-    cxn!(gr, POD2   <=> POD29A: &|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) });
-    cxn!(gr, POD29B <=> POD9:   &|ref items| { items.contains(&BigKeyD1) });
+    cxn!(gr, POD1   <=> POD8:   Box::new(|ref items| { can_shoot_arrows(&items) }));
+    // cxn!(gr, POD8   ==> POD2:   &|ref items| { items.contains(&Hammer) });
+    // cxn!(gr, POD47  <=> POD7:   &|ref items| { items.contains(&Lamp) });
+    // cxn!(gr, POD7   <=> POD10:  &|ref items| { items.contains(&BigKeyD1) });
+    // cxn!(gr, POD4   <=> POD6:   &|ref items| { items.contains(&Lamp) });
+    // cxn!(gr, POD2   <=> POD29A: &|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) });
+    // cxn!(gr, POD29B <=> POD9:   &|ref items| { items.contains(&BigKeyD1) });
     cxn!(gr, POD1   <k> POD2);
     cxn!(gr, POD2   <k> POD3);
     cxn!(gr, POD2   <k> POD4);
