@@ -3,11 +3,10 @@
 use std::collections::{HashMap, HashSet, BTreeSet};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, locations2, items, zones, dungeons};
-use super::glue::*;
 use super::locations2::*;
 use super::world::{Assignments, World};
 use super::zones::Zone;
-use super::connections::{KeyDoor, ItemDoor};
+use super::connections::*;
 use super::dive::Dive;
 
 pub fn generate_world(

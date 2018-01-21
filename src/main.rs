@@ -19,7 +19,6 @@ mod dungeons;
 mod medallions;
 mod world;
 mod generator;
-mod glue;
 mod dive;
 mod connections;
 mod logic;

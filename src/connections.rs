@@ -141,6 +141,7 @@ impl WorldGraph {
       itemfrontier_from_zone: HashMap::new(),
     };
 
+    // PalaceOfDarkness
     cxn!(gr, TempEastLightWorld <=> POD1);
     cxn!(gr, POD1   <=> POD8:   &|ref items| { can_shoot_arrows(&items) });
     cxn!(gr, POD8   ==> POD2:   &|ref items| { items.contains(&Hammer) });
@@ -149,7 +150,6 @@ impl WorldGraph {
     cxn!(gr, POD4   <=> POD6:   &|ref items| { items.contains(&Lamp) });
     cxn!(gr, POD2   <=> POD29A: &|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) });
     cxn!(gr, POD29B <=> POD9:   &|ref items| { items.contains(&BigKeyD1) });
-
     cxn!(gr, POD1   <k> POD2);
     cxn!(gr, POD2   <k> POD3);
     cxn!(gr, POD2   <k> POD4);
@@ -157,42 +157,130 @@ impl WorldGraph {
     cxn!(gr, POD4   <k> POD5);
     cxn!(gr, POD29A <k> POD29B);
 
-    gr.set_foo(
-      Overworld => {
-        TempEastLightWorld => [
-          TempOverworld1,
-          TempOverworld2,
-          TempOverworld3,
-          TempOverworld4,
-          TempOverworld5,
-        ],
-      },
-      PalaceOfDarkness => {
-        POD1 => [PalaceOfDarknessShooterRoom],
-        POD2 => [PalaceOfDarknessStalfosBasement, PalaceOfDarknessTheArenaBridge],
-        // etc
-      },
-    );
+    // Overworld
+    gr.register_zone(None, TempEastLightWorld, [
+      TempOverworld1,
+      TempOverworld2,
+      TempOverworld3,
+      TempOverworld4,
+      TempOverworld5,
+    ]);
+
+    // PalaceOfDarkness
+    gr.register_zone(Some(PalaceOfDarkness), POD1, btreeset!{PalaceOfDarknessShooterRoom});
+    gr.register_zone(Some(PalaceOfDarkness), POD2, btreeset!{
+      PalaceOfDarknessStalfosBasement,
+      PalaceOfDarknessTheArenaBridge,
+    });
+    gr.register_zone(Some(PalaceOfDarkness), POD3, btreeset!{PalaceOfDarknessBigKeyChest});
+    gr.register_zone(Some(PalaceOfDarkness), POD4, btreeset!{PalaceOfDarknessCompassChest});
+    gr.register_zone(Some(PalaceOfDarkness), POD5, btreeset!{PalaceOfDarknessHarmlessHellway});
+    gr.register_zone(Some(PalaceOfDarkness), POD6, btreeset!{
+      PalaceOfDarknessDarkBasementLeft,
+      PalaceOfDarknessDarkBasementRight,
+    });
+    gr.register_zone(Some(PalaceOfDarkness), POD7, btreeset!{
+      PalaceOfDarknessDarkMazeTop,
+      PalaceOfDarknessDarkMazeBottom,
+    });
+    gr.register_zone(Some(PalaceOfDarkness), POD8, btreeset!{
+      PalaceOfDarknessMapChest,
+      PalaceOfDarknessTheArenaLedge,
+    });
+    gr.register_zone(Some(PalaceOfDarkness), POD9, btreeset!{
+      PalaceOfDarknessHelmasaurKing,
+      PalaceOfDarknessPrize,
+    });
+    gr.register_zone(Some(PalaceOfDarkness), POD10, btreeset!{PalaceOfDarknessBigChest});
+
+    // TODO other dungeons; overworld
+  }
+
+  fn register_zone(&self, dungeon: Option<Dungeon>, zone: Zone, locs: Vec<Location2>) {
+    // TODO: probably s/btreeset/vec for speed
+
+    zones_from_dungeon.entry(dungeon)
+      .or_insert(BTreeSet::new())
+      .insert(zone);
+    zones_from_dungeon.insert(zone, dungeon);
+    locations_from_zone.insert(zone, locs);
+  }
+
+
+  pub fn zones_from_dungeon(&self, dungeon: Dungeon) -> BTreeSet<Zone> {
+    self.zones_from_dungeon.get(&dungeon).expect("worldindex is borked")
+  }
+
+  pub fn dungeon_from_zone(&self, zone: Zone) -> Option<Dungeon> {
+    self.dungeon_from_zone.get(&zone)
+  }
+
+  pub fn locations_from_zone(&self, zone: Zone) -> BTreeSet<Location2> {
+    self.locations_from_zone.get(&zone).expect("worldindex is borked")
+  }
+
+
+  pub fn keyfrontier_from_zone(&self, zone: Zone) -> BTreeSet<KeyDoor> {
+    self.keyfrontier_from_zone.get(&zone).expect("worldindex is borked")
+  }
+
+  pub fn itemfrontier_from_zone(&self, zone: Zone) -> Vec<ItemDoor> {
+    self.itemfrontier_from_zone.get(&zone).expect("worldindex is borked")
+  }
+
+  pub fn keyfrontier_from_dungeon(&self, dungeon: Dungeon) -> BTreeSet<KeyDoor> {
+    let zones = self.zones_from_dungeon.get(&dungeon).expect("worldindex is borked");
+    zones.iter()
+      .map(|zone| keyfrontier_from_zone(zone))
+      .collect()
+  }
+
+  pub fn dungeon_from_keydoor(&self, keydoor: KeyDoor) -> Dungeon {
+    self.dungeon_from_zone.get(&keydoor.zone1).expect("your keydoor is outside")
+  }
+
+  // TODO: maybe shouldnt live here
+  #[allow(dead_code)] // TODO: rm?
+  pub fn dungeon_from_key(&self, key: Item) -> Option<Dungeon> {
+    use super::items::*;
+    use super::dungeons::*;
+    match key {
+      KeyH1 => None, // TODO: change later
+      KeyH2 => None, // TODO: change later
+      KeyP1 => Some(EasternPalace),
+      KeyP2 => Some(DesertPalace),
+      KeyP3 => Some(TowerOfHera),
+      KeyD1 => Some(PalaceOfDarkness),
+      KeyD2 => Some(SwampPalace),
+      KeyD3 => Some(SkullWoods),
+      KeyD4 => Some(ThievesTown),
+      KeyD5 => Some(IcePalace),
+      KeyD6 => Some(MiseryMire),
+      KeyD7 => Some(TurtleRock),
+      KeyA1 => None, // TODO: change later
+      KeyA2 => None, // TODO: change later
+      _     => panic!("bad arg"), // TODO: rm? return None?
+    }
+  }
+
+  // TODO: maybe shouldnt live here
+  pub fn key_from_dungeon(&self, dungeon: Dungeon) -> Item {
+    use super::items::*;
+    use super::dungeons::*;
+    match dungeon {
+      EasternPalace => KeyP1,
+      DesertPalace => KeyP2,
+      TowerOfHera => KeyP3,
+      PalaceOfDarkness => KeyD1,
+      SwampPalace => KeyD2,
+      SkullWoods => KeyD3,
+      ThievesTown => KeyD4,
+      IcePalace => KeyD5,
+      MiseryMire => KeyD6,
+      TurtleRock => KeyD7,
+    }
   }
 }
-
-
-gr.add_zone(
-  zone=POD8,
-  locations=[
-    PalaceOfDarknessTheArenaLedge,
-    PalaceOfDarknessMapChest,
-  ],
-  dungeon=PalaceOfDarkness,
-)
-
-gr.add_keydoor(
-  z1, z2
-)
-
-gr.add_itemdoor(
-  z1, z2, reversible=true, cb=()=>true
-)
 
 /*
 Stuff to replicate:
