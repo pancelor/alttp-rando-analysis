@@ -134,7 +134,8 @@ fn get_allowed_locations_to_place_next_item(
     if keyfrontier.len() == 0 {
       // This is a maximal dive; restrict common_locs accordingly
       let current_locs: BTreeSet<Location2> = current_dive.zones.iter()
-        .flat_map(|&zone| locations_from_zone(zone))
+        .flat_map(|&zone| WG.locations_from_zone(zone))
+        .cloned()
         .collect();
       match common_locs {
         None => { common_locs = Some(current_locs); }
@@ -151,11 +152,11 @@ fn get_allowed_locations_to_place_next_item(
     //   We'll end up going to POD later after there are no more EP keys
     //   available.
     let dungeon : &dungeons::Dungeon = dungeons::ALL.iter()
-      .filter(|&&dgn| !(&keyfrontier_from_dungeon(dgn) & &keyfrontier).is_empty())
+      .filter(|&&dgn| !(&WG.keyfrontier_from_dungeon(dgn) & &keyfrontier).is_empty())
       .next()
       .expect("this dive has no keys");
 
-    let doors_to_explore: BTreeSet<KeyDoor> = &keyfrontier_from_dungeon(*dungeon) & &keyfrontier;
+    let doors_to_explore: BTreeSet<KeyDoor> = &WG.keyfrontier_from_dungeon(*dungeon) & &keyfrontier;
 
     let temp_num = doors_to_explore.len();
     for (ii, &door) in doors_to_explore.iter().enumerate() {

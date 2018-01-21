@@ -72,12 +72,12 @@ macro_rules! cxn {
       reversible: false,
       can_pass_callback: $cb,
     };
-    gr.itemfrontier_from_zone.entry($z1)
+    $gr.itemfrontier_from_zone.entry($z1)
       .or_insert(Vec::new())
-      .insert(idoor);
-    gr.itemfrontier_from_zone.entry($z2)
+      .push(idoor);
+    $gr.itemfrontier_from_zone.entry($z2)
       .or_insert(Vec::new())
-      .insert(idoor);
+      .push(idoor);
   });
   ($gr:ident, $z1:ident <=> $z2:ident: $cb:expr) => ({
     let idoor = ItemDoor {
@@ -86,12 +86,12 @@ macro_rules! cxn {
       reversible: true,
       can_pass_callback: $cb,
     };
-    gr.itemfrontier_from_zone.entry($z1)
+    $gr.itemfrontier_from_zone.entry($z1)
       .or_insert(Vec::new())
-      .insert(idoor);
-    gr.itemfrontier_from_zone.entry($z2)
+      .push(idoor);
+    $gr.itemfrontier_from_zone.entry($z2)
       .or_insert(Vec::new())
-      .insert(idoor);
+      .push(idoor);
   });
   ($gr:ident, $z1:ident ==> $z2:ident) => (
     cxn!($gr, $z1 ==> $z2: &|ref _items| true);
@@ -104,15 +104,18 @@ macro_rules! cxn {
       zone1: $z1,
       zone2: $z2,
     };
-    gr.keyfrontier_from_zone.entry($z1)
+    $gr.keyfrontier_from_zone.entry($z1)
       .or_insert(BTreeSet::new())
       .insert(kdoor);
-    gr.keyfrontier_from_zone.entry($z2)
+    $gr.keyfrontier_from_zone.entry($z2)
       .or_insert(BTreeSet::new())
       .insert(kdoor);
   });
 }
 
+lazy_static! {
+  pub static ref WG: WorldGraph = WorldGraph::get();
+}
 
 /// A master record of connections in the world
 pub struct WorldGraph {
@@ -127,13 +130,13 @@ pub struct WorldGraph {
 }
 
 impl WorldGraph {
-  fn get() -> Self {
+  pub fn get() -> Self {
     // TODO cache cache cache pleeease. using lazy_static?
     Self::new()
   }
 
   fn new() -> Self {
-    let gr = Self {
+    let mut gr = Self {
       zones_from_dungeon: HashMap::new(),
       dungeon_from_zone: HashMap::new(),
       locations_from_zone: HashMap::new(),
@@ -158,7 +161,7 @@ impl WorldGraph {
     cxn!(gr, POD29A <k> POD29B);
 
     // Overworld
-    gr.register_zone(None, TempEastLightWorld, [
+    gr.register_zone(None, TempEastLightWorld, btreeset![
       TempOverworld1,
       TempOverworld2,
       TempOverworld3,
@@ -194,49 +197,51 @@ impl WorldGraph {
     gr.register_zone(Some(PalaceOfDarkness), POD10, btreeset!{PalaceOfDarknessBigChest});
 
     // TODO other dungeons; overworld
+    gr
   }
 
-  fn register_zone(&self, dungeon: Option<Dungeon>, zone: Zone, locs: Vec<Location2>) {
-    // TODO: probably s/btreeset/vec for speed
-
-    zones_from_dungeon.entry(dungeon)
-      .or_insert(BTreeSet::new())
-      .insert(zone);
-    zones_from_dungeon.insert(zone, dungeon);
-    locations_from_zone.insert(zone, locs);
+  fn register_zone(&mut self, dungeon: Option<Dungeon>, zone: Zone, locs: BTreeSet<Location2>) {
+    if let Some(dung) = dungeon {
+      self.zones_from_dungeon.entry(dung)
+        .or_insert(BTreeSet::new())
+        .insert(zone);
+      self.dungeon_from_zone.insert(zone, dung);
+    }
+    self.locations_from_zone.insert(zone, locs);
   }
 
 
-  pub fn zones_from_dungeon(&self, dungeon: Dungeon) -> BTreeSet<Zone> {
+  pub fn zones_from_dungeon(&self, dungeon: Dungeon) -> &BTreeSet<Zone> {
     self.zones_from_dungeon.get(&dungeon).expect("worldindex is borked")
   }
 
   pub fn dungeon_from_zone(&self, zone: Zone) -> Option<Dungeon> {
     self.dungeon_from_zone.get(&zone)
+      .and_then(|x| Some(x.clone()))
   }
 
-  pub fn locations_from_zone(&self, zone: Zone) -> BTreeSet<Location2> {
+  pub fn locations_from_zone(&self, zone: Zone) -> &BTreeSet<Location2> {
     self.locations_from_zone.get(&zone).expect("worldindex is borked")
   }
 
-
-  pub fn keyfrontier_from_zone(&self, zone: Zone) -> BTreeSet<KeyDoor> {
+  pub fn keyfrontier_from_zone(&self, zone: Zone) -> &BTreeSet<KeyDoor> {
     self.keyfrontier_from_zone.get(&zone).expect("worldindex is borked")
   }
 
-  pub fn itemfrontier_from_zone(&self, zone: Zone) -> Vec<ItemDoor> {
+  pub fn itemfrontier_from_zone(&self, zone: Zone) -> &Vec<ItemDoor> {
     self.itemfrontier_from_zone.get(&zone).expect("worldindex is borked")
   }
 
   pub fn keyfrontier_from_dungeon(&self, dungeon: Dungeon) -> BTreeSet<KeyDoor> {
     let zones = self.zones_from_dungeon.get(&dungeon).expect("worldindex is borked");
-    zones.iter()
-      .map(|zone| keyfrontier_from_zone(zone))
+    zones.iter() // TODO what happens if we into_iter here?
+      .flat_map(|&zone| self.keyfrontier_from_zone(zone))
+      .cloned()
       .collect()
   }
 
   pub fn dungeon_from_keydoor(&self, keydoor: KeyDoor) -> Dungeon {
-    self.dungeon_from_zone.get(&keydoor.zone1).expect("your keydoor is outside")
+    self.dungeon_from_zone.get(&keydoor.zone1).expect("your keydoor is outside").clone()
   }
 
   // TODO: maybe shouldnt live here

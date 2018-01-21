@@ -60,33 +60,27 @@ impl Dive {
     hasher.finish()
   }
 
-  /// all reachable keydoors
-  fn all_keydoors(&self) -> BTreeSet<KeyDoor> {
-    self.zones.iter() // TODO squash; it'll be good
-      .flat_map(|&zone| keyfrontier_from_zone(zone))
-      .collect()
-  }
-
   fn dungeons_i_own_keys_for(&self) -> BTreeSet<&Dungeon> {
     dungeons::ALL.iter()
       .filter(|&&dungeon| {
-        let target_key = key_from_dungeon(dungeon);
+        let target_key = WG.key_from_dungeon(dungeon);
         let num_keys = self.items.iter()
           .filter(|&&item| item == target_key)
           .count();
         let num_opened_doors = self.open_doors.iter()
-          .filter(|&&kdoor| dungeon_from_keydoor(kdoor) == dungeon)
+          .filter(|&&kdoor| WG.dungeon_from_keydoor(kdoor) == dungeon)
           .count();
         num_opened_doors < num_keys
       }).collect()
   }
 
-  /// all reachable keydoors, filtered to ones that we 1. have keys for and 2. haven't opened yet
   pub fn key_frontier(&self) -> BTreeSet<KeyDoor> {
     let dungeons_i_own_keys_for = self.dungeons_i_own_keys_for();
-    self.all_keydoors().into_iter()
-      .filter(|&kdoor| dungeons_i_own_keys_for.contains(&dungeon_from_keydoor(kdoor)))
-      .filter(|kdoor| !self.open_doors.contains(&kdoor))
+    self.zones.iter()
+      .flat_map(|&zone| WG.keyfrontier_from_zone(zone))
+      .filter(|&&kdoor| dungeons_i_own_keys_for.contains(&WG.dungeon_from_keydoor(kdoor)))
+      .filter(|&&kdoor| !self.open_doors.contains(&kdoor))
+      .cloned()
       .collect()
   }
 
@@ -98,8 +92,9 @@ impl Dive {
   ///   self but are not actually reachable from self
   fn item_frontier(&self) -> Vec<ItemDoor> {
     self.zones.iter()
-      .flat_map(|&zone| itemfrontier_from_zone(zone))
-      .filter(|&idoor| !(self.zones.contains(&idoor.zone1) && self.zones.contains(&idoor.zone2)))
+      .flat_map(|&zone| WG.itemfrontier_from_zone(zone))
+      .filter(|&&idoor| !(self.zones.contains(&idoor.zone1) && self.zones.contains(&idoor.zone2)))
+      .cloned()
       .collect()
   }
 
@@ -153,12 +148,13 @@ impl Dive {
 
     // sanity check door is in frontier
     let key_frontier: BTreeSet<KeyDoor> = self.zones.iter()
-      .flat_map(|&zone| keyfrontier_from_zone(zone))
+      .flat_map(|&zone| WG.keyfrontier_from_zone(zone))
+      .cloned()
       .collect();
     if !key_frontier.contains(&door) { panic!("trying to cross through a door not in the frontier"); }
 
     // sanity check we have a key to open the door
-    let dungeon = dungeon_from_keydoor(door);
+    let dungeon = WG.dungeon_from_keydoor(door);
     if !self.dungeons_i_own_keys_for().contains(&dungeon) {
       panic!("Trying to open a door you don't have a key for");
     }
@@ -187,7 +183,7 @@ impl Dive {
       panic!("Trying to re-loot a zone");
     }
 
-    locations_from_zone(zone).iter()
+    WG.locations_from_zone(zone).iter()
       .filter_map(|loc| assignments.get(&loc))
       .for_each(|&item| self.items.push(item));
 

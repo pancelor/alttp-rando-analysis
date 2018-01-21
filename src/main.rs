@@ -1,7 +1,7 @@
 extern crate env_logger;
 extern crate group_by;
-// #[macro_use]
-// extern crate lazy_static;
+#[macro_use]
+extern crate lazy_static;
 #[macro_use]
 extern crate log;
 #[macro_use]
