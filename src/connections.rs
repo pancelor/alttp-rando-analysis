@@ -92,7 +92,7 @@ macro_rules! cxn {
       can_pass_callback: $cb,
     };
     $gr.itemfrontier_from_zone.entry($z1)
-      .or_insert(Vec::new())
+      .or_insert(Vec::new()) // TODO: same (below)
       .push(idoor);
     let idoor = ItemDoor {
       zone1: $z1,
@@ -101,7 +101,7 @@ macro_rules! cxn {
       can_pass_callback: $cb,
     };
     $gr.itemfrontier_from_zone.entry($z2)
-      .or_insert(Vec::new())
+      .or_insert(Vec::new()) // TODO: same (below)
       .push(idoor);
   });
   ($gr:ident, $z1:ident ==> $z2:ident) => (
@@ -116,33 +116,27 @@ macro_rules! cxn {
       zone2: $z2,
     };
     $gr.keyfrontier_from_zone.entry($z1)
-      .or_insert(BTreeSet::new())
+      .or_insert(BTreeSet::new()) // TODO: throw errors if we need to insert; WorldGraph::new() sets these up for us
       .insert(kdoor);
     $gr.keyfrontier_from_zone.entry($z2)
-      .or_insert(BTreeSet::new())
+      .or_insert(BTreeSet::new()) // TODO: same
       .insert(kdoor);
   });
 }
 
 lazy_static! {
   pub static ref WG: WorldGraph = {
-    let mut gr = WorldGraph {
-      zones_from_dungeon: HashMap::new(),
-      dungeon_from_zone: HashMap::new(),
-      locations_from_zone: HashMap::new(),
-      keyfrontier_from_zone: HashMap::new(),
-      itemfrontier_from_zone: HashMap::new(),
-    };
+    let mut gr = WorldGraph::new();
 
     // PalaceOfDarkness
     cxn!(gr, TempEastLightWorld <=> POD1);
     cxn!(gr, POD1   <=> POD8:   Box::new(|ref items| { can_shoot_arrows(&items) }));
-    // cxn!(gr, POD8   ==> POD2:   &|ref items| { items.contains(&Hammer) });
-    // cxn!(gr, POD47  <=> POD7:   &|ref items| { items.contains(&Lamp) });
-    // cxn!(gr, POD7   <=> POD10:  &|ref items| { items.contains(&BigKeyD1) });
-    // cxn!(gr, POD4   <=> POD6:   &|ref items| { items.contains(&Lamp) });
-    // cxn!(gr, POD2   <=> POD29A: &|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) });
-    // cxn!(gr, POD29B <=> POD9:   &|ref items| { items.contains(&BigKeyD1) });
+    cxn!(gr, POD8   ==> POD2:   Box::new(|ref items| { items.contains(&Hammer) }));
+    cxn!(gr, POD47  <=> POD7:   Box::new(|ref items| { items.contains(&Lamp) }));
+    cxn!(gr, POD7   <=> POD10:  Box::new(|ref items| { items.contains(&BigKeyD1) }));
+    cxn!(gr, POD4   <=> POD6:   Box::new(|ref items| { items.contains(&Lamp) }));
+    cxn!(gr, POD2   <=> POD29A: Box::new(|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) }));
+    cxn!(gr, POD29B <=> POD9:   Box::new(|ref items| { items.contains(&BigKeyD1) }));
     cxn!(gr, POD1   <k> POD2);
     cxn!(gr, POD2   <k> POD3);
     cxn!(gr, POD2   <k> POD4);
@@ -185,6 +179,9 @@ lazy_static! {
       PalaceOfDarknessPrize,
     });
     gr.register_zone(Some(PalaceOfDarkness), POD10, btreeset!{PalaceOfDarknessBigChest});
+    gr.register_zone(Some(PalaceOfDarkness), POD47, btreeset!{});
+    gr.register_zone(Some(PalaceOfDarkness), POD29A, btreeset!{});
+    gr.register_zone(Some(PalaceOfDarkness), POD29B, btreeset!{});
 
     // TODO other dungeons; overworld
     gr
@@ -204,6 +201,25 @@ pub struct WorldGraph {
 }
 
 impl WorldGraph {
+  fn new() -> Self {
+    let mut myself = Self {
+      zones_from_dungeon: HashMap::new(),
+      dungeon_from_zone: HashMap::new(),
+      locations_from_zone: HashMap::new(),
+      keyfrontier_from_zone: HashMap::new(),
+      itemfrontier_from_zone: HashMap::new(),
+    };
+    for &dungeon in ALL_DUNGEONS.iter() { // TODO: remove eventually?
+      myself.zones_from_dungeon.insert(dungeon, btreeset!{});
+    }
+    for &zone in ALL_ZONES.iter() { // TODO: remove eventually?
+      myself.locations_from_zone.insert(zone, btreeset!{});
+      myself.keyfrontier_from_zone.insert(zone, btreeset!{});
+      myself.itemfrontier_from_zone.insert(zone, vec![]);
+    }
+    myself
+  }
+
   fn register_zone(&mut self, dungeon: Option<Dungeon>, zone: Zone, locs: BTreeSet<Location2>) {
     if let Some(dung) = dungeon {
       self.zones_from_dungeon.entry(dung)
@@ -216,7 +232,7 @@ impl WorldGraph {
 
 
   pub fn zones_from_dungeon(&self, dungeon: Dungeon) -> &BTreeSet<Zone> {
-    self.zones_from_dungeon.get(&dungeon).expect("worldindex is borked")
+    self.zones_from_dungeon.get(&dungeon).expect("worldindex is borked 1")
   }
 
   pub fn dungeon_from_zone(&self, zone: Zone) -> Option<Dungeon> {
@@ -225,27 +241,28 @@ impl WorldGraph {
   }
 
   pub fn locations_from_zone(&self, zone: Zone) -> &BTreeSet<Location2> {
-    self.locations_from_zone.get(&zone).expect("worldindex is borked")
+    self.locations_from_zone.get(&zone).expect("worldindex is borked 2")
   }
 
-  pub fn keyfrontier_from_zone(&self, zone: Zone) -> &BTreeSet<KeyDoor> {
-    self.keyfrontier_from_zone.get(&zone).expect("worldindex is borked")
+  pub fn keyfrontier_from_zone(&self, zone: Zone) -> Option<&BTreeSet<KeyDoor>> {
+    self.keyfrontier_from_zone.get(&zone)
   }
 
   pub fn itemfrontier_from_zone(&self, zone: Zone) -> &Vec<ItemDoor> {
-    self.itemfrontier_from_zone.get(&zone).expect("worldindex is borked")
+    self.itemfrontier_from_zone.get(&zone).expect("worldindex is borked 4")
   }
 
   pub fn keyfrontier_from_dungeon(&self, dungeon: Dungeon) -> BTreeSet<KeyDoor> {
-    let zones = self.zones_from_dungeon.get(&dungeon).expect("worldindex is borked");
+    let zones = self.zones_from_dungeon(dungeon);
     zones.iter() // TODO what happens if we into_iter here?
-      .flat_map(|&zone| self.keyfrontier_from_zone(zone))
+      .filter_map(|&zone| self.keyfrontier_from_zone(zone))
+      .flat_map(|&ref kdoorset| kdoorset)
       .cloned()
       .collect()
   }
 
   pub fn dungeon_from_keydoor(&self, keydoor: KeyDoor) -> Dungeon {
-    self.dungeon_from_zone.get(&keydoor.zone1).expect("your keydoor is outside").clone()
+    self.dungeon_from_zone(keydoor.zone1).expect("your keydoor is outside").clone()
   }
 
   // TODO: maybe shouldnt live here

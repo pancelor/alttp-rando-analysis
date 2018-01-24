@@ -2,13 +2,13 @@
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::collections::{HashMap, BTreeSet};
+use std::collections::{HashSet, HashMap, BTreeSet};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, locations2, items, zones, dungeons};
 use super::zones::Zone;
 use super::connections::*;
 use super::items::Item;
-use super::dungeons::Dungeon;
+use super::dungeons::*;
 use super::world::Assignments;
 use super::locations2::Location2;
 use group_by;
@@ -61,7 +61,7 @@ impl Dive {
   }
 
   fn dungeons_i_own_keys_for(&self) -> BTreeSet<&Dungeon> {
-    dungeons::ALL.iter()
+    ALL_DUNGEONS.iter()
       .filter(|&&dungeon| {
         let target_key = WG.key_from_dungeon(dungeon);
         let num_keys = self.items.iter()
@@ -77,7 +77,8 @@ impl Dive {
   pub fn key_frontier(&self) -> BTreeSet<KeyDoor> {
     let dungeons_i_own_keys_for = self.dungeons_i_own_keys_for();
     self.zones.iter()
-      .flat_map(|&zone| WG.keyfrontier_from_zone(zone))
+      .filter_map(|&zone| WG.keyfrontier_from_zone(zone))
+      .flat_map(|&ref kdoorset| kdoorset)
       .filter(|&&kdoor| dungeons_i_own_keys_for.contains(&WG.dungeon_from_keydoor(kdoor)))
       .filter(|&&kdoor| !self.open_doors.contains(&kdoor))
       .cloned()
@@ -119,6 +120,7 @@ impl Dive {
       {
         let item_frontier: Vec<&ItemDoor> = self.item_frontier();
         new_zones = self.do_one_exploration_pass_on_frontier(&item_frontier);
+        debug!("Explore pass #{}: new_zones={:?}", num_passes, new_zones);
         if new_zones.len() == 0 {
           break;
         }
@@ -132,10 +134,10 @@ impl Dive {
 
   /// Returns any new zones that should be added
   /// TODO: it's probably a lot better to instead return a list of new idoors; esp when the dive is beatable
-  fn do_one_exploration_pass_on_frontier(&self, ifront: &Vec<&ItemDoor>) -> Vec<Zone> {
+  fn do_one_exploration_pass_on_frontier(&self, ifront: &Vec<&ItemDoor>) -> HashSet<Zone> {
     trace!("do_one_exploration_pass_on_frontier(\n\tifront={:?},\n)", ifront);
 
-    let mut new_zones = Vec::new();
+    let mut new_zones = HashSet::new();
     for &current_edge in ifront.iter() {
       if !current_edge.can_pass(&self.items) { continue; }
       let zone: Zone = if !self.zones.contains(&current_edge.zone2) {
@@ -145,7 +147,7 @@ impl Dive {
       } else {
         continue;
       };
-      new_zones.push(zone);
+      new_zones.insert(zone);
     }
     new_zones
   }
@@ -155,7 +157,8 @@ impl Dive {
 
     // sanity check door is in frontier
     let key_frontier: BTreeSet<KeyDoor> = self.zones.iter()
-      .flat_map(|&zone| WG.keyfrontier_from_zone(zone))
+      .filter_map(|&zone| WG.keyfrontier_from_zone(zone))
+      .flat_map(|&ref kdoorset| kdoorset)
       .cloned()
       .collect();
     if !key_frontier.contains(&door) { panic!("trying to cross through a door not in the frontier"); }

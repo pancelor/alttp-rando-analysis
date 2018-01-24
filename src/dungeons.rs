@@ -17,7 +17,7 @@ pub enum Dungeon {
 }
 pub use self::Dungeon::*;
 
-pub const ALL: &[Dungeon] = &[
+pub const ALL_DUNGEONS: &[Dungeon] = &[
   EasternPalace,
   DesertPalace,
   TowerOfHera,

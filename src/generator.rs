@@ -7,6 +7,7 @@ use super::locations2::*;
 use super::world::{Assignments, World};
 use super::zones::Zone;
 use super::connections::*;
+use super::dungeons::*;
 use super::dive::Dive;
 
 pub fn generate_world(
@@ -151,7 +152,7 @@ fn get_allowed_locations_to_place_next_item(
     //   EP keydoors, because that dungeon comes earlier (in vanilla).
     //   We'll end up going to POD later after there are no more EP keys
     //   available.
-    let dungeon : &dungeons::Dungeon = dungeons::ALL.iter()
+    let dungeon : &dungeons::Dungeon = ALL_DUNGEONS.iter()
       .filter(|&&dgn| !(&WG.keyfrontier_from_dungeon(dgn) & &keyfrontier).is_empty())
       .next()
       .expect("this dive has no keys");
