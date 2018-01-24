@@ -74,6 +74,12 @@ macro_rules! cxn {
     $gr.itemfrontier_from_zone.entry($z1)
       .or_insert(Vec::new())
       .push(idoor);
+    let idoor = ItemDoor {
+      zone1: $z1,
+      zone2: $z2,
+      reversible: false,
+      can_pass_callback: $cb,
+    };
     $gr.itemfrontier_from_zone.entry($z2)
       .or_insert(Vec::new())
       .push(idoor);
@@ -88,6 +94,12 @@ macro_rules! cxn {
     $gr.itemfrontier_from_zone.entry($z1)
       .or_insert(Vec::new())
       .push(idoor);
+    let idoor = ItemDoor {
+      zone1: $z1,
+      zone2: $z2,
+      reversible: true,
+      can_pass_callback: $cb,
+    };
     $gr.itemfrontier_from_zone.entry($z2)
       .or_insert(Vec::new())
       .push(idoor);
