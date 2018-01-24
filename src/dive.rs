@@ -115,20 +115,27 @@ impl Dive {
       num_passes += 1;
       // gotta set item_frontier here b/c this algo will otherwise fail if there are two ItemDoors in sequence (e.g. with a key spoke also connected to the hub of those three connections)
       // TODO: make it smarterrr probs (i.e. that reverted commit)
-      let item_frontier: Vec<&ItemDoor> = self.item_frontier();
-      if !self.do_one_exploration_pass_on_frontier(&item_frontier, &assignments) {
-        break;
+      let new_zones;
+      {
+        let item_frontier: Vec<&ItemDoor> = self.item_frontier();
+        new_zones = self.do_one_exploration_pass_on_frontier(&item_frontier);
+        if new_zones.len() == 0 {
+          break;
+        }
+      }
+      for zone in new_zones {
+        self.loot_zone(zone, &assignments);
       }
     }
     debug!("Explore finished after {} passes", num_passes);
   }
 
-  /// Returns whether any new zones were added during this pass
+  /// Returns any new zones that should be added
   /// TODO: it's probably a lot better to instead return a list of new idoors; esp when the dive is beatable
-  fn do_one_exploration_pass_on_frontier(&mut self, ifront: &Vec<&ItemDoor>, assignments: &Assignments) -> bool {
+  fn do_one_exploration_pass_on_frontier(&self, ifront: &Vec<&ItemDoor>) -> Vec<Zone> {
     trace!("do_one_exploration_pass_on_frontier(\n\tifront={:?},\n)", ifront);
 
-    let mut new_zones = false;
+    let mut new_zones = Vec::new();
     for &current_edge in ifront.iter() {
       if !current_edge.can_pass(&self.items) { continue; }
       let zone: Zone = if !self.zones.contains(&current_edge.zone2) {
@@ -138,8 +145,7 @@ impl Dive {
       } else {
         continue;
       };
-      new_zones = true;
-      self.loot_zone(zone, &assignments);
+      new_zones.push(zone);
     }
     new_zones
   }
