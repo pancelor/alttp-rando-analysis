@@ -14,10 +14,25 @@ pub struct World {
 impl World {
   pub fn new() -> Self {
     let assignments = hashmap!{
+
       // TODO
     };
     Self {
       assignments,
     }
   }
+
+  pub fn assign(&mut self, item: Item, loc: Location2) {
+    if self.assignments.contains_key(&loc) {
+      debug!("About to panic:\n\titem={:?}\n\tloc={:?}\n\tcurrent={:?}", item, loc, self.assignments.get(&loc));
+      panic!("Trying to overwrite an item assignment");
+    }
+
+    self.assignments.insert(loc, item);
+  }
 }
+
+// TODO: add .assign method
+//   kill pub assignments
+//   make assignments Options
+//   preload assignments with keys etc

@@ -325,9 +325,10 @@ impl WorldGraph {
   pub fn item_can_be_placed_at(&self, item: Item, loc: Location2) -> bool {
     match item {
       // TODO: more
-      KeyD1
-      | KeyP1 => {
-        let dungeon = WG.dungeon_from_key(item).expect("bad key enum");
+        KeyD1 | CompassD1 | MapD1
+      | KeyP1 | CompassP1 | MapP1
+      => {
+        let dungeon = WG.dungeon_from_item(item).expect("bad key enum");
         let locs = WG.locations_from_dungeon(dungeon).expect("not a dungeon somehow");
         locs.contains(&loc)
       },
@@ -336,24 +337,24 @@ impl WorldGraph {
   }
 
   // TODO: maybe shouldn't live here
-  fn dungeon_from_key(&self, key: Item) -> Option<Dungeon> {
+  fn dungeon_from_item(&self, key: Item) -> Option<Dungeon> {
     use super::items::*;
     use super::dungeons::*;
     match key {
-      KeyH1 => None, // TODO: change later
-      KeyH2 => None, // TODO: change later
-      KeyP1 => Some(EasternPalace),
-      KeyP2 => Some(DesertPalace),
-      KeyP3 => Some(TowerOfHera),
-      KeyD1 => Some(PalaceOfDarkness),
-      KeyD2 => Some(SwampPalace),
-      KeyD3 => Some(SkullWoods),
-      KeyD4 => Some(ThievesTown),
-      KeyD5 => Some(IcePalace),
-      KeyD6 => Some(MiseryMire),
-      KeyD7 => Some(TurtleRock),
-      KeyA1 => None, // TODO: change later
-      KeyA2 => None, // TODO: change later
+      KeyH1 | CompassH1 | MapH1 => None, // TODO: change later
+      KeyH2 | CompassH2 | MapH2 => None, // TODO: change later
+      KeyP1 | CompassP1 | MapP1 => Some(EasternPalace),
+      KeyP2 | CompassP2 | MapP2 => Some(DesertPalace),
+      KeyP3 | CompassP3 | MapP3 => Some(TowerOfHera),
+      KeyD1 | CompassD1 | MapD1 => Some(PalaceOfDarkness),
+      KeyD2 | CompassD2 | MapD2 => Some(SwampPalace),
+      KeyD3 | CompassD3 | MapD3 => Some(SkullWoods),
+      KeyD4 | CompassD4 | MapD4 => Some(ThievesTown),
+      KeyD5 | CompassD5 | MapD5 => Some(IcePalace),
+      KeyD6 | CompassD6 | MapD6 => Some(MiseryMire),
+      KeyD7 | CompassD7 | MapD7 => Some(TurtleRock),
+      KeyA1 | CompassA1 | MapA1 => None, // TODO: change later
+      KeyA2 | CompassA2 | MapA2 => None, // TODO: change later
       _     => panic!("bad arg"), // TODO: rm? return None?
     }
   }
