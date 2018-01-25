@@ -111,8 +111,8 @@ fn key_in_dark_maze(world: &world::World) -> bool{
   use locations2::*;
   use items::*;
   (
-    world.assignments.get(&PalaceOfDarknessBigChest) == Some(&KeyD1)
-    || world.assignments.get(&PalaceOfDarknessDarkMazeTop) == Some(&KeyD1)
-    || world.assignments.get(&PalaceOfDarknessDarkMazeBottom) == Some(&KeyD1)
+    world.get(&PalaceOfDarknessBigChest) == Some(&KeyD1)
+    || world.get(&PalaceOfDarknessDarkMazeTop) == Some(&KeyD1)
+    || world.get(&PalaceOfDarknessDarkMazeBottom) == Some(&KeyD1)
   )
 }

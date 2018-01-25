@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet, BTreeSet};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, locations2, items, zones, dungeons};
 use super::locations2::*;
-use super::world::{Assignments, World};
+use super::world::World;
 use super::zones::Zone;
 use super::connections::*;
 use super::dungeons::*;
@@ -17,9 +17,11 @@ pub fn generate_world(
   rng: &mut ThreadRng,
 ) -> World {
   trace!("fn generate_world(\nadvancement_items={:?},\n\tjunk_items={:?},\n\trng\n)", advancement_items, junk_items);
-  let mut assignments;
+  let mut world;
   { // Set up assignments
-    assignments = HashMap::new();
+    world = World::new();
+
+    WG.prefill_pots_etc(&mut world);
 
     let advancement_items_iter;
     let mut junk_items_iter;
@@ -38,38 +40,35 @@ pub fn generate_world(
     let mut randomized_order_locations = locations2::get_all_locations();
     rng.shuffle(&mut randomized_order_locations);
 
-    fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![], &mut assignments);
+    fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![], &mut world);
 
     // rng.shuffle(&mut randomized_order_locations); // TODO: does this even do anything?
 
-    fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut assignments);
+    fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut world);
     // assert_eq!(junk_items_iter.next(), None); // TODO uncomment?
   }
 
-  let world = World {
-    assignments,
-  };
   world
 }
 
 // TODO: temp fxn
 pub fn can_win(world: &World) -> bool {
-  let locs = get_allowed_locations_to_place_next_item(vec![], &world.assignments);
+  let locs = get_allowed_locations_to_place_next_item(vec![], &world);
   locs.contains(&Location2::PalaceOfDarknessPrize) // TODO: s/PalaceOfDarknessPrize/DefeatGanon/
 }
 
 fn fast_fill_items_in_locations(
   fill_items: &mut IntoIter<items::Item>,
   locations: &Vec<locations2::Location2>,
-  assignments: &mut Assignments,
+  world: &mut World,
 ) {
-  trace!("fn fast_fill_items_in_locations(\nfill_items={:?},\n\tlocations={:?},\n\tassignments={:?}\n)", fill_items, locations, assignments);
+  trace!("fn fast_fill_items_in_locations(\nfill_items={:?},\n\tlocations={:?},\n\tworld{:?}\n)", fill_items, locations, world);
   for &loc in locations.iter() {
-    if assignments.contains_key(&loc) { continue };
+    if world.contains_key(&loc) { continue };
     match fill_items.next() {
       Some(item) => {
         info!("Fast filling {:?} with {:?}", loc, item);
-        assignments.insert(loc, item)
+        world.assign(loc, item)
       },
       None => break,
     };
@@ -81,9 +80,9 @@ fn fill_items_in_locations(
   fill_items: IntoIter<items::Item>,
   locations: &Vec<locations2::Location2>,
   base_assumed_items: &Vec<items::Item>,
-  mut assignments: &mut Assignments, // TODO WTF why do we need 2 `mut`s here?? and only here???
+  mut world: &mut World, // TODO WTF why do we need 2 `mut`s here?? and only here???
 ) {
-  trace!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tassignments={:?}\n)", fill_items, locations, base_assumed_items, assignments);
+  trace!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tworld{:?}\n)", fill_items, locations, base_assumed_items, world);
   let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
   for _ in 0..remaining_fill_items.len() {
     let item = remaining_fill_items.pop().expect("bad for loop sync");
@@ -91,25 +90,25 @@ fn fill_items_in_locations(
     assumed_items.append(&mut (remaining_fill_items.clone()));
 
     let assumed_items_str = format!("{:?}", assumed_items); // avoid move-checker memes
-    let allowed_locations = get_allowed_locations_to_place_next_item(assumed_items, &mut assignments);
+    let allowed_locations = get_allowed_locations_to_place_next_item(assumed_items, &mut world);
     debug!("Found locations:\n\tassumed_items={:?}\n\tallowed_locations={:?}\n\tallowed_locations.len()={}", assumed_items_str, allowed_locations, allowed_locations.len());
     let loc: &Location2 = locations.iter()
-      .filter(|&&loc| !assignments.contains_key(&loc))
+      .filter(|&&loc| !world.contains_key(&loc))
       .filter(|&&loc| allowed_locations.contains(&loc))
       .filter(|&&loc| WG.item_can_be_placed_at(item, loc)) // TODO: do this earlier to save work?
       .next()
       .expect("No locations left");
     info!("Filling {:?} with {:?}", loc, item);
-    assignments.insert(*loc, item);
+    world.assign(*loc, item);
   }
 }
 
 fn get_allowed_locations_to_place_next_item(
   assumed: Vec<items::Item>,
-  assignments: &Assignments,
+  world: &World,
 ) -> BTreeSet<Location2> {
-  trace!("fn get_allowed_locations_to_place_next_item(\n\tassumed={:?},\n\tassignments={:?}\n)", assumed, assignments);
-  let first_dive: Dive = Dive::new(assumed, &assignments);
+  trace!("fn get_allowed_locations_to_place_next_item(\n\tassumed={:?},\n\tworld{:?}\n)", assumed, world);
+  let first_dive: Dive = Dive::new(assumed, &world);
   let mut stack: Vec<Dive> = Vec::new();
 
   let mut num_dives_seen: u64 = 1;
@@ -165,7 +164,7 @@ fn get_allowed_locations_to_place_next_item(
     for (ii, &door) in doors_to_explore.iter().enumerate() {
       debug!("Pushing dive stack ({}/{}): {:?}", ii+1, temp_num, door);
       let mut new_dive: Dive = current_dive.clone();
-      new_dive.explore_keydoor(door, &assignments);
+      new_dive.explore_keydoor(door, &world);
       stack.push(new_dive);
     }
   }

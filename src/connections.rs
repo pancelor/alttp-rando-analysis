@@ -2,6 +2,7 @@
 
 use std::collections::{HashMap, BTreeSet};
 use super::locations2::*;
+use super::world::World;
 use super::zones::*;
 use super::dungeons::*;
 use super::logic::*;
@@ -190,6 +191,9 @@ lazy_static! {
     });
     gr.register_zone(Some(EasternPalace), EP56, btreeset!{});
 
+    gr.preset_item(EasternPalaceKeyPot, KeyP1);
+    gr.preset_item(EasternPalaceKeyEyegore, KeyP1);
+
     // PalaceOfDarkness
     gr.register_zone(Some(PalaceOfDarkness), POD1, btreeset!{
       PalaceOfDarknessShooterRoom
@@ -245,6 +249,8 @@ pub struct WorldGraph {
   // connection fields
   keyfrontier_from_zone: HashMap<Zone, BTreeSet<KeyDoor>>,
   itemfrontier_from_zone: HashMap<Zone, Vec<ItemDoor>>,
+
+  preset_items: HashMap<Location2, Item>,
 }
 
 impl WorldGraph {
@@ -255,6 +261,7 @@ impl WorldGraph {
       locations_from_zone: HashMap::new(),
       keyfrontier_from_zone: HashMap::new(),
       itemfrontier_from_zone: HashMap::new(),
+      preset_items: HashMap::new(),
     }
   }
 
@@ -288,6 +295,16 @@ impl WorldGraph {
 
   pub fn itemfrontier_from_zone(&self, zone: Zone) -> Option<&Vec<ItemDoor>> {
     self.itemfrontier_from_zone.get(&zone)
+  }
+
+  pub fn preset_item(&mut self, loc: Location2, item: Item) {
+    self.preset_items.insert(loc, item);
+  }
+
+  pub fn prefill_pots_etc(&self, world: &mut World) {
+    for (&loc, &item) in self.preset_items.iter() {
+      world.assign(loc, item);
+    }
   }
 
   pub fn keyfrontier_from_dungeon(&self, dungeon: Dungeon) -> BTreeSet<KeyDoor> {

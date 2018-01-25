@@ -9,7 +9,7 @@ use super::zones::Zone;
 use super::connections::*;
 use super::items::Item;
 use super::dungeons::*;
-use super::world::Assignments;
+use super::world::World;
 use super::locations2::Location2;
 use group_by;
 
@@ -42,15 +42,15 @@ impl Hash for Dive {
 impl Dive {
   pub fn new(
     items: Vec<Item>,
-    assignments: &Assignments,
+    world: &World,
   ) -> Self {
     let mut me = Self {
       zones: BTreeSet::new(),
       items,
       open_doors: BTreeSet::new(),
     };
-    me.loot_zone(Zone::TempEastLightWorld, &assignments);
-    me.explore(&assignments);
+    me.loot_zone(Zone::TempEastLightWorld, &world);
+    me.explore(&world);
     me
   }
 
@@ -101,16 +101,16 @@ impl Dive {
       .collect()
   }
 
-  pub fn explore_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
+  pub fn explore_keydoor(&mut self, door: KeyDoor, world: &World) {
     trace!("fn explore_keydoor()");
-    self.open_keydoor(door, &assignments);
-    self.explore(&assignments);
+    self.open_keydoor(door, &world);
+    self.explore(&world);
   }
 
-  pub fn explore(&mut self, assignments: &Assignments) {
+  pub fn explore(&mut self, world: &World) {
     // assumes self is already greedy (i.e. wont re-explore self.zones)
     debug!("Explore:\n\titems={:?}", self.items);
-    trace!("fn explore(\n\tself={:?},\n\tassignments={:?}\n)", self, assignments);
+    trace!("fn explore(\n\tself={:?},\n\tworld={:?}\n)", self, world);
 
     let mut num_passes = 0;
     loop {
@@ -127,7 +127,7 @@ impl Dive {
         }
       }
       for zone in new_zones {
-        self.loot_zone(zone, &assignments);
+        self.loot_zone(zone, &world);
       }
     }
     debug!("Explore finished after {} passes", num_passes);
@@ -153,8 +153,8 @@ impl Dive {
     new_zones
   }
 
-  fn open_keydoor(&mut self, door: KeyDoor, assignments: &Assignments) {
-    trace!("fn open_keydoor(\n\tself={:?},\n\tdoor={:?}\n\tassignments={:?}\n)", self, door, assignments);
+  fn open_keydoor(&mut self, door: KeyDoor, world: &World) {
+    trace!("fn open_keydoor(\n\tself={:?},\n\tdoor={:?}\n\tworld={:?}\n)", self, door, world);
 
     // sanity check door is in frontier
     let key_frontier: BTreeSet<KeyDoor> = self.zones.iter()
@@ -185,10 +185,10 @@ impl Dive {
       trace!("opened a useless door (e.g. the left<->right keydoor in GT");
       return;
     }
-    self.loot_zone(new_zone, &assignments);
+    self.loot_zone(new_zone, &world);
   }
 
-  fn loot_zone(&mut self, zone: Zone, assignments: &Assignments) {
+  fn loot_zone(&mut self, zone: Zone, world: &World) {
     // TODO: make self.items a method, and calc it on the fly from zones? makes for easier debugging... yeah lets do it
     if !self.zones.insert(zone) {
       panic!("Trying to re-loot a zone");
@@ -197,12 +197,12 @@ impl Dive {
     let locations = WG.locations_from_zone(zone);
     if let Some(locs) = locations {
       locs.iter()
-        .filter_map(|loc| assignments.get(&loc))
+        .filter_map(|loc| world.get(&loc))
         .for_each(|&item| self.items.push(item));
     }
 
     debug!("Looting {:?}", zone);
     // debug!("Looting:\n\tzone={:?}\n\t(post) self.items={:?}", zone, self.items);
-    trace!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tassignments={:?}\n)", self, zone, assignments);
+    trace!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tworld={:?}\n)", self, zone, world);
   }
 }
