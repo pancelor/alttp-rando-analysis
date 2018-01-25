@@ -55,9 +55,11 @@ fn real_main() {
   ];
 
   let mut dungeon_items = vec![
-    BigKeyP1,
     MapP1,
+    MapD1,
+
     CompassP1,
+    CompassD1,
 
     KeyD1,
     KeyD1,
@@ -65,9 +67,9 @@ fn real_main() {
     KeyD1,
     KeyD1,
     KeyD1,
-    BigKeyD1,
-    MapD1,
-    CompassD1,
+
+    BigKeyP1,
+    BigKeyD1, // items at this end will be placed first
   ];
 
   let keysanity = env::var("KEYSANITY").is_ok();

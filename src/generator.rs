@@ -24,18 +24,8 @@ pub fn generate_world(
 
     WG.prefill_pots_etc(&mut world);
 
-    let advancement_items_iter;
-    let dungeon_items_iter;
     let mut junk_items_iter;
     { // init item iterators
-      let mut advancement_items_clone = advancement_items.clone();
-      rng.shuffle(&mut advancement_items_clone);
-      advancement_items_iter = advancement_items_clone.into_iter();
-
-      let mut dungeon_items_clone = dungeon_items.clone();
-      rng.shuffle(&mut dungeon_items_clone);
-      dungeon_items_iter = dungeon_items_clone.into_iter();
-
       let mut junk_items_clone = junk_items.clone();
       rng.shuffle(&mut junk_items_clone);
       junk_items_iter = junk_items_clone.into_iter();
@@ -47,9 +37,9 @@ pub fn generate_world(
     rng.shuffle(&mut randomized_order_locations);
     debug!("randomized_order_locations={:?}", randomized_order_locations);
 
-    fill_items_in_locations(dungeon_items_iter, &randomized_order_locations, &advancement_items, &mut world);
+    fill_items_in_locations(dungeon_items.clone(), &randomized_order_locations, &advancement_items, &mut world);
     randomized_order_locations.reverse();
-    fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![], &mut world);
+    fill_items_in_locations(advancement_items_iter.clone(), &randomized_order_locations, &vec![], &mut world);
 
     // rng.shuffle(&mut randomized_order_locations); // TODO: does this even do anything?
 
@@ -84,15 +74,13 @@ fn fast_fill_items_in_locations(
   }
 }
 
-use std::vec::IntoIter;
 fn fill_items_in_locations(
-  fill_items: IntoIter<items::Item>,
+  remaining_fill_items: Vec<items::Item>,
   locations: &Vec<locations2::Location2>,
   base_assumed_items: &Vec<items::Item>,
   mut world: &mut World, // TODO WTF why do we need 2 `mut`s here?? and only here???
 ) {
   trace!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tworld{:?}\n)", fill_items, locations, base_assumed_items, world);
-  let mut remaining_fill_items: Vec<items::Item> = fill_items.collect();
   for _ in 0..remaining_fill_items.len() {
     let item = remaining_fill_items.pop().expect("bad for loop sync");
     let mut assumed_items = base_assumed_items.clone();
@@ -200,6 +188,6 @@ fn get_allowed_locations_to_place_next_item(
     }
   }
 
-  info!("Num dives: (total, duplicates, %) = ({}, {}, {})", num_dives_seen, num_duplicate_dives_seen, (num_duplicate_dives_seen as f64) / (num_dives_seen as f64));
+  info!("Num dives: (total, duplicates, % dups) = ({}, {}, {:.2})", num_dives_seen, num_duplicate_dives_seen, (num_duplicate_dives_seen as f64) / (num_dives_seen as f64));
   common_locs.expect("there are no locations common to every maximal dive")
 }
