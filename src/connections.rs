@@ -137,6 +137,13 @@ lazy_static! {
     cxn!(gr, EP5 <k> EP56);
     cxn!(gr, EP56 <=> EP6: Box::new(|ref items| { items.contains(&Bow) }));
 
+    // TowerOfHera
+    cxn!(gr, TempEastLightWorld <=> TH1);
+    cxn!(gr, TH1 <k> TH12);
+    cxn!(gr, TH12 <=> TH2: Box::new(|ref items| { can_light_torches(&items) }));
+    cxn!(gr, TH1 <=> TH3: Box::new(|ref items| { items.contains(&BigKeyP3) }));
+    cxn!(gr, TH3 <=> TH4: Box::new(|ref items| { has_sword(&items) || items.contains(&Hammer) }));
+
     // PalaceOfDarkness
     cxn!(gr, TempEastLightWorld <=> POD1);
     cxn!(gr, POD1   <=> POD8:   Box::new(|ref items| { can_shoot_arrows(&items) }));
@@ -193,6 +200,24 @@ lazy_static! {
 
     gr.preset_item(EasternPalaceKeyPot, KeyP1);
     gr.preset_item(EasternPalaceKeyEyegore, KeyP1);
+
+    // TowerOfHera
+    gr.register_zone(Some(TowerOfHera), TH1, btreeset!{
+      TowerOfHeraMapChest,
+      TowerOfHeraBasementCage,
+    });
+    gr.register_zone(Some(TowerOfHera), TH2, btreeset!{
+      TowerOfHeraBigKeyChest,
+    });
+    gr.register_zone(Some(TowerOfHera), TH3, btreeset!{
+      TowerOfHeraCompassChest,
+      TowerOfHeraBigChest,
+    });
+    gr.register_zone(Some(TowerOfHera), TH4, btreeset!{
+      TowerOfHeraMoldorm,
+      TowerOfHeraPrize,
+    });
+    gr.register_zone(Some(TowerOfHera), TH12, btreeset!{});
 
     // PalaceOfDarkness
     gr.register_zone(Some(PalaceOfDarkness), POD1, btreeset!{
@@ -396,7 +421,7 @@ impl WorldGraph {
     match dungeon {
       EasternPalace => Some(EasternPalacePrize),
       // DesertPalace => Some(DesertPalacePrize),
-      // TowerOfHera => Some(TowerOfHeraPrize),
+      TowerOfHera => Some(TowerOfHeraPrize),
       PalaceOfDarkness => Some(PalaceOfDarknessPrize),
       // SwampPalace => Some(SwampPalacePrize),
       // SkullWoods => Some(SkullWoodsPrize),

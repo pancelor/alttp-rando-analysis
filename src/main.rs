@@ -50,18 +50,22 @@ fn real_main() {
   use items::*;
 
   let mut advancement_items = vec![
+    FireRod,
     Bow,
     Hammer,
     Lamp,
   ];
 
   let mut dungeon_items = vec![
+    MapP3,
     MapP1,
     MapD1,
 
+    CompassP3,
     CompassP1,
     CompassD1,
 
+    KeyP3,
     KeyD1,
     KeyD1,
     KeyD1,
@@ -69,6 +73,7 @@ fn real_main() {
     KeyD1,
     KeyD1,
 
+    BigKeyP3,
     BigKeyP1,
     BigKeyD1, // items at this end will be placed first
   ];
@@ -80,7 +85,7 @@ fn real_main() {
   debug!("keysanity={}, dungeon_items={:?}", keysanity, dungeon_items);
 
   let mut junk_items = vec![];
-  junk_items.extend((0..).take(17).map(|_| Heart));
+  junk_items.extend((0..).take(19).map(|_| Heart));
 
   // TODO: check all prizes are gettable; make temp prize locs?
 

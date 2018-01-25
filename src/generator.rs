@@ -36,7 +36,7 @@ pub fn generate_world(
       let mut prizes = vec![
         items::Item::Crystal1,
         items::Item::Crystal2,
-        // items::Item::Crystal3,
+        items::Item::Crystal3,
         // items::Item::Crystal4,
         // items::Item::Crystal5,
         // items::Item::Crystal6,
@@ -47,7 +47,7 @@ pub fn generate_world(
       ];
       rng.shuffle(&mut prizes);
       let mut iter = prizes.into_iter();
-      // world.assign(TowerOfHeraPrize, iter.next().unwrap());
+      world.assign(TowerOfHeraPrize, iter.next().unwrap());
       world.assign(EasternPalacePrize, iter.next().unwrap());
       // world.assign(DesertPalacePrize, iter.next().unwrap());
       // world.assign(SkullWoodsPrize, iter.next().unwrap());
