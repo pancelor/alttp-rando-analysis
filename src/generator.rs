@@ -104,9 +104,21 @@ fn fill_items_in_locations(
 
     // let loc: &Location2 = locations.iter()
     let locs: Vec<&Location2> = locations.iter()
+      .inspect(|loc| {
+        debug!("filter1 {:?}", loc);
+      })
       .filter(|&&loc| !world.contains_key(&loc))
+      .inspect(|loc| {
+        debug!("filter2 {:?}", loc);
+      })
       .filter(|&&loc| allowed_locations.contains(&loc))
+      .inspect(|loc| {
+        debug!("filter3 {:?}", loc);
+      })
       .filter(|&&loc| WG.item_can_be_placed_at(item, loc)) // TODO: do this earlier to save work?
+      .inspect(|loc| {
+        debug!("filter4 {:?}", loc);
+      })
       .collect();
       // .next()
       // .expect("No locations left");

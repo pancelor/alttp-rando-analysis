@@ -347,12 +347,15 @@ impl WorldGraph {
 
     keysanity || match item {
       // TODO: more
-        KeyD1 | CompassD1 | MapD1
-      | KeyP1 | CompassP1 | MapP1
+        KeyD1 | BigKeyD1 | CompassD1 | MapD1
+      | KeyP1 | BigKeyP1 | CompassP1 | MapP1
       => {
         let dungeon = WG.dungeon_from_item(item).expect("bad key enum");
         let locs = WG.locations_from_dungeon(dungeon).expect("not a dungeon somehow");
-        locs.contains(&loc)
+        let x = locs.contains(&loc);
+        // TODO: s/debug/trace
+        // debug!("item_can_be_placed_at\n\titem={:?}\n\tloc={:?}\n\tlocs={:?}\n\tcan={}", item, loc, locs, x);
+        x
       },
       _ => true,
     }
