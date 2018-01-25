@@ -3,6 +3,13 @@
 #[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Zone {
   TempEastLightWorld,
+  EP1,
+  EP2,
+  EP3,
+  EP4,
+  EP5,
+  EP6,
+  EP56,
   POD1,
   POD2,
   POD3,
@@ -23,6 +30,11 @@ pub use self::Zone::*;
 #[allow(dead_code)]
 pub const ALL_ZONES: &[Zone] = &[
   TempEastLightWorld,
+  EP1,
+  EP2,
+  EP3,
+  EP4,
+  EP5,
   POD1,
   POD2,
   POD3,

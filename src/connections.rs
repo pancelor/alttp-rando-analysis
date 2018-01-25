@@ -127,6 +127,15 @@ lazy_static! {
   pub static ref WG: WorldGraph = {
     let mut gr = WorldGraph::new();
 
+    // EasternPalace
+    cxn!(gr, TempEastLightWorld <=> EP1);
+    cxn!(gr, EP1 <=> EP2: Box::new(|ref items| { items.contains(&Lamp) }));
+    cxn!(gr, EP2 <k> EP3);
+    cxn!(gr, EP1 <=> EP4: Box::new(|ref items| { items.contains(&BigKeyP1) }));
+    cxn!(gr, EP1 <=> EP5: Box::new(|ref items| { items.contains(&Lamp) && items.contains(&BigKeyP1) }));
+    cxn!(gr, EP5 <k> EP56);
+    cxn!(gr, EP56 <=> EP6: Box::new(|ref items| { items.contains(&Bow) }));
+
     // PalaceOfDarkness
     cxn!(gr, TempEastLightWorld <=> POD1);
     cxn!(gr, POD1   <=> POD8:   Box::new(|ref items| { can_shoot_arrows(&items) }));
@@ -150,17 +159,54 @@ lazy_static! {
       TempOverworld3,
       TempOverworld4,
       TempOverworld5,
+      TempOverworld6,
+      TempOverworld7,
+      TempOverworld8,
+      TempOverworld9,
+      TempOverworld10,
     ]);
 
+    // Eastern Palace
+    gr.register_zone(Some(EasternPalace), EP1, btreeset!{
+      EasternPalaceCompassChest,
+      EasternPalaceCannonballChest,
+      EasternPalaceMapChest,
+    });
+    gr.register_zone(Some(EasternPalace), EP2, btreeset!{
+      EasternPalaceKeyPot,
+    });
+    gr.register_zone(Some(EasternPalace), EP3, btreeset!{
+      EasternPalaceBigKeyChest,
+    });
+    gr.register_zone(Some(EasternPalace), EP4, btreeset!{
+      EasternPalaceBigChest,
+    });
+    gr.register_zone(Some(EasternPalace), EP5, btreeset!{
+      EasternPalaceKeyEyegore,
+    });
+    gr.register_zone(Some(EasternPalace), EP6, btreeset!{
+      EasternPalaceArmosKnights,
+      EasternPalacePrize,
+    });
+    gr.register_zone(Some(EasternPalace), EP56, btreeset!{});
+
     // PalaceOfDarkness
-    gr.register_zone(Some(PalaceOfDarkness), POD1, btreeset!{PalaceOfDarknessShooterRoom});
+    gr.register_zone(Some(PalaceOfDarkness), POD1, btreeset!{
+      PalaceOfDarknessShooterRoom
+    });
     gr.register_zone(Some(PalaceOfDarkness), POD2, btreeset!{
       PalaceOfDarknessStalfosBasement,
       PalaceOfDarknessTheArenaBridge,
     });
-    gr.register_zone(Some(PalaceOfDarkness), POD3, btreeset!{PalaceOfDarknessBigKeyChest});
-    gr.register_zone(Some(PalaceOfDarkness), POD4, btreeset!{PalaceOfDarknessCompassChest});
-    gr.register_zone(Some(PalaceOfDarkness), POD5, btreeset!{PalaceOfDarknessHarmlessHellway});
+    gr.register_zone(Some(PalaceOfDarkness), POD3, btreeset!{
+      PalaceOfDarknessBigKeyChest
+    });
+    gr.register_zone(Some(PalaceOfDarkness), POD4, btreeset!{
+      PalaceOfDarknessCompassChest
+    });
+    gr.register_zone(Some(PalaceOfDarkness), POD5, btreeset!{
+      PalaceOfDarknessHarmlessHellway
+    });
     gr.register_zone(Some(PalaceOfDarkness), POD6, btreeset!{
       PalaceOfDarknessDarkBasementLeft,
       PalaceOfDarknessDarkBasementRight,
@@ -177,7 +223,9 @@ lazy_static! {
       PalaceOfDarknessHelmasaurKing,
       PalaceOfDarknessPrize,
     });
-    gr.register_zone(Some(PalaceOfDarkness), POD10, btreeset!{PalaceOfDarknessBigChest});
+    gr.register_zone(Some(PalaceOfDarkness), POD10, btreeset!{
+      PalaceOfDarknessBigChest
+    });
     gr.register_zone(Some(PalaceOfDarkness), POD47, btreeset!{});
     gr.register_zone(Some(PalaceOfDarkness), POD29A, btreeset!{});
     gr.register_zone(Some(PalaceOfDarkness), POD29B, btreeset!{});
@@ -257,13 +305,38 @@ impl WorldGraph {
     }
   }
 
+  fn locations_from_dungeon(&self, dungeon: Dungeon) -> Option<BTreeSet<Location2>> {
+    self.zones_from_dungeon(dungeon)
+      .and_then(|zones| {
+        let ret = zones.iter()
+          .filter_map(|&zone| self.locations_from_zone(zone))
+          .flat_map(|&ref locset| locset)
+          .cloned()
+          .collect();
+        Some(ret)
+      })
+  }
+
   pub fn dungeon_from_keydoor(&self, keydoor: KeyDoor) -> Dungeon {
     self.dungeon_from_zone(keydoor.zone1).expect("your keydoor is outside").clone()
   }
 
-  // TODO: maybe shouldnt live here
-  #[allow(dead_code)] // TODO: rm?
-  pub fn dungeon_from_key(&self, key: Item) -> Option<Dungeon> {
+  // TODO: maybe shouldn't live here
+  pub fn item_can_be_placed_at(&self, item: Item, loc: Location2) -> bool {
+    match item {
+      // TODO: more
+      KeyD1
+      | KeyP1 => {
+        let dungeon = WG.dungeon_from_key(item).expect("bad key enum");
+        let locs = WG.locations_from_dungeon(dungeon).expect("not a dungeon somehow");
+        locs.contains(&loc)
+      },
+      _ => true,
+    }
+  }
+
+  // TODO: maybe shouldn't live here
+  fn dungeon_from_key(&self, key: Item) -> Option<Dungeon> {
     use super::items::*;
     use super::dungeons::*;
     match key {
@@ -285,7 +358,7 @@ impl WorldGraph {
     }
   }
 
-  // TODO: maybe shouldnt live here
+  // TODO: maybe shouldn't live here
   pub fn key_from_dungeon(&self, dungeon: Dungeon) -> Item {
     use super::items::*;
     use super::dungeons::*;

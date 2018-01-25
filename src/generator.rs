@@ -96,6 +96,7 @@ fn fill_items_in_locations(
     let loc: &Location2 = locations.iter()
       .filter(|&&loc| !assignments.contains_key(&loc))
       .filter(|&&loc| allowed_locations.contains(&loc))
+      .filter(|&&loc| WG.item_can_be_placed_at(item, loc)) // TODO: do this earlier to save work?
       .next()
       .expect("No locations left");
     info!("Filling {:?} with {:?}", loc, item);

@@ -56,30 +56,35 @@ fn temp_main() {
 fn real_main() {
   use items::*;
   let advancement_items = vec![
-    KeyD1,
-    KeyD1,
-    KeyD1,
-    KeyD1,
-    KeyD1,
-    KeyD1,
     Bow,
     Hammer,
     Lamp,
+
+    BigKeyP1,
+    MapP1,
+    CompassP1,
+
+    KeyD1,
+    KeyD1,
+    KeyD1,
+    KeyD1,
+    KeyD1,
+    KeyD1,
     BigKeyD1,
     MapD1,
     CompassD1,
   ];
 
-  let junk_items = vec![
-    BottleWithBee,
-    BottleWithBee,
-    BottleWithBee,
-    BottleWithBee,
-    BottleWithBee,
-    BottleWithBee,
-    BottleWithBee,
-    BottleWithBee,
-  ];
+  let mut junk_items = vec![];
+  junk_items.extend((0..).take(19).map(|_| Heart));
+
+  // TODO: check all prizes are gettable; make temp prize locs?
+
+  assert_eq!(
+    locations2::get_all_locations().len(),
+    advancement_items.len() + junk_items.len(),
+    "Location/Item counts don't match"
+  );
 
   // need 14 + prize + 5 overworld = 20 items total
 

@@ -10,3 +10,14 @@ pub type Assignments = HashMap<Location2, Item>;
 pub struct World {
   pub assignments: Assignments,
 }
+
+impl World {
+  pub fn new() -> Self {
+    let assignments = hashmap!{
+      // TODO
+    };
+    Self {
+      assignments,
+    }
+  }
+}
