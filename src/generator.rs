@@ -18,11 +18,49 @@ pub fn generate_world(
   rng: &mut ThreadRng,
 ) -> World {
   trace!("fn generate_world(\nadvancement_items={:?},\n\tjunk_items={:?},\n\trng\n)", advancement_items, junk_items);
-  let mut world;
-  { // Set up assignments
-    world = World::new();
+  let medallions;
+  { // Set up medallions
+    let all_meds = medallions::get_all_medallions();
+    medallions = medallions::EntranceConfig {
+      turtle_rock: *rng.choose(&all_meds).expect("empty medallion array"),
+      misery_mire: *rng.choose(&all_meds).expect("empty medallion array"),
+    };
+  }
 
-    WG.prefill_pots_etc(&mut world);
+  let mut world = World::new(medallions);
+
+  WG.prefill_pots_etc(&mut world);
+
+  { // Set up assignments
+    { // Place prizes
+      let mut prizes = vec![
+        items::Item::Crystal1,
+        items::Item::Crystal2,
+        // items::Item::Crystal3,
+        // items::Item::Crystal4,
+        // items::Item::Crystal5,
+        // items::Item::Crystal6,
+        // items::Item::Crystal7,
+        // items::Item::PendantOfCourage,
+        // items::Item::PendantOfPower,
+        // items::Item::PendantOfWisdom,
+      ];
+      rng.shuffle(&mut prizes);
+      let mut iter = prizes.into_iter();
+      // world.assign(TowerOfHeraPrize, iter.next().unwrap());
+      world.assign(EasternPalacePrize, iter.next().unwrap());
+      // world.assign(DesertPalacePrize, iter.next().unwrap());
+      // world.assign(SkullWoodsPrize, iter.next().unwrap());
+      // world.assign(ThievesTownPrize, iter.next().unwrap());
+      // world.assign(MiseryMirePrize, iter.next().unwrap());
+      // world.assign(SwampPalacePrize, iter.next().unwrap());
+      // world.assign(IcePalacePrize, iter.next().unwrap());
+      world.assign(PalaceOfDarknessPrize, iter.next().unwrap());
+      // world.assign(TurtleRockPrize, iter.next().unwrap());
+      if iter.next() != None {
+        panic!("bad prize count");
+      }
+    }
 
     rng.shuffle(&mut junk_items);
     let mut junk_items_iter = junk_items.into_iter();
@@ -34,7 +72,19 @@ pub fn generate_world(
     debug!("randomized_order_locations={:?}", randomized_order_locations);
 
     fill_items_in_locations(dungeon_items, &randomized_order_locations, &advancement_items, &mut world);
+
+    // TODO: very old code; to reimplement at some point
+    // // { // put some junk in ganon
+    // //   let num_junk_items = rng.next_u32() % 16;
+    // //   let ganon_locs: Vec<locations::Location> = regions::get_locations_for(regions::Region::GanonsTower).into_iter()
+    // //     .filter(|loc| world.assignments.get(loc) == None)
+    // //     .take(num_junk_items as usize)
+    // //     .collect();
+    // //   fast_fill_items_in_locations(&mut junk_items_iter, &ganon_locs, &mut world.assignments);
+    // // }
+
     randomized_order_locations.reverse();
+
     fill_items_in_locations(advancement_items, &randomized_order_locations, &vec![], &mut world);
 
     // rng.shuffle(&mut randomized_order_locations); // TODO: does this even do anything?

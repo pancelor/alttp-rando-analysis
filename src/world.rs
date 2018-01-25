@@ -2,6 +2,7 @@
 
 use std::collections::HashMap;
 use super::locations2::Location2;
+use super::medallions;
 use super::items::Item;
 
 pub type Assignments = HashMap<Location2, Item>;
@@ -9,15 +10,15 @@ pub type Assignments = HashMap<Location2, Item>;
 #[derive(Eq, PartialEq, Debug)]
 pub struct World {
   assignments: Assignments,
+  medallions: medallions::EntranceConfig,
 }
 
 impl World {
-  pub fn new() -> Self {
-    let assignments = hashmap!{
-      // TODO
-    };
+  pub fn new(medallions: medallions::EntranceConfig) -> Self {
+    let assignments = hashmap!{};
     Self {
       assignments,
+      medallions
     }
   }
 
