@@ -11,9 +11,9 @@ use super::dungeons::*;
 use super::dive::Dive;
 
 pub fn generate_world(
-  advancement_items: &Vec<items::Item>,
-  dungeon_items: &Vec<items::Item>,
-  junk_items: &Vec<items::Item>,
+  advancement_items: Vec<items::Item>,
+  dungeon_items: Vec<items::Item>,
+  mut junk_items: Vec<items::Item>,
   // TODO: add back in nice_items and do the ganon tower pre-fill thing
   rng: &mut ThreadRng,
 ) -> World {
@@ -24,12 +24,8 @@ pub fn generate_world(
 
     WG.prefill_pots_etc(&mut world);
 
-    let mut junk_items_iter;
-    { // init item iterators
-      let mut junk_items_clone = junk_items.clone();
-      rng.shuffle(&mut junk_items_clone);
-      junk_items_iter = junk_items_clone.into_iter();
-    }
+    rng.shuffle(&mut junk_items);
+    let mut junk_items_iter = junk_items.into_iter();
 
     // The code from here to the end is based on RandomAssumed.php
 
@@ -37,14 +33,14 @@ pub fn generate_world(
     rng.shuffle(&mut randomized_order_locations);
     debug!("randomized_order_locations={:?}", randomized_order_locations);
 
-    fill_items_in_locations(dungeon_items.clone(), &randomized_order_locations, &advancement_items, &mut world);
+    fill_items_in_locations(dungeon_items, &randomized_order_locations, &advancement_items, &mut world);
     randomized_order_locations.reverse();
-    fill_items_in_locations(advancement_items_iter.clone(), &randomized_order_locations, &vec![], &mut world);
+    fill_items_in_locations(advancement_items, &randomized_order_locations, &vec![], &mut world);
 
     // rng.shuffle(&mut randomized_order_locations); // TODO: does this even do anything?
 
     fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut world);
-    // assert_eq!(junk_items_iter.next(), None); // TODO uncomment?
+    assert_eq!(junk_items_iter.next(), None, "Item/Loc count mismatch"); // TODO uncomment?
   }
 
   world
@@ -56,6 +52,7 @@ pub fn can_win(world: &World) -> bool {
   locs.contains(&Location2::PalaceOfDarknessPrize) // TODO: s/PalaceOfDarknessPrize/DefeatGanon/
 }
 
+use std::vec::IntoIter;
 fn fast_fill_items_in_locations(
   fill_items: &mut IntoIter<items::Item>,
   locations: &Vec<locations2::Location2>,
@@ -75,48 +72,27 @@ fn fast_fill_items_in_locations(
 }
 
 fn fill_items_in_locations(
-  remaining_fill_items: Vec<items::Item>,
+  mut remaining_fill_items: Vec<items::Item>,
   locations: &Vec<locations2::Location2>,
   base_assumed_items: &Vec<items::Item>,
-  mut world: &mut World, // TODO WTF why do we need 2 `mut`s here?? and only here???
+  world: &mut World,
 ) {
-  trace!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tworld{:?}\n)", fill_items, locations, base_assumed_items, world);
+  trace!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tworld{:?}\n)", remaining_fill_items, locations, base_assumed_items, world);
   for _ in 0..remaining_fill_items.len() {
     let item = remaining_fill_items.pop().expect("bad for loop sync");
     let mut assumed_items = base_assumed_items.clone();
     assumed_items.append(&mut (remaining_fill_items.clone()));
 
     let assumed_items_str = format!("{:?}", assumed_items); // avoid move-checker memes
-    let allowed_locations = get_allowed_locations_to_place_next_item(assumed_items, &mut world);
+    let allowed_locations = get_allowed_locations_to_place_next_item(assumed_items, &world);
     debug!("Found locations:\n\titem={:?}\n\tassumed_items={:?}\n\tallowed_locations={:?}\n\tallowed_locations.len()={}", item, assumed_items_str, allowed_locations, allowed_locations.len());
 
-    // let loc: &Location2 = locations.iter()
-    let locs: Vec<&Location2> = locations.iter()
-      .inspect(|loc| {
-        debug!("filter1 {:?}", loc);
-      })
+    let loc: &Location2 = locations.iter()
       .filter(|&&loc| !world.contains_key(&loc))
-      .inspect(|loc| {
-        debug!("filter2 {:?}", loc);
-      })
       .filter(|&&loc| allowed_locations.contains(&loc))
-      .inspect(|loc| {
-        debug!("filter3 {:?}", loc);
-      })
       .filter(|&&loc| WG.item_can_be_placed_at(item, loc)) // TODO: do this earlier to save work?
-      .inspect(|loc| {
-        debug!("filter4 {:?}", loc);
-      })
-      .collect();
-      // .next()
-      // .expect("No locations left");
-    debug!("Filtered locations={:?}", locs);
-    if locs.len() == 0 {
-      info!("about to panic; world={:?}", world);
-      panic!("No more locations");
-    }
-    let loc = locs[0];
-
+      .next()
+      .expect("No locations left");
     info!("Filling {:?} with {:?}", loc, item);
     world.assign(*loc, item);
   }

@@ -301,6 +301,11 @@ impl WorldGraph {
     self.preset_items.insert(loc, item);
   }
 
+  // meh
+  pub fn num_presets(&self) -> usize {
+    self.preset_items.len()
+  }
+
   pub fn prefill_pots_etc(&self, world: &mut World) {
     for (&loc, &item) in self.preset_items.iter() {
       world.assign(loc, item);

@@ -46,6 +46,7 @@ fn temp_main() {
 
 #[allow(dead_code)]
 fn real_main() {
+  use connections::WG;
   use items::*;
 
   let mut advancement_items = vec![
@@ -79,13 +80,13 @@ fn real_main() {
   debug!("keysanity={}, dungeon_items={:?}", keysanity, dungeon_items);
 
   let mut junk_items = vec![];
-  junk_items.extend((0..).take(19).map(|_| Heart));
+  junk_items.extend((0..).take(17).map(|_| Heart));
 
   // TODO: check all prizes are gettable; make temp prize locs?
 
   assert_eq!(
     locations2::get_all_locations().len(),
-    advancement_items.len() + dungeon_items.len() + junk_items.len(),
+    advancement_items.len() + dungeon_items.len() + junk_items.len() + WG.num_presets(),
     "Location/Item counts don't match"
   );
 
@@ -99,7 +100,7 @@ fn real_main() {
   };
   for ii in 0..sim_count {
     info!("sim #{:?}", ii);
-    let world = generator::generate_world(&advancement_items, &dungeon_items, &junk_items, &mut rng);
+    let world = generator::generate_world(advancement_items.clone(), dungeon_items.clone(), junk_items.clone(), &mut rng);
 
     info!("worldgen finished: {:?}", world);
     if ep_has_prog(&world) {
