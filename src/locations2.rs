@@ -28,6 +28,18 @@ pub enum Location2 {
   EasternPalaceArmosKnights,
   EasternPalacePrize,
 
+  DesertPalaceMapChest,
+  DesertPalaceTorch,
+  DesertPalaceBigKeyChest,
+  DesertPalaceCompassChest,
+  DesertPalaceBigChest,
+  DesertPalaceKeyPotA,
+  DesertPalaceKeyPotB,
+  DesertPalaceKeyPotC,
+  DesertPalaceKeyPotD,
+  DesertPalaceLanmolas,
+  DesertPalacePrize,
+
   TowerOfHeraMapChest,
   TowerOfHeraBasementCage,
   TowerOfHeraBigKeyChest,
@@ -52,7 +64,6 @@ pub enum Location2 {
   PalaceOfDarknessHelmasaurKing,
   PalaceOfDarknessPrize,
 
-  // DesertPalacePrize,
   // IcePalacePrize,
   // MiseryMirePrize,
   // SkullWoodsPrize,
@@ -85,6 +96,18 @@ pub fn get_all_locations() -> Vec<Location2> {
     EasternPalaceArmosKnights,
     EasternPalacePrize,
 
+    DesertPalaceMapChest,
+    DesertPalaceTorch,
+    DesertPalaceBigKeyChest,
+    DesertPalaceCompassChest,
+    DesertPalaceBigChest,
+    DesertPalaceKeyPotA,
+    DesertPalaceKeyPotB,
+    DesertPalaceKeyPotC,
+    DesertPalaceKeyPotD,
+    DesertPalaceLanmolas,
+    DesertPalacePrize,
+
     TowerOfHeraMapChest,
     TowerOfHeraBasementCage,
     TowerOfHeraBigKeyChest,
@@ -110,7 +133,6 @@ pub fn get_all_locations() -> Vec<Location2> {
     PalaceOfDarknessPrize,
 
 
-    // DesertPalacePrize,
     // IcePalacePrize,
     // MiseryMirePrize,
     // SkullWoodsPrize,

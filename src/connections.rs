@@ -137,6 +137,20 @@ lazy_static! {
     cxn!(gr, EP5 <k> EP56);
     cxn!(gr, EP56 <=> EP6: Box::new(|ref items| { items.contains(&Bow) }));
 
+    // DesertPalace
+    // TODO: merge w/ mire / ledge etc when those are added
+    // TODO: <=> should be ==>, but I haven't thought through s+q yet
+    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { items.contains(&BookOfMudora) }));
+    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { can_fly(&items) && can_lift_dark_rocks(&items) && items.contains(&MagicMirror) }));
+    cxn!(gr, DP1 <=> DP2: Box::new(|ref items| { items.contains(&PegasusBoots) }));
+    cxn!(gr, DP1 <k> DP3);
+    cxn!(gr, DP1 <=> DP4: Box::new(|ref items| { items.contains(&BigKeyP2) }));
+    cxn!(gr, DP1 <k> DP15A);
+    cxn!(gr, DP15A <k> DP15B);
+    cxn!(gr, DP15B <k> DP15C);
+    cxn!(gr, DP15C <k> DP15D);
+    cxn!(gr, DP15D <=> DP5: Box::new(|ref items| { items.contains(&BigKeyP2) && can_light_torches(&items) && (can_kill_most_things(&items) || items.contains(&IceRod)) }));
+
     // TowerOfHera
     cxn!(gr, TempEastLightWorld <=> TH1);
     cxn!(gr, TH1 <k> TH12);
@@ -159,6 +173,8 @@ lazy_static! {
     cxn!(gr, POD4   <k> POD47);
     cxn!(gr, POD4   <k> POD5);
     cxn!(gr, POD29A <k> POD29B);
+
+
 
     // Overworld
     gr.register_zone(None, TempEastLightWorld, btreeset![
@@ -200,6 +216,38 @@ lazy_static! {
 
     gr.preset_item(EasternPalaceKeyPot, KeyP1);
     gr.preset_item(EasternPalaceKeyEyegore, KeyP1);
+
+    // DesertPalace
+    gr.register_zone(Some(DesertPalace), DP1, btreeset!{
+      DesertPalaceMapChest,
+    });
+    gr.register_zone(Some(DesertPalace), DP2, btreeset!{
+      DesertPalaceTorch,
+    });
+    gr.register_zone(Some(DesertPalace), DP3, btreeset!{
+      DesertPalaceBigKeyChest,
+      DesertPalaceCompassChest,
+    });
+    gr.register_zone(Some(DesertPalace), DP4, btreeset!{
+      DesertPalaceBigChest,
+    });
+    gr.register_zone(Some(DesertPalace), DP5, btreeset!{
+      DesertPalaceLanmolas,
+      DesertPalacePrize,
+    });
+    gr.register_zone(Some(DesertPalace), DP15A, btreeset!{
+      DesertPalaceKeyPotA,
+    });
+    gr.register_zone(Some(DesertPalace), DP15B, btreeset!{
+      DesertPalaceKeyPotB,
+    });
+    gr.register_zone(Some(DesertPalace), DP15C, btreeset!{
+      DesertPalaceKeyPotC,
+    });
+    gr.register_zone(Some(DesertPalace), DP15D, btreeset!{
+      DesertPalaceKeyPotD,
+    });
+
 
     // TowerOfHera
     gr.register_zone(Some(TowerOfHera), TH1, btreeset!{
@@ -429,7 +477,7 @@ impl WorldGraph {
     use super::dungeons::*;
     match dungeon {
       EasternPalace => Some(EasternPalacePrize),
-      // DesertPalace => Some(DesertPalacePrize),
+      DesertPalace => Some(DesertPalacePrize),
       TowerOfHera => Some(TowerOfHeraPrize),
       PalaceOfDarkness => Some(PalaceOfDarknessPrize),
       // SwampPalace => Some(SwampPalacePrize),

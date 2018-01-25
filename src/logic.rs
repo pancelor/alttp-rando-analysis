@@ -90,6 +90,23 @@ pub fn glitched_link_in_dark_world(
   || has_a_bottle(&my_items)
 }
 
+pub fn can_kill_most_things(
+  my_items: &Vec<items::Item>,
+) -> bool {
+  has_sword(&my_items)
+  || my_items.contains(&CaneOfSomaria)
+  || my_items.contains(&CaneOfByrna)
+  || can_shoot_arrows(&my_items)
+  || my_items.contains(&Hammer)
+  || my_items.contains(&FireRod)
+}
+
+pub fn can_get_good_bee(
+  _my_items: &Vec<items::Item>,
+) -> bool {
+  unimplemented!() // TODO impl
+}
+
 pub fn has_sword(
   my_items: &Vec<items::Item>,
 ) -> bool {

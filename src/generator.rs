@@ -38,7 +38,7 @@ pub fn generate_world(
         Item::Crystal1,
         Item::Crystal2,
         Item::Crystal3,
-        // Item::Crystal4,
+        Item::Crystal4,
         // Item::Crystal5,
         // Item::Crystal6,
         // Item::Crystal7,
@@ -50,7 +50,7 @@ pub fn generate_world(
       let mut iter = prizes.into_iter();
       world.assign(TowerOfHeraPrize, iter.next().unwrap());
       world.assign(EasternPalacePrize, iter.next().unwrap());
-      // world.assign(DesertPalacePrize, iter.next().unwrap());
+      world.assign(DesertPalacePrize, iter.next().unwrap());
       // world.assign(SkullWoodsPrize, iter.next().unwrap());
       // world.assign(ThievesTownPrize, iter.next().unwrap());
       // world.assign(MiseryMirePrize, iter.next().unwrap());

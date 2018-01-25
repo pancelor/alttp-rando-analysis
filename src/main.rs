@@ -52,21 +52,31 @@ fn real_main() {
 
   let mut advancement_items = vec![
     FireRod,
+    IceRod,
     Bow,
     Hammer,
     Lamp,
+    BookOfMudora,
+    PegasusBoots,
+    ProgressiveGlove,
+    ProgressiveGlove,
+    MagicMirror,
+    OcarinaActive, // TODO: inactive
   ];
 
   let mut dungeon_items = vec![
     MapP3,
+    MapP2,
     MapP1,
     MapD1,
 
     CompassP3,
+    CompassP2,
     CompassP1,
     CompassD1,
 
     KeyP3,
+    KeyP2,
     KeyD1,
     KeyD1,
     KeyD1,
@@ -75,6 +85,7 @@ fn real_main() {
     KeyD1,
 
     BigKeyP3,
+    BigKeyP2,
     BigKeyP1,
     BigKeyD1, // items at this end will be placed first
   ];
@@ -86,7 +97,7 @@ fn real_main() {
   debug!("keysanity={}, dungeon_items={:?}", keysanity, dungeon_items);
 
   let mut junk_items = vec![];
-  junk_items.extend((0..).take(16).map(|_| Heart));
+  junk_items.extend((0..).take(11).map(|_| Heart));
 
   let mut rng = rand::thread_rng();
 
