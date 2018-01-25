@@ -139,13 +139,13 @@ lazy_static! {
 
     // DesertPalace
     // TODO: merge w/ mire / ledge etc when those are added
-    // TODO: <=> should be ==>, but I haven't thought through s+q yet
+    // TODO: TempEastLightWorld <=> DP1 should be ==>, but I haven't thought through s+q yet
     cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { items.contains(&BookOfMudora) }));
     cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { can_fly(&items) && can_lift_dark_rocks(&items) && items.contains(&MagicMirror) }));
     cxn!(gr, DP1 <=> DP2: Box::new(|ref items| { items.contains(&PegasusBoots) }));
     cxn!(gr, DP1 <k> DP3);
     cxn!(gr, DP1 <=> DP4: Box::new(|ref items| { items.contains(&BigKeyP2) }));
-    cxn!(gr, DP1 <k> DP15A);
+    cxn!(gr, DP1 <=> DP15A: Box::new(|ref items| { can_lift_rocks(&items) }));
     cxn!(gr, DP15A <k> DP15B);
     cxn!(gr, DP15B <k> DP15C);
     cxn!(gr, DP15C <k> DP15D);
@@ -244,10 +244,11 @@ lazy_static! {
     gr.register_zone(Some(DesertPalace), DP15C, btreeset!{
       DesertPalaceKeyPotC,
     });
-    gr.register_zone(Some(DesertPalace), DP15D, btreeset!{
-      DesertPalaceKeyPotD,
-    });
+    gr.register_zone(Some(DesertPalace), DP15D, btreeset!{});
 
+    gr.preset_item(DesertPalaceKeyPotA, KeyP2);
+    gr.preset_item(DesertPalaceKeyPotB, KeyP2);
+    gr.preset_item(DesertPalaceKeyPotC, KeyP2);
 
     // TowerOfHera
     gr.register_zone(Some(TowerOfHera), TH1, btreeset!{

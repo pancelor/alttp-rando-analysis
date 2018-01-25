@@ -118,7 +118,6 @@ fn fast_fill_items_in_locations(
     if world.contains_key(&loc) { continue };
     match fill_items.next() {
       Some(item) => {
-        info!("Fast filling {:?} with {:?}", loc, item);
         world.assign(loc, item)
       },
       None => break,
@@ -148,7 +147,6 @@ fn fill_items_in_locations(
       .filter(|&&loc| WG.item_can_be_placed_at(item, loc)) // TODO: do this earlier to save work?
       .next()
       .expect("No locations left");
-    info!("Filling {:?} with {:?}", loc, item);
     world.assign(*loc, item);
   }
 }

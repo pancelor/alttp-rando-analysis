@@ -56,6 +56,7 @@ impl World {
       panic!("Trying to overwrite an item assignment");
     }
 
+    info!("Filling {:?} with {:?}", loc, item);
     self.assignments.insert(loc, item);
   }
 }
