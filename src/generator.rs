@@ -90,7 +90,9 @@ pub fn generate_world(
     // rng.shuffle(&mut randomized_order_locations); // TODO: does this even do anything?
 
     fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut world);
-    assert_eq!(junk_items_iter.next(), None, "Item/Loc count mismatch"); // TODO uncomment?
+
+    assert_eq!(world.num_assignments(), randomized_order_locations.len(), "Item/Loc count mismatch");
+    assert_eq!(junk_items_iter.next(), None, "Item/Loc count mismatch");
   }
 
   world

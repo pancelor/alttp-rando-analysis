@@ -326,7 +326,8 @@ impl WorldGraph {
     self.preset_items.insert(loc, item);
   }
 
-  // meh
+  // TODO: rm
+  #[allow(dead_code)]
   pub fn num_presets(&self) -> usize {
     self.preset_items.len()
   }
@@ -377,8 +378,16 @@ impl WorldGraph {
 
     keysanity || match item {
       // TODO: more
-        KeyD1 | BigKeyD1 | CompassD1 | MapD1
-      | KeyP1 | BigKeyP1 | CompassP1 | MapP1
+        KeyP1 | BigKeyP1 | CompassP1 | MapP1
+      | KeyP2 | BigKeyP2 | CompassP2 | MapP2
+      | KeyP3 | BigKeyP3 | CompassP3 | MapP3
+      | KeyD1 | BigKeyD1 | CompassD1 | MapD1
+      | KeyD2 | BigKeyD2 | CompassD2 | MapD2
+      | KeyD3 | BigKeyD3 | CompassD3 | MapD3
+      | KeyD4 | BigKeyD4 | CompassD4 | MapD4
+      | KeyD5 | BigKeyD5 | CompassD5 | MapD5
+      | KeyD6 | BigKeyD6 | CompassD6 | MapD6
+      | KeyD7 | BigKeyD7 | CompassD7 | MapD7
       => {
         let dungeon = WG.dungeon_from_item(item).expect("bad key enum");
         let locs = WG.locations_from_dungeon(dungeon).expect("not a dungeon somehow");

@@ -68,7 +68,7 @@ pub fn get_all_locations() -> Vec<Location2> {
     TempOverworld2,
     TempOverworld3,
     TempOverworld4,
-    TempOverworld5, // TODO dup up to 10; then compile
+    TempOverworld5,
     TempOverworld6,
     TempOverworld7,
     TempOverworld8,
