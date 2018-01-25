@@ -93,7 +93,8 @@ impl Dive {
   ///   self but are not actually reachable from self
   fn item_frontier(&self) -> Vec<&ItemDoor> {
     self.zones.iter()
-      .flat_map(|&zone| WG.itemfrontier_from_zone(zone))
+      .filter_map(|&zone| WG.itemfrontier_from_zone(zone))
+      .flat_map(|&ref idoorset| idoorset)
       .filter(|&idoor_ref| {
         !(self.zones.contains(&idoor_ref.zone1) && self.zones.contains(&idoor_ref.zone2))
       })
@@ -193,9 +194,12 @@ impl Dive {
       panic!("Trying to re-loot a zone");
     }
 
-    WG.locations_from_zone(zone).iter()
-      .filter_map(|loc| assignments.get(&loc))
-      .for_each(|&item| self.items.push(item));
+    let locations = WG.locations_from_zone(zone);
+    if let Some(locs) = locations {
+      locs.iter()
+        .filter_map(|loc| assignments.get(&loc))
+        .for_each(|&item| self.items.push(item));
+    }
 
     debug!("Looting {:?}", zone);
     // debug!("Looting:\n\tzone={:?}\n\t(post) self.items={:?}", zone, self.items);

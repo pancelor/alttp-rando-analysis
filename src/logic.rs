@@ -12,9 +12,7 @@ pub fn count(
 ) -> usize {
   my_items.iter()
     .filter(|&&it| it == *item)
-    .cloned()
-    .collect::<Vec<items::Item>>()
-    .len()
+    .count()
 }
 
 pub fn can_lift_rocks(

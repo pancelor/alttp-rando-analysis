@@ -1,4 +1,3 @@
-#![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
 use std::collections::{HashMap, BTreeSet};
@@ -92,7 +91,7 @@ macro_rules! cxn {
       can_pass_callback: $cb,
     };
     $gr.itemfrontier_from_zone.entry($z1)
-      .or_insert(Vec::new()) // TODO: same (below)
+      .or_insert(Vec::new())
       .push(idoor);
     let idoor = ItemDoor {
       zone1: $z1,
@@ -101,7 +100,7 @@ macro_rules! cxn {
       can_pass_callback: $cb,
     };
     $gr.itemfrontier_from_zone.entry($z2)
-      .or_insert(Vec::new()) // TODO: same (below)
+      .or_insert(Vec::new())
       .push(idoor);
   });
   ($gr:ident, $z1:ident ==> $z2:ident) => (
@@ -116,10 +115,10 @@ macro_rules! cxn {
       zone2: $z2,
     };
     $gr.keyfrontier_from_zone.entry($z1)
-      .or_insert(BTreeSet::new()) // TODO: throw errors if we need to insert; WorldGraph::new() sets these up for us
+      .or_insert(BTreeSet::new())
       .insert(kdoor);
     $gr.keyfrontier_from_zone.entry($z2)
-      .or_insert(BTreeSet::new()) // TODO: same
+      .or_insert(BTreeSet::new())
       .insert(kdoor);
   });
 }
@@ -202,22 +201,13 @@ pub struct WorldGraph {
 
 impl WorldGraph {
   fn new() -> Self {
-    let mut myself = Self {
+    Self {
       zones_from_dungeon: HashMap::new(),
       dungeon_from_zone: HashMap::new(),
       locations_from_zone: HashMap::new(),
       keyfrontier_from_zone: HashMap::new(),
       itemfrontier_from_zone: HashMap::new(),
-    };
-    for &dungeon in ALL_DUNGEONS.iter() { // TODO: remove eventually?
-      myself.zones_from_dungeon.insert(dungeon, btreeset!{});
     }
-    for &zone in ALL_ZONES.iter() { // TODO: remove eventually?
-      myself.locations_from_zone.insert(zone, btreeset!{});
-      myself.keyfrontier_from_zone.insert(zone, btreeset!{});
-      myself.itemfrontier_from_zone.insert(zone, vec![]);
-    }
-    myself
   }
 
   fn register_zone(&mut self, dungeon: Option<Dungeon>, zone: Zone, locs: BTreeSet<Location2>) {
@@ -231,34 +221,40 @@ impl WorldGraph {
   }
 
 
-  pub fn zones_from_dungeon(&self, dungeon: Dungeon) -> &BTreeSet<Zone> {
-    self.zones_from_dungeon.get(&dungeon).expect("worldindex is borked 1")
+  fn zones_from_dungeon(&self, dungeon: Dungeon) -> Option<&BTreeSet<Zone>> {
+    self.zones_from_dungeon.get(&dungeon)
   }
 
-  pub fn dungeon_from_zone(&self, zone: Zone) -> Option<Dungeon> {
+  fn dungeon_from_zone(&self, zone: Zone) -> Option<Dungeon> {
     self.dungeon_from_zone.get(&zone)
       .and_then(|x| Some(x.clone()))
   }
 
-  pub fn locations_from_zone(&self, zone: Zone) -> &BTreeSet<Location2> {
-    self.locations_from_zone.get(&zone).expect("worldindex is borked 2")
+  pub fn locations_from_zone(&self, zone: Zone) -> Option<&BTreeSet<Location2>> {
+    self.locations_from_zone.get(&zone)
   }
 
   pub fn keyfrontier_from_zone(&self, zone: Zone) -> Option<&BTreeSet<KeyDoor>> {
     self.keyfrontier_from_zone.get(&zone)
   }
 
-  pub fn itemfrontier_from_zone(&self, zone: Zone) -> &Vec<ItemDoor> {
-    self.itemfrontier_from_zone.get(&zone).expect("worldindex is borked 4")
+  pub fn itemfrontier_from_zone(&self, zone: Zone) -> Option<&Vec<ItemDoor>> {
+    self.itemfrontier_from_zone.get(&zone)
   }
 
   pub fn keyfrontier_from_dungeon(&self, dungeon: Dungeon) -> BTreeSet<KeyDoor> {
-    let zones = self.zones_from_dungeon(dungeon);
-    zones.iter() // TODO what happens if we into_iter here?
-      .filter_map(|&zone| self.keyfrontier_from_zone(zone))
-      .flat_map(|&ref kdoorset| kdoorset)
-      .cloned()
-      .collect()
+    match self.zones_from_dungeon(dungeon) {
+      Some(zones) => {
+        zones.iter()
+          .filter_map(|&zone| self.keyfrontier_from_zone(zone))
+          .flat_map(|&ref kdoorset| kdoorset)
+          .cloned()
+          .collect()
+      },
+      None => {
+        BTreeSet::new()
+      }
+    }
   }
 
   pub fn dungeon_from_keydoor(&self, keydoor: KeyDoor) -> Dungeon {
@@ -307,26 +303,5 @@ impl WorldGraph {
     }
   }
 }
-
-/*
-Stuff to replicate:
-
-index also has methods that replace glue.rs:
-  // only deals with add_zone info
-  zones_from_dungeon
-  dungeon_from_zone
-  locations_from_zone
-
-  // deals with connections
-  keyfrontier_from_zone
-  itemfrontier_from_zone
-
-  // easy
-  keyfrontier_from_dungeon
-  dungeon_from_keydoor
-  // maybe shouldnt live here
-    dungeon_from_key
-    key_from_dungeon
-*/
 
 // fn todo(_: &Vec<Item>) -> bool { true } // for warning suppression

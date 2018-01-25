@@ -20,6 +20,7 @@ pub enum Zone {
 }
 pub use self::Zone::*;
 
+#[allow(dead_code)]
 pub const ALL_ZONES: &[Zone] = &[
   TempEastLightWorld,
   POD1,

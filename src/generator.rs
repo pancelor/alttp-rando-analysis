@@ -135,7 +135,8 @@ fn get_allowed_locations_to_place_next_item(
     if keyfrontier.len() == 0 {
       // This is a maximal dive; restrict common_locs accordingly
       let current_locs: BTreeSet<Location2> = current_dive.zones.iter()
-        .flat_map(|&zone| WG.locations_from_zone(zone))
+        .filter_map(|&zone| WG.locations_from_zone(zone))
+        .flat_map(|&ref locset| locset)
         .cloned()
         .collect();
       match common_locs {
