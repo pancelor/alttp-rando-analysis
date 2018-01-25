@@ -41,6 +41,15 @@ pub enum Location2 {
   PalaceOfDarknessShooterRoom,
   PalaceOfDarknessHelmasaurKing,
   PalaceOfDarknessPrize,
+
+  // DesertPalacePrize,
+  // TowerOfHeraPrize,
+  // IcePalacePrize,
+  // MiseryMirePrize,
+  // SkullWoodsPrize,
+  // SwampPalacePrize,
+  // ThievesTownPrize,
+  // TurtleRockPrize,
 }
 pub use self::Location2::*;
 
@@ -80,5 +89,14 @@ pub fn get_all_locations() -> Vec<Location2> {
     PalaceOfDarknessShooterRoom,
     PalaceOfDarknessHelmasaurKing,
     PalaceOfDarknessPrize,
+
+    // DesertPalacePrize,
+    // TowerOfHeraPrize,
+    // IcePalacePrize,
+    // MiseryMirePrize,
+    // SkullWoodsPrize,
+    // SwampPalacePrize,
+    // ThievesTownPrize,
+    // TurtleRockPrize,
   ]
 }

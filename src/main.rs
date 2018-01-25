@@ -103,29 +103,11 @@ fn real_main() {
     let world = generator::generate_world(advancement_items.clone(), dungeon_items.clone(), junk_items.clone(), &mut rng);
 
     info!("worldgen finished: {:?}", world);
-    if ep_has_prog(&world) {
-      info!("^ ep has prog!");
-    }
     if !generator::can_win(&world) {
       println!("{:?}", world);
       panic!("uh oh, this world isn't beatable");
     }
   }
-}
-
-#[allow(dead_code)]
-fn ep_has_prog(world: &world::World) -> bool{
-  use items::*;
-  use dungeons::*;
-  use connections::WG;
-
-  for &loc in WG.locations_from_dungeon(EasternPalace).expect("wat").iter() {
-    let item: &Item = world.get(&loc).expect("didn't fill");
-    if item == &Hammer || item == &Lamp || item == &Bow {
-      return true;
-    }
-  }
-  false
 }
 
 // TODO rm

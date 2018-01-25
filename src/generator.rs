@@ -48,8 +48,11 @@ pub fn generate_world(
 
 // TODO: temp fxn
 pub fn can_win(world: &World) -> bool {
-  let locs = get_allowed_locations_to_place_next_item(vec![], &world);
-  locs.contains(&Location2::PalaceOfDarknessPrize) // TODO: s/PalaceOfDarknessPrize/DefeatGanon/
+  let reachable_locs = get_allowed_locations_to_place_next_item(vec![], &world);
+  ALL_DUNGEONS.iter()
+    .filter_map(|&dungeon| WG.prize_loc_from_dungeon(dungeon))
+    .inspect(|&loc| debug!("Goal: also reach {:?}", loc))
+    .all(|loc| reachable_locs.contains(&loc))
 }
 
 use std::vec::IntoIter;

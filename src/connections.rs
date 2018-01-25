@@ -390,6 +390,25 @@ impl WorldGraph {
   }
 
   // TODO: maybe shouldn't live here
+  pub fn prize_loc_from_dungeon(&self, dungeon: Dungeon) -> Option<Location2> {
+    use super::locations2::*;
+    use super::dungeons::*;
+    match dungeon {
+      EasternPalace => Some(EasternPalacePrize),
+      // DesertPalace => Some(DesertPalacePrize),
+      // TowerOfHera => Some(TowerOfHeraPrize),
+      PalaceOfDarkness => Some(PalaceOfDarknessPrize),
+      // SwampPalace => Some(SwampPalacePrize),
+      // SkullWoods => Some(SkullWoodsPrize),
+      // ThievesTown => Some(ThievesTownPrize),
+      // IcePalace => Some(IcePalacePrize),
+      // MiseryMire => Some(MiseryMirePrize),
+      // TurtleRock => Some(TurtleRockPrize),
+      _ => None,
+    }
+  }
+
+  // TODO: maybe shouldn't live here
   pub fn key_from_dungeon(&self, dungeon: Dungeon) -> Item {
     use super::items::*;
     use super::dungeons::*;
