@@ -35,31 +35,26 @@ fn temp_main() {
   use locations2::*;
   use items::*;
   use zones::*;
-  use connections::KeyDoor;
+  use dungeons::*;
+  use connections::{WG, KeyDoor};
   use dive::Dive;
 
-  let d1 = Dive{
-    zones: btreeset!{POD47, TempEastLightWorld, POD1},
-    items: vec![Lamp, KeyD1, KeyD1, Hammer, Bow],
-    open_doors: btreeset!{},
-  };
-  let d2 = Dive{
-    zones: btreeset!{TempEastLightWorld, POD1, POD47},
-    items: vec![KeyD1, Bow, Lamp, Hammer, KeyD1],
-    open_doors: btreeset!{},
-  };
-
-  println!("eq={} h1={} h2={}", (d1==d2), d1.hash_value(), d2.hash_value());
+  let locs1 = WG.locations_from_dungeon(EasternPalace);
+  let locs2 = WG.locations_from_dungeon(PalaceOfDarkness);
+  println!("EP={:?} PD={:?}", locs1, locs2);
 }
 
 #[allow(dead_code)]
 fn real_main() {
   use items::*;
-  let advancement_items = vec![
+
+  let mut advancement_items = vec![
     Bow,
     Hammer,
     Lamp,
+  ];
 
+  let mut dungeon_items = vec![
     BigKeyP1,
     MapP1,
     CompassP1,
@@ -75,6 +70,12 @@ fn real_main() {
     CompassD1,
   ];
 
+  let keysanity = env::var("KEYSANITY").is_ok();
+  if keysanity {
+    advancement_items.append(&mut dungeon_items);
+  }
+  debug!("keysanity={}, dungeon_items={:?}", keysanity, dungeon_items);
+
   let mut junk_items = vec![];
   junk_items.extend((0..).take(19).map(|_| Heart));
 
@@ -82,7 +83,7 @@ fn real_main() {
 
   assert_eq!(
     locations2::get_all_locations().len(),
-    advancement_items.len() + junk_items.len(),
+    advancement_items.len() + dungeon_items.len() + junk_items.len(),
     "Location/Item counts don't match"
   );
 
@@ -96,13 +97,32 @@ fn real_main() {
   };
   for ii in 0..sim_count {
     info!("sim #{:?}", ii);
-    let world = generator::generate_world(&advancement_items, &junk_items, &mut rng);
+    let world = generator::generate_world(&advancement_items, &dungeon_items, &junk_items, &mut rng);
+
     info!("worldgen finished: {:?}", world);
+    if ep_has_prog(&world) {
+      info!("^ ep has prog!");
+    }
     if !generator::can_win(&world) {
       println!("{:?}", world);
       panic!("uh oh, this world isn't beatable");
     }
   }
+}
+
+#[allow(dead_code)]
+fn ep_has_prog(world: &world::World) -> bool{
+  use items::*;
+  use dungeons::*;
+  use connections::WG;
+
+  for &loc in WG.locations_from_dungeon(EasternPalace).expect("wat").iter() {
+    let item: &Item = world.get(&loc).expect("didn't fill");
+    if item == &Hammer || item == &Lamp || item == &Bow {
+      return true;
+    }
+  }
+  false
 }
 
 // TODO rm

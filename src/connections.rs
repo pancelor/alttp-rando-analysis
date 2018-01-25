@@ -322,7 +322,8 @@ impl WorldGraph {
     }
   }
 
-  fn locations_from_dungeon(&self, dungeon: Dungeon) -> Option<BTreeSet<Location2>> {
+  // TODO: temp pub
+  pub fn locations_from_dungeon(&self, dungeon: Dungeon) -> Option<BTreeSet<Location2>> {
     self.zones_from_dungeon(dungeon)
       .and_then(|zones| {
         let ret = zones.iter()
@@ -340,7 +341,11 @@ impl WorldGraph {
 
   // TODO: maybe shouldn't live here
   pub fn item_can_be_placed_at(&self, item: Item, loc: Location2) -> bool {
-    match item {
+    use std::env;
+
+    let keysanity = env::var("KEYSANITY").is_ok();
+
+    keysanity || match item {
       // TODO: more
         KeyD1 | CompassD1 | MapD1
       | KeyP1 | CompassP1 | MapP1
@@ -358,20 +363,20 @@ impl WorldGraph {
     use super::items::*;
     use super::dungeons::*;
     match key {
-      KeyH1 | CompassH1 | MapH1 => None, // TODO: change later
-      KeyH2 | CompassH2 | MapH2 => None, // TODO: change later
-      KeyP1 | CompassP1 | MapP1 => Some(EasternPalace),
-      KeyP2 | CompassP2 | MapP2 => Some(DesertPalace),
-      KeyP3 | CompassP3 | MapP3 => Some(TowerOfHera),
-      KeyD1 | CompassD1 | MapD1 => Some(PalaceOfDarkness),
-      KeyD2 | CompassD2 | MapD2 => Some(SwampPalace),
-      KeyD3 | CompassD3 | MapD3 => Some(SkullWoods),
-      KeyD4 | CompassD4 | MapD4 => Some(ThievesTown),
-      KeyD5 | CompassD5 | MapD5 => Some(IcePalace),
-      KeyD6 | CompassD6 | MapD6 => Some(MiseryMire),
-      KeyD7 | CompassD7 | MapD7 => Some(TurtleRock),
-      KeyA1 | CompassA1 | MapA1 => None, // TODO: change later
-      KeyA2 | CompassA2 | MapA2 => None, // TODO: change later
+      KeyH1 | BigKeyH1 | CompassH1 | MapH1 => None, // TODO: set this for real
+      KeyH2 | BigKeyH2 | CompassH2 | MapH2 => None, // TODO: set this for real
+      KeyP1 | BigKeyP1 | CompassP1 | MapP1 => Some(EasternPalace),
+      KeyP2 | BigKeyP2 | CompassP2 | MapP2 => Some(DesertPalace),
+      KeyP3 | BigKeyP3 | CompassP3 | MapP3 => Some(TowerOfHera),
+      KeyD1 | BigKeyD1 | CompassD1 | MapD1 => Some(PalaceOfDarkness),
+      KeyD2 | BigKeyD2 | CompassD2 | MapD2 => Some(SwampPalace),
+      KeyD3 | BigKeyD3 | CompassD3 | MapD3 => Some(SkullWoods),
+      KeyD4 | BigKeyD4 | CompassD4 | MapD4 => Some(ThievesTown),
+      KeyD5 | BigKeyD5 | CompassD5 | MapD5 => Some(IcePalace),
+      KeyD6 | BigKeyD6 | CompassD6 | MapD6 => Some(MiseryMire),
+      KeyD7 | BigKeyD7 | CompassD7 | MapD7 => Some(TurtleRock),
+      KeyA1 | BigKeyA1 | CompassA1 | MapA1 => None, // TODO: set this for real
+      KeyA2 | BigKeyA2 | CompassA2 | MapA2 => None, // TODO: set this for real
       _     => panic!("bad arg"), // TODO: rm? return None?
     }
   }

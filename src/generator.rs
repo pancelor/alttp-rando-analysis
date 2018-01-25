@@ -12,6 +12,7 @@ use super::dive::Dive;
 
 pub fn generate_world(
   advancement_items: &Vec<items::Item>,
+  dungeon_items: &Vec<items::Item>,
   junk_items: &Vec<items::Item>,
   // TODO: add back in nice_items and do the ganon tower pre-fill thing
   rng: &mut ThreadRng,
@@ -24,11 +25,16 @@ pub fn generate_world(
     WG.prefill_pots_etc(&mut world);
 
     let advancement_items_iter;
+    let dungeon_items_iter;
     let mut junk_items_iter;
     { // init item iterators
       let mut advancement_items_clone = advancement_items.clone();
       rng.shuffle(&mut advancement_items_clone);
       advancement_items_iter = advancement_items_clone.into_iter();
+
+      let mut dungeon_items_clone = dungeon_items.clone();
+      rng.shuffle(&mut dungeon_items_clone);
+      dungeon_items_iter = dungeon_items_clone.into_iter();
 
       let mut junk_items_clone = junk_items.clone();
       rng.shuffle(&mut junk_items_clone);
@@ -39,7 +45,10 @@ pub fn generate_world(
 
     let mut randomized_order_locations = locations2::get_all_locations();
     rng.shuffle(&mut randomized_order_locations);
+    debug!("randomized_order_locations={:?}", randomized_order_locations);
 
+    fill_items_in_locations(dungeon_items_iter, &randomized_order_locations, &advancement_items, &mut world);
+    randomized_order_locations.reverse();
     fill_items_in_locations(advancement_items_iter, &randomized_order_locations, &vec![], &mut world);
 
     // rng.shuffle(&mut randomized_order_locations); // TODO: does this even do anything?
@@ -91,13 +100,23 @@ fn fill_items_in_locations(
 
     let assumed_items_str = format!("{:?}", assumed_items); // avoid move-checker memes
     let allowed_locations = get_allowed_locations_to_place_next_item(assumed_items, &mut world);
-    debug!("Found locations:\n\tassumed_items={:?}\n\tallowed_locations={:?}\n\tallowed_locations.len()={}", assumed_items_str, allowed_locations, allowed_locations.len());
-    let loc: &Location2 = locations.iter()
+    debug!("Found locations:\n\titem={:?}\n\tassumed_items={:?}\n\tallowed_locations={:?}\n\tallowed_locations.len()={}", item, assumed_items_str, allowed_locations, allowed_locations.len());
+
+    // let loc: &Location2 = locations.iter()
+    let locs: Vec<&Location2> = locations.iter()
       .filter(|&&loc| !world.contains_key(&loc))
       .filter(|&&loc| allowed_locations.contains(&loc))
       .filter(|&&loc| WG.item_can_be_placed_at(item, loc)) // TODO: do this earlier to save work?
-      .next()
-      .expect("No locations left");
+      .collect();
+      // .next()
+      // .expect("No locations left");
+    debug!("Filtered locations={:?}", locs);
+    if locs.len() == 0 {
+      info!("about to panic; world={:?}", world);
+      panic!("No more locations");
+    }
+    let loc = locs[0];
+
     info!("Filling {:?} with {:?}", loc, item);
     world.assign(*loc, item);
   }
