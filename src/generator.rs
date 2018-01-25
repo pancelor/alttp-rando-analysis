@@ -4,6 +4,7 @@ use std::collections::{HashMap, HashSet, BTreeSet};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, locations2, items, zones, dungeons};
 use super::locations2::*;
+use super::items::Item;
 use super::world::World;
 use super::zones::Zone;
 use super::connections::*;
@@ -11,9 +12,9 @@ use super::dungeons::*;
 use super::dive::Dive;
 
 pub fn generate_world(
-  advancement_items: Vec<items::Item>,
-  dungeon_items: Vec<items::Item>,
-  mut junk_items: Vec<items::Item>,
+  advancement_items: Vec<Item>,
+  dungeon_items: Vec<Item>,
+  mut junk_items: Vec<Item>,
   // TODO: add back in nice_items and do the ganon tower pre-fill thing
   rng: &mut ThreadRng,
 ) -> World {
@@ -34,16 +35,16 @@ pub fn generate_world(
   { // Set up assignments
     { // Place prizes
       let mut prizes = vec![
-        items::Item::Crystal1,
-        items::Item::Crystal2,
-        items::Item::Crystal3,
-        // items::Item::Crystal4,
-        // items::Item::Crystal5,
-        // items::Item::Crystal6,
-        // items::Item::Crystal7,
-        // items::Item::PendantOfCourage,
-        // items::Item::PendantOfPower,
-        // items::Item::PendantOfWisdom,
+        Item::Crystal1,
+        Item::Crystal2,
+        Item::Crystal3,
+        // Item::Crystal4,
+        // Item::Crystal5,
+        // Item::Crystal6,
+        // Item::Crystal7,
+        // Item::PendantOfCourage,
+        // Item::PendantOfPower,
+        // Item::PendantOfWisdom,
       ];
       rng.shuffle(&mut prizes);
       let mut iter = prizes.into_iter();
@@ -69,7 +70,6 @@ pub fn generate_world(
 
     let mut randomized_order_locations = locations2::get_all_locations();
     rng.shuffle(&mut randomized_order_locations);
-    debug!("randomized_order_locations={:?}", randomized_order_locations);
 
     fill_items_in_locations(dungeon_items, &randomized_order_locations, &advancement_items, &mut world);
 
@@ -109,8 +109,8 @@ pub fn can_win(world: &World) -> bool {
 
 use std::vec::IntoIter;
 fn fast_fill_items_in_locations(
-  fill_items: &mut IntoIter<items::Item>,
-  locations: &Vec<locations2::Location2>,
+  fill_items: &mut IntoIter<Item>,
+  locations: &Vec<Location2>,
   world: &mut World,
 ) {
   trace!("fn fast_fill_items_in_locations(\nfill_items={:?},\n\tlocations={:?},\n\tworld{:?}\n)", fill_items, locations, world);
@@ -127,9 +127,9 @@ fn fast_fill_items_in_locations(
 }
 
 fn fill_items_in_locations(
-  mut remaining_fill_items: Vec<items::Item>,
-  locations: &Vec<locations2::Location2>,
-  base_assumed_items: &Vec<items::Item>,
+  mut remaining_fill_items: Vec<Item>,
+  locations: &Vec<Location2>,
+  base_assumed_items: &Vec<Item>,
   world: &mut World,
 ) {
   trace!("fn fill_items_in_locations(\n\tfill_items={:?},\n\tlocations={:?},\n\tbase_assumed_items={:?},\n\tworld{:?}\n)", remaining_fill_items, locations, base_assumed_items, world);
@@ -154,7 +154,7 @@ fn fill_items_in_locations(
 }
 
 fn get_allowed_locations_to_place_next_item(
-  assumed: Vec<items::Item>,
+  assumed: Vec<Item>,
   world: &World,
 ) -> BTreeSet<Location2> {
   trace!("fn get_allowed_locations_to_place_next_item(\n\tassumed={:?},\n\tworld{:?}\n)", assumed, world);
@@ -181,7 +181,8 @@ fn get_allowed_locations_to_place_next_item(
     }
 
     let keyfrontier: BTreeSet<KeyDoor> = current_dive.key_frontier();
-    debug!("Popping dive stack (size {}):\n\tdive.zones={:?}\n\tkeyfrontier={:?}", stack.len()+1, current_dive.zones, keyfrontier);
+
+    debug!("Popping dive stack (size {}):\n\tdive.zones={:?}\n\tkeyfrontier={:?}\n\tkeycounts={:?}", stack.len()+1, current_dive.zones, keyfrontier, current_dive.keycounts());
     if keyfrontier.len() == 0 {
       // This is a maximal dive; restrict common_locs accordingly
       let current_locs: BTreeSet<Location2> = current_dive.zones.iter()

@@ -2,7 +2,7 @@
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::collections::{HashSet, HashMap, BTreeSet};
+use std::collections::{HashSet, HashMap, BTreeSet, BTreeMap};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, locations2, items, zones, dungeons};
 use super::zones::Zone;
@@ -58,6 +58,18 @@ impl Dive {
     let mut hasher = DefaultHasher::new();
     self.hash(&mut hasher);
     hasher.finish()
+  }
+
+  // useful for printing/debugging how many keys are in my item collection
+  pub fn keycounts(&self) -> BTreeMap<Item, usize> {
+    items::all_small_keys().iter()
+      .filter_map(|key| {
+        match logic::count(key, &self.items) {
+          0 => None,
+          count => Some((*key, count)),
+        }
+      })
+      .collect()
   }
 
   fn dungeons_i_own_keys_for(&self) -> BTreeSet<&Dungeon> {
@@ -121,7 +133,7 @@ impl Dive {
       {
         let item_frontier: Vec<&ItemDoor> = self.item_frontier();
         new_zones = self.do_one_exploration_pass_on_frontier(&item_frontier);
-        debug!("Explore pass #{}: new_zones={:?}", num_passes, new_zones);
+        debug!("Explore pass #{}: looting new_zones={:?}", num_passes, new_zones);
         if new_zones.len() == 0 {
           break;
         }
@@ -185,6 +197,7 @@ impl Dive {
       trace!("opened a useless door (e.g. the left<->right keydoor in GT");
       return;
     }
+    debug!("Looting other side of keydoor: {:?}", new_zone);
     self.loot_zone(new_zone, &world);
   }
 
@@ -201,7 +214,6 @@ impl Dive {
         .for_each(|&item| self.items.push(item));
     }
 
-    debug!("Looting {:?}", zone);
     // debug!("Looting:\n\tzone={:?}\n\t(post) self.items={:?}", zone, self.items);
     trace!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tworld={:?}\n)", self, zone, world);
   }

@@ -299,7 +299,7 @@ pub fn get_dungeon_pool() -> Vec<Item> {
   return res;
 }
 
-fn all_small_keys() -> BTreeSet<Item> {
+pub fn all_small_keys() -> BTreeSet<Item> {
   btreeset!{
     KeyH1,
     KeyH2,
