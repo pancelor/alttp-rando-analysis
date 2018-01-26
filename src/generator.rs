@@ -34,33 +34,17 @@ pub fn generate_world(
 
   { // Set up assignments
     { // Place prizes
-      let mut prizes = vec![
-        Item::Crystal1,
-        Item::Crystal2,
-        Item::Crystal3,
-        Item::Crystal4,
-        // Item::Crystal5,
-        // Item::Crystal6,
-        // Item::Crystal7,
-        // Item::PendantOfCourage,
-        // Item::PendantOfPower,
-        // Item::PendantOfWisdom,
-      ];
-      rng.shuffle(&mut prizes);
-      let mut iter = prizes.into_iter();
-      world.assign(TowerOfHeraPrize, iter.next().unwrap());
-      world.assign(EasternPalacePrize, iter.next().unwrap());
-      world.assign(DesertPalacePrize, iter.next().unwrap());
-      // world.assign(SkullWoodsPrize, iter.next().unwrap());
-      // world.assign(ThievesTownPrize, iter.next().unwrap());
-      // world.assign(MiseryMirePrize, iter.next().unwrap());
-      // world.assign(SwampPalacePrize, iter.next().unwrap());
-      // world.assign(IcePalacePrize, iter.next().unwrap());
-      world.assign(PalaceOfDarknessPrize, iter.next().unwrap());
-      // world.assign(TurtleRockPrize, iter.next().unwrap());
-      if iter.next() != None {
-        panic!("bad prize count");
-      }
+      // TODO: bring back old code here
+      world.assign(EasternPalacePrize, items::BeatEP);
+      world.assign(DesertPalacePrize, items::BeatDP);
+      world.assign(TowerOfHeraPrize, items::BeatTH);
+      // world.assign(SkullWoodsPrize, items::BeatSW);
+      // world.assign(ThievesTownPrize, items::BeatTT);
+      // world.assign(MiseryMirePrize, items::BeatMM);
+      // world.assign(SwampPalacePrize, items::BeatSP);
+      // world.assign(IcePalacePrize, items::BeatIP);
+      world.assign(PalaceOfDarknessPrize, items::BeatPOD);
+      // world.assign(TurtleRockPrize, items::BeatTR);
     }
 
     rng.shuffle(&mut junk_items);
@@ -92,19 +76,25 @@ pub fn generate_world(
     fast_fill_items_in_locations(&mut junk_items_iter, &randomized_order_locations, &mut world);
 
     assert_eq!(world.num_assignments(), randomized_order_locations.len(), "Item/Loc count mismatch");
-    assert_eq!(junk_items_iter.next(), None, "Item/Loc count mismatch");
   }
 
   world
 }
 
 // TODO: temp fxn
-pub fn can_win(world: &World) -> bool {
+// note: doesn't handle multiples; e.g. it will say you can collect 2 bottles even if you can only collect 1
+pub fn can_collect(world: &World, items: &Vec<Item>) -> bool {
   let reachable_locs = get_allowed_locations_to_place_next_item(vec![], &world);
-  ALL_DUNGEONS.iter()
-    .filter_map(|&dungeon| WG.prize_loc_from_dungeon(dungeon))
-    .inspect(|&loc| debug!("Goal: also reach {:?}", loc))
-    .all(|loc| reachable_locs.contains(&loc))
+  let reachable_items: Vec<Item> = reachable_locs.iter()
+    .filter_map(|&loc| world.get(&loc))
+    .cloned()
+    .collect();
+  for &item in items.iter() {
+    if !reachable_items.contains(&item) {
+      return false
+    }
+  }
+  true
 }
 
 use std::vec::IntoIter;

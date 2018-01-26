@@ -44,9 +44,36 @@ fn temp_main() {
   println!("EP={:?} PD={:?}", locs1, locs2);
 }
 
+struct ItemPools {
+  advancement_items: Vec<items::Item>,
+  dungeon_items: Vec<items::Item>,
+  junk_items: Vec<items::Item>,
+  required_items_to_win: Vec<items::Item>,
+}
+
 #[allow(dead_code)]
-#[allow(unused_imports)]
 fn real_main() {
+  let pools = get_items();
+  let mut rng = rand::thread_rng();
+
+  let sim_count = match env::var("NSIM") {
+    Ok(val) => val.parse().expect("bad NSIM format"),
+    Err(_) => 1,
+  };
+  for ii in 0..sim_count {
+    info!("sim #{:?}", ii);
+    let world = generator::generate_world(pools.advancement_items.clone(), pools.dungeon_items.clone(), pools.junk_items.clone(), &mut rng);
+
+    info!("worldgen finished: {:?}", world);
+    if !generator::can_collect(&world, &pools.required_items_to_win) {
+      println!("{:?}", world);
+      panic!("uh oh, this world isn't beatable");
+    }
+  }
+}
+
+#[allow(unused_imports)]
+fn get_items() -> ItemPools {
   use connections::WG;
   use items::*;
 
@@ -64,57 +91,77 @@ fn real_main() {
     OcarinaActive, // TODO: inactive
   ];
 
-  let mut dungeon_items = vec![
-    MapP3,
-    MapP2,
-    MapP1,
-    MapD1,
+  let mut dungeon_items;
+  let required_items_to_win: Vec<Item>;
+  { // init dungeon_items
+    #![allow(non_snake_case)]
 
-    CompassP3,
-    CompassP2,
-    CompassP1,
-    CompassD1,
+    let mut EP_dungeon_items = vec![
+      CanEnterEP,
+      MapP1,
+      CompassP1,
+      BigKeyP1,
+    ];
+    let mut DP_dungeon_items = vec![
+      CanEnterDP,
+      MapP2,
+      CompassP2,
+      KeyP2,
+      BigKeyP2,
+    ];
+    let mut TH_dungeon_items = vec![
+      CanEnterTH,
+      MapP3,
+      CompassP3,
+      KeyP3,
+      BigKeyP3,
+    ];
+    let mut POD_dungeon_items = vec![
+      CanEnterPOD,
+      MapD1,
+      CompassD1,
+      KeyD1,
+      KeyD1,
+      KeyD1,
+      KeyD1,
+      KeyD1,
+      KeyD1,
+      BigKeyD1,
+    ];
 
-    KeyP3,
-    KeyP2,
-    KeyD1,
-    KeyD1,
-    KeyD1,
-    KeyD1,
-    KeyD1,
-    KeyD1,
+    dungeon_items = vec![];
+    if !env_is_set("EP") { // pass EP=<any> to turn OFF item placement in EP
+      dungeon_items.append(&mut EP_dungeon_items);
+    }
+    if !env_is_set("DP") {
+      dungeon_items.append(&mut DP_dungeon_items);
+    }
+    if !env_is_set("TH") {
+      dungeon_items.append(&mut TH_dungeon_items);
+    }
+    if !env_is_set("POD") {
+      dungeon_items.append(&mut POD_dungeon_items);
+    }
+    dungeon_items.sort();
 
-    BigKeyP3,
-    BigKeyP2,
-    BigKeyP1,
-    BigKeyD1, // items at this end will be placed first
-  ];
+    required_items_to_win = dungeon_items.iter()
+      .filter_map(|&item| canenter_to_beat(item))
+      .collect();
+  }
 
-  let keysanity = env::var("KEYSANITY").is_ok();
+  let keysanity = env_is_set("KEYSANITY");
   if keysanity {
     advancement_items.append(&mut dungeon_items);
   }
   debug!("keysanity={}, dungeon_items={:?}", keysanity, dungeon_items);
 
-  let mut junk_items = vec![];
-  junk_items.extend((0..).take(11).map(|_| Heart));
+  let junk_items: Vec<Item> = (0..).take(100).map(|_| Heart).collect();
 
-  let mut rng = rand::thread_rng();
+  ItemPools{advancement_items, dungeon_items, junk_items, required_items_to_win}
+}
 
-  let sim_count = match env::var("NSIM") {
-    Ok(val) => val.parse().expect("bad NSIM format"),
-    Err(_) => 1,
-  };
-  for ii in 0..sim_count {
-    info!("sim #{:?}", ii);
-    let world = generator::generate_world(advancement_items.clone(), dungeon_items.clone(), junk_items.clone(), &mut rng);
-
-    info!("worldgen finished: {:?}", world);
-    if !generator::can_win(&world) {
-      println!("{:?}", world);
-      panic!("uh oh, this world isn't beatable");
-    }
-  }
+fn env_is_set(name: &str) -> bool {
+  env::var(name).is_ok()
 }
 
 // TODO rm

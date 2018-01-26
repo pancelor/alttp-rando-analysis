@@ -129,7 +129,7 @@ lazy_static! {
     let mut gr = WorldGraph::new();
 
     // EasternPalace
-    cxn!(gr, TempEastLightWorld <=> EP1);
+    cxn!(gr, TempEastLightWorld <=> EP1: Box::new(|ref items| { items.contains(&CanEnterEP) }));
     cxn!(gr, EP1 <=> EP2: Box::new(|ref items| { items.contains(&Lamp) }));
     cxn!(gr, EP2 <k> EP3);
     cxn!(gr, EP1 <=> EP4: Box::new(|ref items| { items.contains(&BigKeyP1) }));
@@ -140,8 +140,8 @@ lazy_static! {
     // DesertPalace
     // TODO: merge w/ mire / ledge etc when those are added
     // TODO: TempEastLightWorld <=> DP1 should be ==>, but I haven't thought through s+q yet
-    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { items.contains(&BookOfMudora) }));
-    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { can_fly(&items) && can_lift_dark_rocks(&items) && items.contains(&MagicMirror) }));
+    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { items.contains(&BookOfMudora) && items.contains(&CanEnterDP)}));
+    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { can_fly(&items) && can_lift_dark_rocks(&items) && items.contains(&MagicMirror) && items.contains(&CanEnterDP)}));
     cxn!(gr, DP1 <=> DP2: Box::new(|ref items| { items.contains(&PegasusBoots) }));
     cxn!(gr, DP1 <k> DP3);
     cxn!(gr, DP1 <=> DP4: Box::new(|ref items| { items.contains(&BigKeyP2) }));
@@ -152,14 +152,14 @@ lazy_static! {
     cxn!(gr, DP15D <=> DP5: Box::new(|ref items| { items.contains(&BigKeyP2) && can_light_torches(&items) && (can_kill_most_things(&items) || items.contains(&IceRod)) }));
 
     // TowerOfHera
-    cxn!(gr, TempEastLightWorld <=> TH1);
+    cxn!(gr, TempEastLightWorld <=> TH1: Box::new(|ref items| { items.contains(&CanEnterTH) }));
     cxn!(gr, TH1 <k> TH12);
     cxn!(gr, TH12 <=> TH2: Box::new(|ref items| { can_light_torches(&items) }));
     cxn!(gr, TH1 <=> TH3: Box::new(|ref items| { items.contains(&BigKeyP3) }));
     cxn!(gr, TH3 <=> TH4: Box::new(|ref items| { has_sword(&items) || items.contains(&Hammer) }));
 
     // PalaceOfDarkness
-    cxn!(gr, TempEastLightWorld <=> POD1);
+    cxn!(gr, TempEastLightWorld <=> POD1: Box::new(|ref items| { items.contains(&CanEnterPOD) }));
     cxn!(gr, POD1   <=> POD8:   Box::new(|ref items| { can_shoot_arrows(&items) }));
     cxn!(gr, POD8   ==> POD2:   Box::new(|ref items| { items.contains(&Hammer) }));
     cxn!(gr, POD47  <=> POD7:   Box::new(|ref items| { items.contains(&Lamp) }));
@@ -473,6 +473,7 @@ impl WorldGraph {
   }
 
   // TODO: maybe shouldn't live here
+  #[allow(dead_code)]
   pub fn prize_loc_from_dungeon(&self, dungeon: Dungeon) -> Option<Location2> {
     use super::locations2::*;
     use super::dungeons::*;
