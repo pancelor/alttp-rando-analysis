@@ -155,7 +155,7 @@ fn get_items() -> ItemPools {
   }
   debug!("keysanity={}, dungeon_items={:?}", keysanity, dungeon_items);
 
-  let junk_items: Vec<Item> = (0..).take(100).map(|_| Heart).collect();
+  let junk_items: Vec<Item> = (0..).take(100).map(|_| items::TEMP_JUNK).collect();
 
   ItemPools{advancement_items, dungeon_items, junk_items, required_items_to_win}
 }

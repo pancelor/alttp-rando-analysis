@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use super::locations2::*;
 use super::medallions;
 use super::items::Item;
+use super::items;
 
 pub type Assignments = HashMap<Location2, Item>;
 
@@ -17,12 +18,20 @@ use std::fmt;
 impl fmt::Debug for World {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     writeln!(f, "World {{\n\tmedallons: {:?}\n\tassignments={{", self.medallions)?;
+    let mut write_later = Vec::new();
     for &loc in get_all_locations().iter() {
       let item = match self.assignments.get(&loc) {
-        Some(it) => format!("{:?}", it),
-        None => format!("<none>"),
+        Some(&it) if it == items::TEMP_JUNK => {
+          write_later.push(loc);
+          continue
+        },
+        Some(&it) => format!("{:?}", it),
+        None => format!("***none***"),
       };
       writeln!(f, "\t\t{:?}={:?}", loc, item)?;
+    }
+    for &loc in write_later.iter() {
+      writeln!(f, "\t\t{:?}={:?}", loc, "-")?;
     }
     write!(f, "\t}}\n}}")
   }

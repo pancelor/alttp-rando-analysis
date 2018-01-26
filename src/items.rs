@@ -341,6 +341,8 @@ pub fn all_small_keys() -> BTreeSet<Item> {
   }
 }
 
+pub static TEMP_JUNK: Item = Heart;
+
 pub fn is_key(item: Item) -> bool {
   all_small_keys().contains(&item)
 }
