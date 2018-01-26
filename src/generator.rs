@@ -4,6 +4,7 @@ use std::collections::{HashMap, HashSet, BTreeSet};
 use rand::{Rng, ThreadRng};
 use super::{medallions, logic, locations2, items, zones, dungeons};
 use super::locations2::*;
+use super::stats::*;
 use super::items::Item;
 use super::world::World;
 use super::zones::Zone;
@@ -149,8 +150,8 @@ fn get_allowed_locations_to_place_next_item(
   let first_dive: Dive = Dive::new(assumed, &world);
   let mut stack: Vec<Dive> = Vec::new();
 
-  let mut num_dives_seen: u64 = 1;
-  let mut num_duplicate_dives_seen: u64 = 0;
+  let mut num_dives_seen: usize = 0;
+  let mut num_duplicate_dives_seen: usize = 0;
   let mut dive_hashes_seen: HashSet<u64> = HashSet::new();
 
   // The set of Locations that are common to every maximal dive
@@ -208,6 +209,6 @@ fn get_allowed_locations_to_place_next_item(
     }
   }
 
-  info!("Num dives: (total, duplicates, % dups) = ({}, {}, {:.2})", num_dives_seen, num_duplicate_dives_seen, (num_duplicate_dives_seen as f64) / (num_dives_seen as f64));
+  DIVES.lock().unwrap().record(num_dives_seen, num_duplicate_dives_seen);
   common_locs.expect("there are no locations common to every maximal dive")
 }

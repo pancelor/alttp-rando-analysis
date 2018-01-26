@@ -23,6 +23,8 @@ mod dive;
 mod connections;
 mod logic;
 
+mod stats;
+
 
 fn main() {
   env_logger::init().unwrap();
@@ -53,6 +55,8 @@ struct ItemPools {
 
 #[allow(dead_code)]
 fn real_main() {
+  use stats::*;
+
   let pools = get_items();
   let mut rng = rand::thread_rng();
 
@@ -65,6 +69,7 @@ fn real_main() {
     let world = generator::generate_world(pools.advancement_items.clone(), pools.dungeon_items.clone(), pools.junk_items.clone(), &mut rng);
 
     info!("worldgen finished: {:?}", world);
+    info!("Final dive stats: {}", DIVES.lock().unwrap().format());
     if !generator::can_collect(&world, &pools.required_items_to_win) {
       println!("{:?}", world);
       panic!("uh oh, this world isn't beatable");
