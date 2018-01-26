@@ -135,7 +135,7 @@ lazy_static! {
     cxn!(gr, EP1 <=> EP4: Box::new(|ref items| { items.contains(&BigKeyP1) }));
     cxn!(gr, EP1 <=> EP5: Box::new(|ref items| { items.contains(&Lamp) && items.contains(&BigKeyP1) }));
     cxn!(gr, EP5 <k> EP56);
-    cxn!(gr, EP56 <=> EP6: Box::new(|ref items| { items.contains(&Bow) }));
+    cxn!(gr, EP56 <=> EP6: Box::new(|ref items| { can_shoot_arrows(&items) }));
 
     // DesertPalace
     // TODO: merge w/ mire / ledge etc when those are added

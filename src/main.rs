@@ -93,7 +93,7 @@ fn get_items() -> ItemPools {
     ProgressiveGlove,
     ProgressiveGlove,
     MagicMirror,
-    OcarinaActive, // TODO: inactive
+    OcarinaActive,
   ];
 
   let mut dungeon_items;
@@ -148,6 +148,9 @@ fn get_items() -> ItemPools {
       dungeon_items.append(&mut POD_dungeon_items);
     }
     dungeon_items.sort();
+    // This `sort` is very important; this combined with the Ord trait on Item
+    //   and the order of definition there means that items will be placed
+    //   in the right order (big key -> key -> compass/map)
 
     required_items_to_win = dungeon_items.iter()
       .filter_map(|&item| canenter_to_beat(item))
