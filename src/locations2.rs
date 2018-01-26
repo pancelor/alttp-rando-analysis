@@ -34,8 +34,8 @@ pub enum Location2 {
   DesertPalaceCompassChest,
   DesertPalaceBigChest,
   DesertPalaceKeyPotA,
-  DesertPalaceKeyPotB,
-  DesertPalaceKeyPotC,
+  // DesertPalaceKeyPotB,
+  // DesertPalaceKeyPotC,
   DesertPalaceLanmolas,
   DesertPalacePrize,
 
@@ -101,8 +101,8 @@ pub fn get_all_locations() -> Vec<Location2> {
     DesertPalaceCompassChest,
     DesertPalaceBigChest,
     DesertPalaceKeyPotA,
-    DesertPalaceKeyPotB,
-    DesertPalaceKeyPotC,
+    // DesertPalaceKeyPotB,
+    // DesertPalaceKeyPotC,
     DesertPalaceLanmolas,
     DesertPalacePrize,
 

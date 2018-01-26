@@ -146,9 +146,9 @@ lazy_static! {
     cxn!(gr, DP1 <k> DP3);
     cxn!(gr, DP1 <=> DP4: Box::new(|ref items| { items.contains(&BigKeyP2) }));
     cxn!(gr, DP1 <=> DP15A: Box::new(|ref items| { can_lift_rocks(&items) }));
-    cxn!(gr, DP15A <k> DP15B);
-    cxn!(gr, DP15B <k> DP15C);
-    cxn!(gr, DP15C <k> DP15D);
+    cxn!(gr, DP15A <k> DP15D);
+    // cxn!(gr, DP15B <k> DP15C);
+    // cxn!(gr, DP15C <k> DP15D);
     cxn!(gr, DP15D <=> DP5: Box::new(|ref items| { items.contains(&BigKeyP2) && can_light_torches(&items) && (can_kill_most_things(&items) || items.contains(&IceRod)) }));
 
     // TowerOfHera
@@ -238,17 +238,17 @@ lazy_static! {
     gr.register_zone(Some(DesertPalace), DP15A, btreeset!{
       DesertPalaceKeyPotA,
     });
-    gr.register_zone(Some(DesertPalace), DP15B, btreeset!{
-      DesertPalaceKeyPotB,
-    });
-    gr.register_zone(Some(DesertPalace), DP15C, btreeset!{
-      DesertPalaceKeyPotC,
-    });
+    // gr.register_zone(Some(DesertPalace), DP15B, btreeset!{
+    //   DesertPalaceKeyPotB,
+    // });
+    // gr.register_zone(Some(DesertPalace), DP15C, btreeset!{
+    //   DesertPalaceKeyPotC,
+    // });
     gr.register_zone(Some(DesertPalace), DP15D, btreeset!{});
 
     gr.preset_item(DesertPalaceKeyPotA, KeyP2);
-    gr.preset_item(DesertPalaceKeyPotB, KeyP2);
-    gr.preset_item(DesertPalaceKeyPotC, KeyP2);
+    // gr.preset_item(DesertPalaceKeyPotB, KeyP2);
+    // gr.preset_item(DesertPalaceKeyPotC, KeyP2);
 
     // TowerOfHera
     gr.register_zone(Some(TowerOfHera), TH1, btreeset!{
