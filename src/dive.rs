@@ -63,7 +63,7 @@ impl Dive {
   fn dungeons_i_own_keys_for(&self) -> BTreeSet<&Dungeon> {
     ALL_DUNGEONS.iter()
       .filter(|&&dungeon| {
-        let target_key = DUNGEON_INFO.get(&dungeon).expect("unknown dungeon").key;
+        let target_key = WG.dungeon_info(dungeon).key;
         let num_keys = self.items.iter()
           .filter(|&&item| item == target_key)
           .count();

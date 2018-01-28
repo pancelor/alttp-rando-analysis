@@ -480,6 +480,10 @@ impl WorldGraph {
       _     => None,
     }
   }
+
+  pub fn dungeon_info(&self, dungeon: Dungeon) -> &DungeonInfo {
+    DUNGEON_INFO.get(&dungeon).expect("not a dungeon somehow")
+  }
 }
 
 pub struct DungeonInfo {

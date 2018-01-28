@@ -180,15 +180,32 @@ fn get_allowed_locations_to_place_next_item(
       .filter(|&&dgn| !WG.keyfrontier_from_dungeon(dgn).is_disjoint(&keyfrontier)) // only keep dungeons with common keydoors
       .next()
       .expect("this dive has no keys and yet is somehow not maximal?");
+    let dungeon_keyfrontier = WG.keyfrontier_from_dungeon(*dungeon);
+    let doors_to_explore: BTreeSet<KeyDoor> = &dungeon_keyfrontier & &keyfrontier;
 
-    let doors_to_explore: BTreeSet<KeyDoor> = &WG.keyfrontier_from_dungeon(*dungeon) & &keyfrontier;
+    let num_keys: usize = current_dive.keycounts().get(&WG.dungeon_info(*dungeon).key).expect("bad key").clone();
+    let have_all_keys = dungeon_keyfrontier.len() == num_keys;
 
-    let temp_num = doors_to_explore.len();
-    for (ii, &door) in doors_to_explore.iter().enumerate() {
-      debug!("Pushing dive stack ({}/{}): {:?}", ii+1, temp_num, door);
-      let mut new_dive: Dive = current_dive.clone();
-      new_dive.explore_keydoor(door, &world);
-      stack.push(new_dive);
+    debug!("key stats: num_keys={}/{}", num_keys, dungeon_keyfrontier.len());
+    // If we have every key for the given dungeon; don't fan out at all;
+    //   just explore every available keydoor. This is an optimization;
+    //   setting `have_all_keys=false` will make the algorithm slower but
+    //   still correct
+    if have_all_keys {
+      let mut current_dive = current_dive;
+      for (ii, &door) in doors_to_explore.iter().enumerate() {
+        debug!("Have all keys; exploring door {}/{}: {:?}", ii+1, doors_to_explore.len(), door);
+        current_dive.explore_keydoor(door, &world);
+      }
+      debug!("Pushing dive stack (special: have all keys)");
+      stack.push(current_dive);
+    } else {
+      for (ii, &door) in doors_to_explore.iter().enumerate() {
+        debug!("Pushing dive stack ({}/{}): {:?}", ii+1, doors_to_explore.len(), door);
+        let mut new_dive: Dive = current_dive.clone();
+        new_dive.explore_keydoor(door, &world);
+        stack.push(new_dive);
+      }
     }
   }
 
