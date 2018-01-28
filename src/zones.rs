@@ -44,6 +44,8 @@ pub enum Zone {
 }
 pub use self::Zone::*;
 
+pub const STARTING_ZONE: Zone = TempEastLightWorld;
+
 #[allow(dead_code)]
 pub const ALL_ZONES: &[Zone] = &[
   TempEastLightWorld,

@@ -322,6 +322,12 @@ pub fn get_dungeon_pool() -> Vec<Item> {
   return res;
 }
 
+pub static TEMP_JUNK: Item = Heart;
+
+
+// misfit functions
+
+
 pub fn all_small_keys() -> BTreeSet<Item> {
   btreeset!{
     KeyH1,
@@ -341,7 +347,6 @@ pub fn all_small_keys() -> BTreeSet<Item> {
   }
 }
 
-pub static TEMP_JUNK: Item = Heart;
 
 pub fn is_key(item: Item) -> bool {
   all_small_keys().contains(&item)

@@ -6,11 +6,9 @@ use super::medallions;
 use super::items::Item;
 use super::items;
 
-pub type Assignments = HashMap<Location2, Item>;
-
 #[derive(Eq, PartialEq)]
 pub struct World {
-  assignments: Assignments,
+  assignments: HashMap<Location2, Item>,
   medallions: medallions::EntranceConfig,
 }
 
@@ -18,20 +16,20 @@ use std::fmt;
 impl fmt::Debug for World {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     writeln!(f, "World {{\n\tmedallons: {:?}\n\tassignments={{", self.medallions)?;
-    let mut write_later = Vec::new();
+    let mut write_later1 = Vec::new();
+    let mut write_later2 = Vec::new();
     for &loc in get_all_locations().iter() {
-      let item = match self.assignments.get(&loc) {
-        Some(&it) if it == items::TEMP_JUNK => {
-          write_later.push(loc);
-          continue
-        },
-        Some(&it) => format!("{:?}", it),
-        None => format!("***none***"),
-      };
-      writeln!(f, "\t\t{:?}={:?}", loc, item)?;
+      match self.assignments.get(&loc) {
+        Some(&item) if item == items::TEMP_JUNK => write_later1.push(loc),
+        Some(&item) => writeln!(f, "\t\t{:?}={:?}", loc, item)?,
+        None => write_later2.push(loc),
+      }
     }
-    for &loc in write_later.iter() {
+    for &loc in write_later1.iter() {
       writeln!(f, "\t\t{:?}={:?}", loc, "-")?;
+    }
+    for &loc in write_later2.iter() {
+      writeln!(f, "\t\t{:?}={:?}", loc, "***none***")?;
     }
     write!(f, "\t}}\n}}")
   }
@@ -39,7 +37,7 @@ impl fmt::Debug for World {
 
 impl World {
   pub fn new(medallions: medallions::EntranceConfig) -> Self {
-    let assignments = hashmap!{};
+    let assignments = HashMap::new();
     Self {
       assignments,
       medallions
@@ -50,13 +48,15 @@ impl World {
     self.assignments.get(loc)
   }
 
+  // "key" as in HashMap.contains_key; not a zelda item
   pub fn contains_key(&self, loc: &Location2) -> bool {
-    self.get(loc).is_some()
+    self.assignments.contains_key(loc)
   }
 
-  // meh
-  pub fn num_assignments(&self) -> usize {
-    self.assignments.len()
+  pub fn fill_presets(&mut self, presets: &HashMap<Location2, Item>) {
+    for (&loc, &item) in presets {
+      self.assign(loc, item);
+    }
   }
 
   pub fn assign(&mut self, loc: Location2, item: Item) {
@@ -67,5 +67,15 @@ impl World {
 
     info!("Filling {:?} with {:?}", loc, item);
     self.assignments.insert(loc, item);
+  }
+}
+
+
+// misfit functions
+
+
+impl World {
+  pub fn num_assignments(&self) -> usize {
+    self.assignments.len()
   }
 }

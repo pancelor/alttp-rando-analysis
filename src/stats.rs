@@ -1,5 +1,9 @@
 use std::sync::Mutex;
 
+lazy_static! {
+  pub static ref DIVES: Mutex<DiveStats> = Mutex::new(DiveStats{total: 0, duplicates: 0});
+}
+
 pub struct DiveStats {
   total: usize,
   duplicates: usize,
@@ -17,8 +21,9 @@ impl DiveStats {
     self.duplicates += other.duplicates;
   }
 
-  pub fn format(&self) -> String {
-    format!("{:?}", self)
+  pub fn clear(&mut self) {
+    self.total = 0;
+    self.duplicates = 0;
   }
 }
 
@@ -34,6 +39,13 @@ impl fmt::Debug for DiveStats {
   }
 }
 
-lazy_static! {
-  pub static ref DIVES: Mutex<DiveStats> = Mutex::new(DiveStats{total: 0, duplicates: 0});
+
+// misfit functions
+
+
+impl DiveStats {
+  // exists for dumb type coercion reasons
+  pub fn format(&self) -> String {
+    format!("{:?}", self)
+  }
 }

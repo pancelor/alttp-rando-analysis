@@ -44,14 +44,14 @@ impl Dive {
     items: Vec<Item>,
     world: &World,
   ) -> Self {
-    let mut me = Self {
+    let mut myself = Self {
       zones: BTreeSet::new(),
       items,
       open_doors: BTreeSet::new(),
     };
-    me.loot_zone(Zone::TempEastLightWorld, &world);
-    me.explore(&world);
-    me
+    myself.loot_zone(zones::STARTING_ZONE, &world);
+    myself.explore(&world);
+    myself
   }
 
   pub fn hash_value(&self) -> u64 {
@@ -60,27 +60,15 @@ impl Dive {
     hasher.finish()
   }
 
-  // useful for printing/debugging how many keys are in my item collection
-  pub fn keycounts(&self) -> BTreeMap<Item, usize> {
-    items::all_small_keys().iter()
-      .filter_map(|key| {
-        match logic::count(key, &self.items) {
-          0 => None,
-          count => Some((*key, count)),
-        }
-      })
-      .collect()
-  }
-
   fn dungeons_i_own_keys_for(&self) -> BTreeSet<&Dungeon> {
     ALL_DUNGEONS.iter()
       .filter(|&&dungeon| {
-        let target_key = WG.key_from_dungeon(dungeon);
+        let target_key = DUNGEON_INFO.get(&dungeon).expect("unknown dungeon").key;
         let num_keys = self.items.iter()
           .filter(|&&item| item == target_key)
           .count();
         let num_opened_doors = self.open_doors.iter()
-          .filter(|&&kdoor| WG.dungeon_from_keydoor(kdoor) == dungeon)
+          .filter(|&&kdoor| WG.dungeon_from_keydoor(kdoor) == &dungeon)
           .count();
         num_opened_doors < num_keys
       }).collect()
@@ -91,7 +79,7 @@ impl Dive {
     self.zones.iter()
       .filter_map(|&zone| WG.keyfrontier_from_zone(zone))
       .flat_map(|&ref kdoorset| kdoorset)
-      .filter(|&&kdoor| dungeons_i_own_keys_for.contains(&WG.dungeon_from_keydoor(kdoor)))
+      .filter(|&&kdoor| dungeons_i_own_keys_for.contains(WG.dungeon_from_keydoor(kdoor)))
       .filter(|&&kdoor| !self.open_doors.contains(&kdoor))
       .cloned()
       .collect()
@@ -178,7 +166,7 @@ impl Dive {
 
     // sanity check we have a key to open the door
     let dungeon = WG.dungeon_from_keydoor(door);
-    if !self.dungeons_i_own_keys_for().contains(&dungeon) {
+    if !self.dungeons_i_own_keys_for().contains(dungeon) {
       panic!("Trying to open a door you don't have a key for");
     }
 
@@ -216,5 +204,23 @@ impl Dive {
 
     // debug!("Looting:\n\tzone={:?}\n\t(post) self.items={:?}", zone, self.items);
     trace!("fn (post) loot_zone(\n\tself={:?},\n\tzone={:?}\n\tworld={:?}\n)", self, zone, world);
+  }
+}
+
+
+// misfit functions
+
+
+impl Dive {
+  // useful for printing/debugging how many keys are in my item collection
+  pub fn keycounts(&self) -> BTreeMap<Item, usize> {
+    items::all_small_keys().iter()
+      .filter_map(|key| {
+        match logic::count(key, &self.items) {
+          0 => None,
+          count => Some((*key, count)),
+        }
+      })
+      .collect()
   }
 }

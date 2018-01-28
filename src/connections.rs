@@ -1,5 +1,6 @@
 #![allow(unused_imports)]
 
+use std::fmt;
 use std::collections::{HashMap, BTreeSet};
 use super::locations2::*;
 use super::world::World;
@@ -24,18 +25,34 @@ pub struct KeyDoor {
   pub zone2: Zone,
 }
 
-// TODO: does this breaks any invariants? e.g. will Ord be broken? which breaks all BTreeSet s?
-// impl PartialEq for KeyDoor {
-//   fn eq(&self, other: &Self) -> bool {
-//     (
-//          self.zone1 == other.zone1
-//       && self.zone2 == other.zone2
-//     ) || (
-//          self.zone1 == other.zone2
-//       && self.zone2 == other.zone1
-//     )
-//   }
-// }
+// This can't be `impl PartialEq for KeyDoor` b/c that would break all `BTreeSet<KeyDoor>`s
+//   see https://doc.rust-lang.org/std/cmp/trait.Ord.html
+impl KeyDoor {
+  #[allow(dead_code)]
+  fn equals(&self, other: &Self) -> bool {
+    (
+         self.zone1 == other.zone1
+      && self.zone2 == other.zone2
+    ) || (
+         self.zone1 == other.zone2
+      && self.zone2 == other.zone1
+    )
+  }
+}
+
+impl ItemDoor {
+  // crappy name; idk. Only used in debugging
+  #[allow(dead_code)]
+  fn is_collocated_with(&self, other: &Self) -> bool {
+    (
+         self.zone1 == other.zone1
+      && self.zone2 == other.zone2
+    ) || (
+         self.zone1 == other.zone2
+      && self.zone2 == other.zone1
+    )
+  }
+}
 
 impl ItemDoor {
   pub fn can_pass(&self, items: &Vec<Item>) -> bool {
@@ -44,7 +61,6 @@ impl ItemDoor {
 }
 
 
-use std::fmt;
 impl fmt::Debug for KeyDoor {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "{:?} <k> {:?}", self.zone1, self.zone2)
@@ -128,53 +144,7 @@ lazy_static! {
   pub static ref WG: WorldGraph = {
     let mut gr = WorldGraph::new();
 
-    // EasternPalace
-    cxn!(gr, TempEastLightWorld <=> EP1: Box::new(|ref items| { items.contains(&CanEnterEP) }));
-    cxn!(gr, EP1 <=> EP2: Box::new(|ref items| { items.contains(&Lamp) }));
-    cxn!(gr, EP2 <k> EP3);
-    cxn!(gr, EP1 <=> EP4: Box::new(|ref items| { items.contains(&BigKeyP1) }));
-    cxn!(gr, EP1 <=> EP5: Box::new(|ref items| { items.contains(&Lamp) && items.contains(&BigKeyP1) }));
-    cxn!(gr, EP5 <k> EP56);
-    cxn!(gr, EP56 <=> EP6: Box::new(|ref items| { can_shoot_arrows(&items) }));
-
-    // DesertPalace
-    // TODO: merge w/ mire / ledge etc when those are added
-    // TODO: TempEastLightWorld <=> DP1 should be ==>, but I haven't thought through s+q yet
-    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { items.contains(&BookOfMudora) && items.contains(&CanEnterDP)}));
-    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { can_fly(&items) && can_lift_dark_rocks(&items) && items.contains(&MagicMirror) && items.contains(&CanEnterDP)}));
-    cxn!(gr, DP1 <=> DP2: Box::new(|ref items| { items.contains(&PegasusBoots) }));
-    cxn!(gr, DP1 <k> DP3);
-    cxn!(gr, DP1 <=> DP4: Box::new(|ref items| { items.contains(&BigKeyP2) }));
-    cxn!(gr, DP1 <=> DP15A: Box::new(|ref items| { can_lift_rocks(&items) }));
-    cxn!(gr, DP15A <k> DP15B);
-    cxn!(gr, DP15B <k> DP15C);
-    cxn!(gr, DP15C <k> DP15D);
-    cxn!(gr, DP15D <=> DP5: Box::new(|ref items| { items.contains(&BigKeyP2) && can_light_torches(&items) && (can_kill_most_things(&items) || items.contains(&IceRod)) }));
-
-    // TowerOfHera
-    cxn!(gr, TempEastLightWorld <=> TH1: Box::new(|ref items| { items.contains(&CanEnterTH) }));
-    cxn!(gr, TH1 <k> TH12);
-    cxn!(gr, TH12 <=> TH2: Box::new(|ref items| { can_light_torches(&items) }));
-    cxn!(gr, TH1 <=> TH3: Box::new(|ref items| { items.contains(&BigKeyP3) }));
-    cxn!(gr, TH3 <=> TH4: Box::new(|ref items| { has_sword(&items) || items.contains(&Hammer) }));
-
-    // PalaceOfDarkness
-    cxn!(gr, TempEastLightWorld <=> POD1: Box::new(|ref items| { items.contains(&CanEnterPOD) }));
-    cxn!(gr, POD1   <=> POD8:   Box::new(|ref items| { can_shoot_arrows(&items) }));
-    cxn!(gr, POD8   ==> POD2:   Box::new(|ref items| { items.contains(&Hammer) }));
-    cxn!(gr, POD47  <=> POD7:   Box::new(|ref items| { items.contains(&Lamp) }));
-    cxn!(gr, POD7   <=> POD10:  Box::new(|ref items| { items.contains(&BigKeyD1) }));
-    cxn!(gr, POD4   <=> POD6:   Box::new(|ref items| { items.contains(&Lamp) }));
-    cxn!(gr, POD2   <=> POD29A: Box::new(|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) }));
-    cxn!(gr, POD29B <=> POD9:   Box::new(|ref items| { items.contains(&BigKeyD1) }));
-    cxn!(gr, POD1   <k> POD2);
-    cxn!(gr, POD2   <k> POD3);
-    cxn!(gr, POD2   <k> POD4);
-    cxn!(gr, POD4   <k> POD47);
-    cxn!(gr, POD4   <k> POD5);
-    cxn!(gr, POD29A <k> POD29B);
-
-
+    // TODO other dungeons; overworld
 
     // Overworld
     gr.register_zone(None, TempEastLightWorld, btreeset![
@@ -190,7 +160,16 @@ lazy_static! {
       TempOverworld10,
     ]);
 
-    // Eastern Palace
+
+    // EasternPalace
+    cxn!(gr, TempEastLightWorld <=> EP1: Box::new(|ref items| { items.contains(&CanEnterEP) }));
+    cxn!(gr, EP1 <=> EP2: Box::new(|ref items| { items.contains(&Lamp) }));
+    cxn!(gr, EP2 <k> EP3);
+    cxn!(gr, EP1 <=> EP4: Box::new(|ref items| { items.contains(&BigKeyP1) }));
+    cxn!(gr, EP1 <=> EP5: Box::new(|ref items| { items.contains(&Lamp) && items.contains(&BigKeyP1) }));
+    cxn!(gr, EP5 <k> EP56);
+    cxn!(gr, EP56 <=> EP6: Box::new(|ref items| { can_shoot_arrows(&items) }));
+
     gr.register_zone(Some(EasternPalace), EP1, btreeset!{
       EasternPalaceCompassChest,
       EasternPalaceCannonballChest,
@@ -217,7 +196,21 @@ lazy_static! {
     gr.preset_item(EasternPalaceKeyPot, KeyP1);
     gr.preset_item(EasternPalaceKeyEyegore, KeyP1);
 
+
     // DesertPalace
+    // TODO: merge w/ mire / ledge etc when those are added
+    // TODO: TempEastLightWorld <=> DP1 should be ==>, but I haven't thought through s+q yet
+    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { items.contains(&BookOfMudora) && items.contains(&CanEnterDP)}));
+    cxn!(gr, TempEastLightWorld <=> DP1: Box::new(|ref items| { can_fly(&items) && can_lift_dark_rocks(&items) && items.contains(&MagicMirror) && items.contains(&CanEnterDP)}));
+    cxn!(gr, DP1 <=> DP2: Box::new(|ref items| { items.contains(&PegasusBoots) }));
+    cxn!(gr, DP1 <k> DP3);
+    cxn!(gr, DP1 <=> DP4: Box::new(|ref items| { items.contains(&BigKeyP2) }));
+    cxn!(gr, DP1 <=> DP15A: Box::new(|ref items| { can_lift_rocks(&items) }));
+    cxn!(gr, DP15A <k> DP15B);
+    cxn!(gr, DP15B <k> DP15C);
+    cxn!(gr, DP15C <k> DP15D);
+    cxn!(gr, DP15D <=> DP5: Box::new(|ref items| { items.contains(&BigKeyP2) && can_light_torches(&items) && (can_kill_most_things(&items) || items.contains(&IceRod)) }));
+
     gr.register_zone(Some(DesertPalace), DP1, btreeset!{
       DesertPalaceMapChest,
     });
@@ -250,7 +243,14 @@ lazy_static! {
     gr.preset_item(DesertPalaceKeyPotB, KeyP2);
     gr.preset_item(DesertPalaceKeyPotC, KeyP2);
 
+
     // TowerOfHera
+    cxn!(gr, TempEastLightWorld <=> TH1: Box::new(|ref items| { items.contains(&CanEnterTH) }));
+    cxn!(gr, TH1 <k> TH12);
+    cxn!(gr, TH12 <=> TH2: Box::new(|ref items| { can_light_torches(&items) }));
+    cxn!(gr, TH1 <=> TH3: Box::new(|ref items| { items.contains(&BigKeyP3) }));
+    cxn!(gr, TH3 <=> TH4: Box::new(|ref items| { has_sword(&items) || items.contains(&Hammer) }));
+
     gr.register_zone(Some(TowerOfHera), TH1, btreeset!{
       TowerOfHeraMapChest,
       TowerOfHeraBasementCage,
@@ -268,7 +268,23 @@ lazy_static! {
     });
     gr.register_zone(Some(TowerOfHera), TH12, btreeset!{});
 
+
     // PalaceOfDarkness
+    cxn!(gr, TempEastLightWorld <=> POD1: Box::new(|ref items| { items.contains(&CanEnterPOD) }));
+    cxn!(gr, POD1   <=> POD8:   Box::new(|ref items| { can_shoot_arrows(&items) }));
+    cxn!(gr, POD8   ==> POD2:   Box::new(|ref items| { items.contains(&Hammer) }));
+    cxn!(gr, POD47  <=> POD7:   Box::new(|ref items| { items.contains(&Lamp) }));
+    cxn!(gr, POD7   <=> POD10:  Box::new(|ref items| { items.contains(&BigKeyD1) }));
+    cxn!(gr, POD4   <=> POD6:   Box::new(|ref items| { items.contains(&Lamp) }));
+    cxn!(gr, POD2   <=> POD29A: Box::new(|ref items| { can_shoot_arrows(&items) && items.contains(&Lamp) && items.contains(&Hammer) }));
+    cxn!(gr, POD29B <=> POD9:   Box::new(|ref items| { items.contains(&BigKeyD1) }));
+    cxn!(gr, POD1   <k> POD2);
+    cxn!(gr, POD2   <k> POD3);
+    cxn!(gr, POD2   <k> POD4);
+    cxn!(gr, POD4   <k> POD47);
+    cxn!(gr, POD4   <k> POD5);
+    cxn!(gr, POD29A <k> POD29B);
+
     gr.register_zone(Some(PalaceOfDarkness), POD1, btreeset!{
       PalaceOfDarknessShooterRoom
     });
@@ -308,7 +324,7 @@ lazy_static! {
     gr.register_zone(Some(PalaceOfDarkness), POD29A, btreeset!{});
     gr.register_zone(Some(PalaceOfDarkness), POD29B, btreeset!{});
 
-    // TODO other dungeons; overworld
+
     gr
   };
 }
@@ -354,9 +370,8 @@ impl WorldGraph {
     self.zones_from_dungeon.get(&dungeon)
   }
 
-  fn dungeon_from_zone(&self, zone: Zone) -> Option<Dungeon> {
+  fn dungeon_from_zone(&self, zone: Zone) -> Option<&Dungeon> {
     self.dungeon_from_zone.get(&zone)
-      .and_then(|x| Some(x.clone()))
   }
 
   pub fn locations_from_zone(&self, zone: Zone) -> Option<&BTreeSet<Location2>> {
@@ -375,18 +390,12 @@ impl WorldGraph {
     self.preset_items.insert(loc, item);
   }
 
-  // TODO: rm
-  #[allow(dead_code)]
-  pub fn num_presets(&self) -> usize {
-    self.preset_items.len()
+  pub fn get_presets(&self) -> &HashMap<Location2, Item> {
+    &self.preset_items
   }
+}
 
-  pub fn prefill_pots_etc(&self, world: &mut World) {
-    for (&loc, &item) in self.preset_items.iter() {
-      world.assign(loc, item);
-    }
-  }
-
+impl WorldGraph {
   pub fn keyfrontier_from_dungeon(&self, dungeon: Dungeon) -> BTreeSet<KeyDoor> {
     match self.zones_from_dungeon(dungeon) {
       Some(zones) => {
@@ -402,7 +411,6 @@ impl WorldGraph {
     }
   }
 
-  // TODO: temp pub
   pub fn locations_from_dungeon(&self, dungeon: Dungeon) -> Option<BTreeSet<Location2>> {
     self.zones_from_dungeon(dungeon)
       .and_then(|zones| {
@@ -415,18 +423,23 @@ impl WorldGraph {
       })
   }
 
-  pub fn dungeon_from_keydoor(&self, keydoor: KeyDoor) -> Dungeon {
-    self.dungeon_from_zone(keydoor.zone1).expect("your keydoor is outside").clone()
+  pub fn dungeon_from_keydoor(&self, keydoor: KeyDoor) -> &Dungeon {
+    self.dungeon_from_zone(keydoor.zone1).expect("your keydoor is outside")
   }
+}
 
-  // TODO: maybe shouldn't live here
+
+// misfit functions
+
+
+impl WorldGraph {
   pub fn item_can_be_placed_at(&self, item: Item, loc: Location2) -> bool {
     use std::env;
 
     let keysanity = env::var("KEYSANITY").is_ok();
 
     keysanity || match item {
-      // TODO: more
+      // TODO: more (A1/A2/H1/H2)
         KeyP1 | BigKeyP1 | CompassP1 | MapP1
       | KeyP2 | BigKeyP2 | CompassP2 | MapP2
       | KeyP3 | BigKeyP3 | CompassP3 | MapP3
@@ -440,19 +453,15 @@ impl WorldGraph {
       => {
         let dungeon = WG.dungeon_from_item(item).expect("bad key enum");
         let locs = WG.locations_from_dungeon(dungeon).expect("not a dungeon somehow");
-        let x = locs.contains(&loc);
-        // TODO: s/debug/trace
-        // debug!("item_can_be_placed_at\n\titem={:?}\n\tloc={:?}\n\tlocs={:?}\n\tcan={}", item, loc, locs, x);
-        x
+        let ret = locs.contains(&loc);
+        trace!("item_can_be_placed_at\n\titem={:?}\n\tloc={:?}\n\tlocs={:?}\n\tcan={}", item, loc, locs, ret);
+        ret
       },
       _ => true,
     }
   }
 
-  // TODO: maybe shouldn't live here
   fn dungeon_from_item(&self, key: Item) -> Option<Dungeon> {
-    use super::items::*;
-    use super::dungeons::*;
     match key {
       KeyH1 | BigKeyH1 | CompassH1 | MapH1 => None, // TODO: set this for real
       KeyH2 | BigKeyH2 | CompassH2 | MapH2 => None, // TODO: set this for real
@@ -468,47 +477,79 @@ impl WorldGraph {
       KeyD7 | BigKeyD7 | CompassD7 | MapD7 => Some(TurtleRock),
       KeyA1 | BigKeyA1 | CompassA1 | MapA1 => None, // TODO: set this for real
       KeyA2 | BigKeyA2 | CompassA2 | MapA2 => None, // TODO: set this for real
-      _     => panic!("bad arg"), // TODO: rm? return None?
-    }
-  }
-
-  // TODO: maybe shouldn't live here
-  #[allow(dead_code)]
-  pub fn prize_loc_from_dungeon(&self, dungeon: Dungeon) -> Option<Location2> {
-    use super::locations2::*;
-    use super::dungeons::*;
-    match dungeon {
-      EasternPalace => Some(EasternPalacePrize),
-      DesertPalace => Some(DesertPalacePrize),
-      TowerOfHera => Some(TowerOfHeraPrize),
-      PalaceOfDarkness => Some(PalaceOfDarknessPrize),
-      // SwampPalace => Some(SwampPalacePrize),
-      // SkullWoods => Some(SkullWoodsPrize),
-      // ThievesTown => Some(ThievesTownPrize),
-      // IcePalace => Some(IcePalacePrize),
-      // MiseryMire => Some(MiseryMirePrize),
-      // TurtleRock => Some(TurtleRockPrize),
-      _ => None,
-    }
-  }
-
-  // TODO: maybe shouldn't live here
-  pub fn key_from_dungeon(&self, dungeon: Dungeon) -> Item {
-    use super::items::*;
-    use super::dungeons::*;
-    match dungeon {
-      EasternPalace => KeyP1,
-      DesertPalace => KeyP2,
-      TowerOfHera => KeyP3,
-      PalaceOfDarkness => KeyD1,
-      SwampPalace => KeyD2,
-      SkullWoods => KeyD3,
-      ThievesTown => KeyD4,
-      IcePalace => KeyD5,
-      MiseryMire => KeyD6,
-      TurtleRock => KeyD7,
+      _     => None,
     }
   }
 }
 
-// fn todo(_: &Vec<Item>) -> bool { true } // for warning suppression
+pub struct DungeonInfo {
+  pub key: Item,
+  pub prize_loc: Location2,
+  pub can_enter_token: Item,
+  pub beat_token: Item,
+}
+
+lazy_static! {
+  pub static ref DUNGEON_INFO: HashMap<Dungeon, DungeonInfo> = hashmap!{
+    EasternPalace => DungeonInfo{
+      key: KeyP1,
+      prize_loc: EasternPalacePrize,
+      can_enter_token: CanEnterEP,
+      beat_token: BeatEP,
+    },
+    DesertPalace => DungeonInfo{
+      key: KeyP2,
+      prize_loc: DesertPalacePrize,
+      can_enter_token: CanEnterDP,
+      beat_token: BeatDP,
+    },
+    TowerOfHera => DungeonInfo{
+      key: KeyP3,
+      prize_loc: TowerOfHeraPrize,
+      can_enter_token: CanEnterTH,
+      beat_token: BeatTH,
+    },
+    PalaceOfDarkness => DungeonInfo{
+      key: KeyD1,
+      prize_loc: PalaceOfDarknessPrize,
+      can_enter_token: CanEnterPOD,
+      beat_token: BeatPOD,
+    },
+    SwampPalace => DungeonInfo{
+      key: KeyD2,
+      prize_loc: SwampPalacePrize,
+      can_enter_token: CanEnterSP,
+      beat_token: BeatSP,
+    },
+    SkullWoods => DungeonInfo{
+      key: KeyD3,
+      prize_loc: SkullWoodsPrize,
+      can_enter_token: CanEnterSW,
+      beat_token: BeatSW,
+    },
+    ThievesTown => DungeonInfo{
+      key: KeyD4,
+      prize_loc: ThievesTownPrize,
+      can_enter_token: CanEnterTT,
+      beat_token: BeatTT,
+    },
+    IcePalace => DungeonInfo{
+      key: KeyD5,
+      prize_loc: IcePalacePrize,
+      can_enter_token: CanEnterIP,
+      beat_token: BeatIP,
+    },
+    MiseryMire => DungeonInfo{
+      key: KeyD6,
+      prize_loc: MiseryMirePrize,
+      can_enter_token: CanEnterMM,
+      beat_token: BeatMM,
+    },
+    TurtleRock => DungeonInfo{
+      key: KeyD7,
+      prize_loc: TurtleRockPrize,
+      can_enter_token: CanEnterTR,
+      beat_token: BeatTR,
+    },
+  };
+}

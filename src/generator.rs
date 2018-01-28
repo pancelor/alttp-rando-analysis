@@ -31,7 +31,7 @@ pub fn generate_world(
 
   let mut world = World::new(medallions);
 
-  WG.prefill_pots_etc(&mut world);
+  world.fill_presets(WG.get_presets());
 
   { // Set up assignments
     { // Place prizes
@@ -58,7 +58,7 @@ pub fn generate_world(
 
     fill_items_in_locations(dungeon_items, &randomized_order_locations, &advancement_items, &mut world);
 
-    // TODO: very old code; to reimplement at some point
+    // TODO: very old code; re-implement at some point
     // // { // put some junk in ganon
     // //   let num_junk_items = rng.next_u32() % 16;
     // //   let ganon_locs: Vec<locations::Location> = regions::get_locations_for(regions::Region::GanonsTower).into_iter()
@@ -82,22 +82,6 @@ pub fn generate_world(
   world
 }
 
-// TODO: temp fxn
-// note: doesn't handle multiples; e.g. it will say you can collect 2 bottles even if you can only collect 1
-pub fn can_collect(world: &World, items: &Vec<Item>) -> bool {
-  let reachable_locs = get_allowed_locations_to_place_next_item(vec![], &world);
-  let reachable_items: Vec<Item> = reachable_locs.iter()
-    .filter_map(|&loc| world.get(&loc))
-    .cloned()
-    .collect();
-  for &item in items.iter() {
-    if !reachable_items.contains(&item) {
-      return false
-    }
-  }
-  true
-}
-
 use std::vec::IntoIter;
 fn fast_fill_items_in_locations(
   fill_items: &mut IntoIter<Item>,
@@ -108,9 +92,7 @@ fn fast_fill_items_in_locations(
   for &loc in locations.iter() {
     if world.contains_key(&loc) { continue };
     match fill_items.next() {
-      Some(item) => {
-        world.assign(loc, item)
-      },
+      Some(item) => world.assign(loc, item),
       None => break,
     };
   }
@@ -148,7 +130,6 @@ fn get_allowed_locations_to_place_next_item(
 ) -> BTreeSet<Location2> {
   trace!("fn get_allowed_locations_to_place_next_item(\n\tassumed={:?},\n\tworld{:?}\n)", assumed, world);
   let first_dive: Dive = Dive::new(assumed, &world);
-  let mut stack: Vec<Dive> = Vec::new();
 
   let mut num_dives_seen: usize = 0;
   let mut num_duplicate_dives_seen: usize = 0;
@@ -157,13 +138,15 @@ fn get_allowed_locations_to_place_next_item(
   // The set of Locations that are common to every maximal dive
   let mut common_locs: Option<BTreeSet<Location2>> = None;
 
+  let mut stack: Vec<Dive> = Vec::new();
   stack.push(first_dive);
   while stack.len() > 0 {
     trace!("while stack (\n\tstack={:?},\n\tcommon_locs={:?}\n)", stack, common_locs);
     let current_dive: Dive = stack.pop().expect("umm this is impossible");
     num_dives_seen += 1;
 
-    if !dive_hashes_seen.insert(current_dive.hash_value()) {
+    let never_seen_before = dive_hashes_seen.insert(current_dive.hash_value());
+    if !never_seen_before {
       // this is a duplicate
       num_duplicate_dives_seen += 1;
       continue;
@@ -193,10 +176,10 @@ fn get_allowed_locations_to_place_next_item(
     //   EP keydoors, because that dungeon comes earlier (in vanilla).
     //   We'll end up going to POD later after there are no more EP keys
     //   available.
-    let dungeon : &dungeons::Dungeon = ALL_DUNGEONS.iter()
-      .filter(|&&dgn| !(&WG.keyfrontier_from_dungeon(dgn) & &keyfrontier).is_empty())
+    let dungeon: &Dungeon = ALL_DUNGEONS.iter()
+      .filter(|&&dgn| !WG.keyfrontier_from_dungeon(dgn).is_disjoint(&keyfrontier)) // only keep dungeons with common keydoors
       .next()
-      .expect("this dive has no keys");
+      .expect("this dive has no keys and yet is somehow not maximal?");
 
     let doors_to_explore: BTreeSet<KeyDoor> = &WG.keyfrontier_from_dungeon(*dungeon) & &keyfrontier;
 
@@ -211,4 +194,18 @@ fn get_allowed_locations_to_place_next_item(
 
   DIVES.lock().unwrap().record(num_dives_seen, num_duplicate_dives_seen);
   common_locs.expect("there are no locations common to every maximal dive")
+}
+
+
+// misfit functions
+
+
+// note: doesn't handle multiples; e.g. it will say you can collect 2 bottles even if you can only collect 1
+pub fn can_collect(world: &World, items: &HashSet<Item>) -> bool {
+  let reachable_locs = get_allowed_locations_to_place_next_item(vec![], &world);
+  let reachable_items: HashSet<Item> = reachable_locs.iter()
+    .filter_map(|&loc| world.get(&loc))
+    .cloned()
+    .collect();
+  &(&reachable_items & items) == items
 }

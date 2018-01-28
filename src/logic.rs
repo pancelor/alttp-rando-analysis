@@ -1,9 +1,7 @@
 #![allow(dead_code)]
 #![allow(unused_imports)]
 
-use std::collections::HashMap;
-use super::{locations2, items};
-use items::*;
+use super::items::*;
 
 pub fn count(item: &Item, my_items: &Vec<Item>) -> usize {
   my_items.iter()

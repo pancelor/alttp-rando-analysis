@@ -25,6 +25,7 @@ mod logic;
 
 mod stats;
 
+use std::collections::HashSet;
 
 fn main() {
   env_logger::init().unwrap();
@@ -43,21 +44,21 @@ fn temp_main() {
 
   let locs1 = WG.locations_from_dungeon(EasternPalace);
   let locs2 = WG.locations_from_dungeon(PalaceOfDarkness);
-  println!("EP={:?} PD={:?}", locs1, locs2);
+  println!("EP={:?} POD={:?}", locs1, locs2);
 }
 
 struct ItemPools {
   advancement_items: Vec<items::Item>,
   dungeon_items: Vec<items::Item>,
   junk_items: Vec<items::Item>,
-  required_items_to_win: Vec<items::Item>,
+  required_items_to_win: HashSet<items::Item>,
 }
 
 #[allow(dead_code)]
 fn real_main() {
   use stats::*;
 
-  let pools = get_items();
+  let pools = get_item_pools();
   let mut rng = rand::thread_rng();
 
   let sim_count = match env::var("NSIM") {
@@ -66,6 +67,7 @@ fn real_main() {
   };
   for ii in 0..sim_count {
     info!("sim #{:?}", ii);
+    DIVES.lock().unwrap().clear();
     let world = generator::generate_world(pools.advancement_items.clone(), pools.dungeon_items.clone(), pools.junk_items.clone(), &mut rng);
 
     info!("worldgen finished: {:?}", world);
@@ -78,7 +80,7 @@ fn real_main() {
 }
 
 #[allow(unused_imports)]
-fn get_items() -> ItemPools {
+fn get_item_pools() -> ItemPools {
   use connections::WG;
   use items::*;
 
@@ -97,7 +99,7 @@ fn get_items() -> ItemPools {
   ];
 
   let mut dungeon_items;
-  let required_items_to_win: Vec<Item>;
+  let required_items_to_win: HashSet<Item>;
   { // init dungeon_items
     #![allow(non_snake_case)]
 
@@ -172,7 +174,10 @@ fn env_is_set(name: &str) -> bool {
   env::var(name).is_ok()
 }
 
-// TODO rm
+
+// misfit functions
+
+
 #[allow(dead_code)]
 fn key_in_dark_maze(world: &world::World) -> bool{
   use locations2::*;
