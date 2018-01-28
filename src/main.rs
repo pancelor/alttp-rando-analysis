@@ -96,6 +96,11 @@ fn get_item_pools() -> ItemPools {
     ProgressiveGlove,
     MagicMirror,
     OcarinaActive,
+    Hookshot,
+    Flippers,
+    CaneOfSomaria,
+    Bombos,
+    MoonPearl,
   ];
 
   let mut dungeon_items;
