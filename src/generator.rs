@@ -217,7 +217,6 @@ fn get_allowed_locations_to_place_next_item(
 // misfit functions
 
 
-// note: doesn't handle multiples; e.g. it will say you can collect 2 bottles even if you can only collect 1
 pub fn can_collect(world: &World, items: &HashSet<Item>) -> bool {
   let reachable_locs = get_allowed_locations_to_place_next_item(vec![], &world);
   let reachable_items: HashSet<Item> = reachable_locs.iter()

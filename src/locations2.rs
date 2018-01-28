@@ -1,10 +1,6 @@
 #![allow(non_camel_case_types)]
 #![allow(unused_imports)]
 
-use super::zones;
-use super::zones::*;
-use super::items::Item;
-
 #[derive(Eq, PartialEq, PartialOrd, Ord, Hash, Copy, Clone, Debug)]
 pub enum Location2 {
   TempOverworld1,

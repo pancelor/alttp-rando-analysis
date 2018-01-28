@@ -3,7 +3,6 @@
 use std::fmt;
 use std::collections::{HashMap, BTreeSet};
 use super::locations2::*;
-use super::world::World;
 use super::zones::*;
 use super::dungeons::*;
 use super::logic::*;
@@ -25,7 +24,8 @@ pub struct KeyDoor {
   pub zone2: Zone,
 }
 
-// This can't be `impl PartialEq for KeyDoor` b/c that would break all `BTreeSet<KeyDoor>`s
+// This can't be `impl PartialEq for KeyDoor` b/c
+//   that would break all `BTreeSet<KeyDoor>`s;
 //   see https://doc.rust-lang.org/std/cmp/trait.Ord.html
 impl KeyDoor {
   #[allow(dead_code)]
@@ -494,7 +494,7 @@ pub struct DungeonInfo {
 }
 
 lazy_static! {
-  pub static ref DUNGEON_INFO: HashMap<Dungeon, DungeonInfo> = hashmap!{
+  static ref DUNGEON_INFO: HashMap<Dungeon, DungeonInfo> = hashmap!{
     EasternPalace => DungeonInfo{
       key: KeyP1,
       prize_loc: EasternPalacePrize,

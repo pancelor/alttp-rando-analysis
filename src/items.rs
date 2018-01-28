@@ -347,7 +347,6 @@ pub fn all_small_keys() -> BTreeSet<Item> {
   }
 }
 
-
 pub fn is_key(item: Item) -> bool {
   all_small_keys().contains(&item)
 }
