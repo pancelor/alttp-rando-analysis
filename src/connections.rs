@@ -335,6 +335,63 @@ lazy_static! {
     gr.register_zone(Some(PalaceOfDarkness), POD29B, btreeset!{});
 
 
+    // Swamp Palace
+    // TODO: careful when ripping out TempPreSP
+    cxn!(gr, TempEastLightWorld <=> TempPreSP: Box::new(|ref items| { items.contains(&MoonPearl) && items.contains(&CanEnterSP) }));
+    cxn!(gr, TempPreSP <=> SP0: Box::new(|ref items| { items.contains(&Flippers) && items.contains(&MagicMirror) }));
+    cxn!(gr, SP0 <k> SP1);
+    cxn!(gr, SP1 <k> SP12);
+    cxn!(gr, SP12 <=> SP2: Box::new(|ref items| { items.contains(&Hammer) }));
+    cxn!(gr, SP2 <=> SP3: Box::new(|ref items| { items.contains(&BigKeyD2) }));
+    cxn!(gr, SP2 <k> SP4);
+    cxn!(gr, SP2 <=> SP25: Box::new(|ref items| { items.contains(&Hookshot) }));
+    cxn!(gr, SP25 <k> SP5);
+    cxn!(gr, SP5 <k> SP56);
+    cxn!(gr, SP56 <=> SP6: Box::new(|ref items| { items.contains(&Hookshot) }));
+
+    gr.register_zone(Some(SwampPalace), SP0, btreeset!{
+      SwampPalaceEntrance,
+    });
+    gr.register_zone(Some(SwampPalace), SP1, btreeset!{
+      SwampPalaceMapChest,
+      SwampPalaceKeySkullA,
+    });
+    gr.register_zone(Some(SwampPalace), SP12, btreeset!{
+      SwampPalaceKeySkullB,
+    });
+    gr.register_zone(Some(SwampPalace), SP2, btreeset!{
+      SwampPalaceCompassChest,
+      SwampPalaceKeySkullC,
+    });
+    gr.register_zone(Some(SwampPalace), SP3, btreeset!{
+      SwampPalaceBigChest,
+    });
+    gr.register_zone(Some(SwampPalace), SP4, btreeset!{
+      SwampPalaceBigKeyChest,
+      SwampPalaceWestChest,
+    });
+    gr.register_zone(Some(SwampPalace), SP25, btreeset!{
+      SwampPalaceKeySkullD,
+    });
+    gr.register_zone(Some(SwampPalace), SP5, btreeset!{
+      SwampPalaceFloodedRoomLeft,
+      SwampPalaceFloodedRoomRight,
+      SwampPalaceWaterfallRoom,
+      SwampPalaceKeySkullE,
+    });
+    gr.register_zone(Some(SwampPalace), SP56, btreeset!{});
+    gr.register_zone(Some(SwampPalace), SP6, btreeset!{
+      SwampPalaceArrghus,
+      SwampPalacePrize,
+    });
+
+    gr.preset_item(SwampPalaceKeySkullA, KeyD2);
+    gr.preset_item(SwampPalaceKeySkullB, KeyD2);
+    gr.preset_item(SwampPalaceKeySkullC, KeyD2);
+    gr.preset_item(SwampPalaceKeySkullD, KeyD2);
+    gr.preset_item(SwampPalaceKeySkullE, KeyD2);
+
+
     gr
   };
 }

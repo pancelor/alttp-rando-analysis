@@ -39,13 +39,13 @@ pub fn generate_world(
       world.assign(EasternPalacePrize, items::BeatEP);
       world.assign(DesertPalacePrize, items::BeatDP);
       world.assign(TowerOfHeraPrize, items::BeatTH);
-      // world.assign(SkullWoodsPrize, items::BeatSW);
-      // world.assign(ThievesTownPrize, items::BeatTT);
-      // world.assign(MiseryMirePrize, items::BeatMM);
-      // world.assign(SwampPalacePrize, items::BeatSP);
-      // world.assign(IcePalacePrize, items::BeatIP);
       world.assign(PalaceOfDarknessPrize, items::BeatPOD);
-      // world.assign(TurtleRockPrize, items::BeatTR);
+      world.assign(SwampPalacePrize, items::BeatSP);
+      world.assign(SkullWoodsPrize, items::BeatSW);
+      world.assign(ThievesTownPrize, items::BeatTT);
+      world.assign(IcePalacePrize, items::BeatIP);
+      world.assign(MiseryMirePrize, items::BeatMM);
+      world.assign(TurtleRockPrize, items::BeatTR);
     }
 
     rng.shuffle(&mut junk_items);

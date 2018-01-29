@@ -140,6 +140,13 @@ fn get_item_pools() -> ItemPools {
       KeyD1,
       BigKeyD1,
     ];
+    let mut SP_dungeon_items = vec![
+      CanEnterSP,
+      MapD2,
+      CompassD2,
+      KeyD2,
+      BigKeyD2,
+    ];
 
     dungeon_items = vec![];
     if !env_is_set("EP") { // pass EP=<any> to turn OFF item placement in EP
@@ -153,6 +160,9 @@ fn get_item_pools() -> ItemPools {
     }
     if !env_is_set("POD") {
       dungeon_items.append(&mut POD_dungeon_items);
+    }
+    if !env_is_set("SP") {
+      dungeon_items.append(&mut SP_dungeon_items);
     }
     dungeon_items.sort();
     // This `sort` is very important; this combined with the Ord trait on Item
