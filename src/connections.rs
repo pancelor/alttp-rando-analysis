@@ -158,6 +158,16 @@ lazy_static! {
       TempOverworld8,
       TempOverworld9,
       TempOverworld10,
+      TempOverworld11,
+      TempOverworld12,
+      TempOverworld13,
+      TempOverworld14,
+      TempOverworld15,
+      TempOverworld16,
+      TempOverworld17,
+      TempOverworld18,
+      TempOverworld19,
+      TempOverworld20,
     ]);
 
 
