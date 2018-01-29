@@ -500,6 +500,15 @@ impl WorldGraph {
 
 
 impl WorldGraph {
+
+  fn item_matches_dungeon(&self, item: Item, loc: Location2) -> bool {
+    let dungeon = WG.dungeon_from_item(item).expect("bad key enum");
+    let locs = WG.locations_from_dungeon(dungeon).expect("not a dungeon somehow");
+    let ret = locs.contains(&loc);
+    trace!("item_can_be_placed_at\n\titem={:?}\n\tloc={:?}\n\tlocs={:?}\n\tcan={}", item, loc, locs, ret);
+    ret
+  }
+
   pub fn item_can_be_placed_at(&self, item: Item, loc: Location2) -> bool {
     use std::env;
 
@@ -511,19 +520,16 @@ impl WorldGraph {
       | KeyP2 | BigKeyP2 | CompassP2 | MapP2
       | KeyP3 | BigKeyP3 | CompassP3 | MapP3
       | KeyD1 | BigKeyD1 | CompassD1 | MapD1
-      | KeyD2 | BigKeyD2 | CompassD2 | MapD2
+      | KeyD2 /*| BigKeyD2*/ | CompassD2 | MapD2
       | KeyD3 | BigKeyD3 | CompassD3 | MapD3
       | KeyD4 | BigKeyD4 | CompassD4 | MapD4
       | KeyD5 | BigKeyD5 | CompassD5 | MapD5
       | KeyD6 | BigKeyD6 | CompassD6 | MapD6
       | KeyD7 | BigKeyD7 | CompassD7 | MapD7
       => {
-        let dungeon = WG.dungeon_from_item(item).expect("bad key enum");
-        let locs = WG.locations_from_dungeon(dungeon).expect("not a dungeon somehow");
-        let ret = locs.contains(&loc);
-        trace!("item_can_be_placed_at\n\titem={:?}\n\tloc={:?}\n\tlocs={:?}\n\tcan={}", item, loc, locs, ret);
-        ret
+        self.item_matches_dungeon(item, loc)
       },
+      BigKeyD2 => self.item_matches_dungeon(item, loc) && loc != SwampPalaceEntrance, // TODO: ughhh this is kinda gross. todo: get over it
       _ => true,
     }
   }
